@@ -1,0 +1,13 @@
+[package]
+name = "repl_derive"
+version = "0.1.0"
+authors = ["Dimitri Polonski <d.polonski@wmt.team>"]
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "1", features = ["extra-traits"] }
+quote = "1"
+
