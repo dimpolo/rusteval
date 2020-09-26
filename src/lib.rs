@@ -1,3 +1,5 @@
+pub use repl_derive::{repl, Interactive, InteractiveMethods};
+
 use core::fmt::Debug;
 
 pub type Result<'a, T> = core::result::Result<T, InteractiveError<'a>>;

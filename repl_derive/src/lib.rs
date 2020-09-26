@@ -64,8 +64,9 @@ pub fn derive_interactive(input: TokenStream) -> TokenStream {
     expanded.into()
 }
 
+#[allow(non_snake_case)]
 #[proc_macro_attribute]
-pub fn interactive_methods(_attr: TokenStream, input: TokenStream) -> TokenStream {
+pub fn InteractiveMethods(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let output = proc_macro2::TokenStream::from(input.clone());
     let ast = parse_macro_input!(input as ItemImpl);
     /*

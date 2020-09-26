@@ -1,4 +1,4 @@
-use repl::{Interactive, InteractiveMethods};
+use repl::InteractiveMethods;
 
 #[derive(Debug, Default)]
 struct TestStruct {

@@ -1,5 +1,4 @@
-use repl::Interactive as _;
-use repl_derive::Interactive;
+use repl::Interactive;
 use std::fmt::Debug;
 
 #[derive(Default, Debug)]
