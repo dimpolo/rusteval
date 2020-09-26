@@ -12,7 +12,7 @@ pub enum InteractiveError<'a> {
     },
     AttributeNotFound {
         struct_name: &'a str,
-        attribute_name: &'a str,
+        field_name: &'a str,
     },
     InstanceNotFound {
         instance_name: &'a str,
@@ -20,13 +20,13 @@ pub enum InteractiveError<'a> {
 }
 
 pub trait Interactive<'a>: Debug {
-    fn __interactive_get_attribute(
+    fn __interactive_get_field(
         &'a self,
-        attribute_name: &'a str,
+        field_name: &'a str,
     ) -> crate::Result<'a, &dyn core::fmt::Debug>;
-    fn __interactive_get_interactive_attribute(
+    fn __interactive_get_interactive_field(
         &'a mut self,
-        attribute_name: &'a str,
+        field_name: &'a str,
     ) -> crate::Result<'a, &mut dyn crate::Interactive>;
     /*
     fn __interactive_call_method(

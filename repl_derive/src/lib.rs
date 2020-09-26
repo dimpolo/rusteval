@@ -42,15 +42,15 @@ pub fn derive_interactive(input: TokenStream) -> TokenStream {
 
     let expanded = quote! {
         impl<'a> repl::Interactive<'a> for #name {
-            fn __interactive_get_attribute(&'a self, attribute_name: &'a str) -> repl::Result<'a, &dyn ::core::fmt::Debug>{
-                match attribute_name {
+            fn __interactive_get_field(&'a self, field_name: &'a str) -> repl::Result<'a, &dyn ::core::fmt::Debug>{
+                match field_name {
                     #(#attr_matches)*
-                    _ => Err(repl::InteractiveError::AttributeNotFound{struct_name: stringify!(#name), attribute_name}),
+                    _ => Err(repl::InteractiveError::AttributeNotFound{struct_name: stringify!(#name), field_name}),
                 }
             }
-            fn __interactive_get_interactive_attribute(&'a mut self, attribute_name: &'a str) -> repl::Result<&'a mut dyn repl::Interactive>{
-                match attribute_name {
-                    _ => Err(repl::InteractiveError::AttributeNotFound{struct_name: stringify!(#name), attribute_name}),
+            fn __interactive_get_interactive_field(&'a mut self, field_name: &'a str) -> repl::Result<&'a mut dyn repl::Interactive>{
+                match field_name {
+                    _ => Err(repl::InteractiveError::AttributeNotFound{struct_name: stringify!(#name), field_name}),
                 }
             }
             /*
