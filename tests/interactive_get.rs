@@ -1,7 +1,9 @@
 use repl::{Interactive, InteractiveMethods};
 
 #[derive(Debug, Default)]
-struct TestStruct {}
+struct TestStruct {
+    a: bool,
+}
 
 #[InteractiveMethods]
 impl TestStruct {
@@ -24,18 +26,39 @@ fn test_get_child() {
             "{:?}",
             parent_struct.__interactive_get_field("child").unwrap()
         ),
-        "TestStruct"
+        "TestStruct { a: false }"
+    );
+}
+
+#[test]
+fn test_get_child_field() {
+    let mut parent_struct = ParentStruct::default();
+
+    assert_eq!(
+        format!(
+            "{:?}",
+            parent_struct
+                .__interactive_get_interactive_field("child")
+                .unwrap()
+                .__interactive_get_field("a")
+                .unwrap()
+        ),
+        "false"
     );
 }
 
 #[test]
 fn test_call_child_method() {
-    let parent_struct = ParentStruct::default();
+    let mut parent_struct = ParentStruct::default();
 
     assert_eq!(
         format!(
             "{:?}",
-            parent_struct.__interactive_get_field("child").unwrap()
+            parent_struct
+                .__interactive_get_interactive_field("child")
+                .unwrap()
+                .__interactive_get_field("a")
+                .unwrap()
         ),
         "TestStruct"
     );
