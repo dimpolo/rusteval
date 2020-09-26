@@ -55,9 +55,11 @@ pub fn derive_interactive(input: TokenStream) -> TokenStream {
                     _ => Err(repl::InteractiveError::AttributeNotFound{struct_name: stringify!(#name), attribute_name}),
                 }
             }
-            fn __interactive_call_method(&'a mut self, method_name: &'a str, _args: &'a str) -> repl::Result<'a, Option<&mut dyn core::fmt::Debug>>{
+            /*
+            fn __interactive_call_method(&'a mut self, method_name: &'a str, _args: &'a str) -> repl::Result<'a, Option<&dyn core::fmt::Debug>>{
                 Err(repl::InteractiveError::MethodNotFound{struct_name: stringify!(#name), method_name})
             }
+            */
         }
     };
 

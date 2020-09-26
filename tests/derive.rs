@@ -45,15 +45,18 @@ fn test_complex_attribute() {
 
 #[test]
 fn test_private_attribute() {
+    // TODO custom private field error
+    use repl::InteractiveError;
+
     let test_struct = TestStruct::default();
 
     assert_eq!(
-        format!(
-            "{:?}",
-            test_struct
-                .__interactive_get_attribute("private_field")
-                .unwrap_err()
-        ),
-        "AttributeNotFound { struct_name: \"TestStruct\", attribute_name: \"private_field\" }"
+        test_struct
+            .__interactive_get_attribute("private_field")
+            .unwrap_err(),
+        InteractiveError::AttributeNotFound {
+            struct_name: "TestStruct",
+            attribute_name: "private_field"
+        }
     );
 }

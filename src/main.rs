@@ -2,20 +2,8 @@ extern crate repl_derive;
 
 use core::fmt::Debug;
 
-use anyhow::{anyhow, bail};
-
 use repl::Interactive;
 use repl_derive::{repl, Interactive};
-
-impl TestStruct {
-    fn ping(&self) {
-        println!("pong");
-    }
-
-    fn answer(&self) -> i32 {
-        42
-    }
-}
 
 #[derive(Default, Debug)]
 struct TestStruct2 {
