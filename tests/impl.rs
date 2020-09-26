@@ -1,39 +1,23 @@
 use repl::InteractiveMethods;
-use repl_derive::Interactive;
+use repl_derive::interactive_methods;
 
-#[derive(Interactive, Debug, Default)]
+#[derive(Debug, Default)]
 struct TestStruct {
     field: u32,
 }
 
+#[interactive_methods]
 impl TestStruct {
+    pub fn clone(&self) -> Self {
+        Self { field: self.field }
+    }
+
     pub fn get_field(&self) -> u32 {
         self.field
     }
 
     pub fn answer(&self) {
         println!("42");
-    }
-}
-
-impl<'a> InteractiveMethods<'a> for TestStruct {
-    fn __interactive_call_method(
-        &'a mut self,
-        method_name: &'a str,
-        _args: &'a str,
-    ) -> repl::Result<'a, Option<Box<dyn core::fmt::Debug>>> {
-        match method_name {
-            "get_field" => Ok(Some(Box::new(self.get_field()) as Box<dyn core::fmt::Debug>)),
-            "answer" => Ok({
-                self.answer();
-                None
-            }),
-
-            _ => Err(repl::InteractiveError::MethodNotFound {
-                struct_name: stringify!(TestStruct),
-                method_name,
-            }),
-        }
     }
 }
 
@@ -79,5 +63,18 @@ fn test_method_not_found() {
             struct_name: "TestStruct",
             method_name: "yeet"
         }
+    );
+}
+
+#[test]
+fn test_clone_method() {
+    let mut test_struct = TestStruct::default();
+
+    assert_eq!(
+        format!(
+            "{:?}",
+            test_struct.__interactive_call_method("clone", "").unwrap()
+        ),
+        "Some(TestStruct { field: 0 })"
     );
 }

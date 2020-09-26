@@ -40,5 +40,5 @@ pub trait InteractiveMethods<'a>: Debug {
         &'a mut self,
         method_name: &'a str,
         args: &'a str,
-    ) -> crate::Result<'a, Option<Box<dyn core::fmt::Debug>>>;
+    ) -> crate::Result<'a, core::option::Option<Box<dyn core::fmt::Debug>>>;
 }
