@@ -27,7 +27,7 @@ pub fn derive_interactive(input: TokenStream) -> TokenStream {
             }
         });
 
-    let _interactive_attr_matches = fields
+    let interactive_attr_matches = fields
         .iter()
         .filter(|field| matches!(field.vis, Visibility::Public(_)))
         .map(|field| {
@@ -47,14 +47,10 @@ pub fn derive_interactive(input: TokenStream) -> TokenStream {
             }
             fn __interactive_get_interactive_field(&'a mut self, field_name: &'a str) -> repl::Result<&'a mut dyn repl::Interactive>{
                 match field_name {
+                    #(#interactive_attr_matches)*
                     _ => Err(repl::InteractiveError::AttributeNotFound{struct_name: stringify!(#name), field_name}),
                 }
             }
-            /*
-            fn __interactive_call_method(&'a mut self, method_name: &'a str, _args: &'a str) -> repl::Result<'a, ::core::option::Option<&dyn ::core::fmt::Debug>>{
-                Err(repl::InteractiveError::MethodNotFound{struct_name: stringify!(#name), method_name})
-            }
-            */
         }
     };
 

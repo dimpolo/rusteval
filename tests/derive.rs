@@ -1,3 +1,5 @@
+#![feature(min_specialization)]
+
 use repl::Interactive;
 use std::fmt::Debug;
 
