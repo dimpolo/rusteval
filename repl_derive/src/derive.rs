@@ -33,7 +33,7 @@ pub fn derive_interactive(input: TokenStream) -> TokenStream {
         .map(|field| {
             let name = &field.ident;
             quote! {
-                stringify!(#name) => Ok(&mut self.#name as &dyn repl::Interactive),
+                stringify!(#name) => Ok(&mut self.#name as &mut dyn repl::Interactive),
             }
         });
 
@@ -45,7 +45,7 @@ pub fn derive_interactive(input: TokenStream) -> TokenStream {
                     _ => Err(repl::InteractiveError::AttributeNotFound{struct_name: stringify!(#name), field_name}),
                 }
             }
-            fn __interactive_get_interactive_field(&'a mut self, field_name: &'a str) -> repl::Result<&'a dyn repl::Interactive>{
+            fn __interactive_get_interactive_field(&'a mut self, field_name: &'a str) -> repl::Result<&'a mut dyn repl::Interactive>{
                 match field_name {
                     #(#interactive_attr_matches)*
                     _ => Err(repl::InteractiveError::AttributeNotFound{struct_name: stringify!(#name), field_name}),

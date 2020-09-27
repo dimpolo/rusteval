@@ -20,18 +20,21 @@ pub enum InteractiveError<'a> {
     InstanceNotFound {
         instance_name: &'a str,
     },
+    WrongNumberOfArguments {
+        expected: usize,
+        found: usize,
+    },
 }
 
-pub trait Interactive<'a>: Debug {
+pub trait Interactive<'a>: Debug + InteractiveMethods<'a> {
     fn __interactive_get_field(
         &'a self,
         field_name: &'a str,
     ) -> crate::Result<'a, &dyn core::fmt::Debug>;
-
     fn __interactive_get_interactive_field(
         &'a mut self,
         field_name: &'a str,
-    ) -> crate::Result<'a, &dyn crate::Interactive>;
+    ) -> crate::Result<'a, &mut dyn crate::Interactive>;
 }
 
 pub trait InteractiveMethods<'a>: Debug {
@@ -42,7 +45,7 @@ pub trait InteractiveMethods<'a>: Debug {
     ) -> crate::Result<'a, core::option::Option<Box<dyn core::fmt::Debug>>>;
 }
 
-impl<'a, T: Debug> Interactive<'a> for T {
+impl<'a, T: Debug + InteractiveMethods<'a>> Interactive<'a> for T {
     default fn __interactive_get_field(&'a self, field_name: &'a str) -> Result<'a, &dyn Debug> {
         Err(InteractiveError::AttributeNotFound {
             struct_name: type_name::<T>(),
@@ -53,10 +56,23 @@ impl<'a, T: Debug> Interactive<'a> for T {
     default fn __interactive_get_interactive_field(
         &'a mut self,
         field_name: &'a str,
-    ) -> Result<'a, &dyn Interactive<'a>> {
+    ) -> Result<'a, &mut dyn Interactive<'a>> {
         Err(InteractiveError::AttributeNotFound {
             struct_name: type_name::<T>(),
             field_name,
+        })
+    }
+}
+
+impl<'a, T: Debug> InteractiveMethods<'a> for T {
+    default fn __interactive_call_method(
+        &'a mut self,
+        method_name: &'a str,
+        _args: &'a str,
+    ) -> Result<'a, Option<Box<dyn Debug>>> {
+        Err(InteractiveError::MethodNotFound {
+            struct_name: type_name::<T>(),
+            method_name,
         })
     }
 }
