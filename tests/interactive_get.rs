@@ -14,7 +14,7 @@ impl TestStruct {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Interactive, Debug, Default)]
 struct ParentStruct {
     pub child: TestStruct,
 }
@@ -63,15 +63,12 @@ fn test_get_child() {
 fn test_get_child_field() {
     let mut parent_struct = ParentStruct::default();
 
+    let child = parent_struct
+        .__interactive_get_interactive_field("child")
+        .unwrap();
+
     assert_eq!(
-        format!(
-            "{:?}",
-            parent_struct
-                .__interactive_get_interactive_field("child")
-                .unwrap()
-                .__interactive_get_field("a")
-                .unwrap()
-        ),
+        format!("{:?}", (&*child).__interactive_get_field("a").unwrap()),
         "false"
     );
 }
