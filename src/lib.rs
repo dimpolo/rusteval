@@ -27,10 +27,11 @@ pub trait Interactive<'a>: Debug {
         &'a self,
         field_name: &'a str,
     ) -> crate::Result<'a, &dyn core::fmt::Debug>;
+
     fn __interactive_get_interactive_field(
         &'a mut self,
         field_name: &'a str,
-    ) -> crate::Result<'a, &mut dyn crate::Interactive>;
+    ) -> crate::Result<'a, &dyn crate::Interactive>;
 }
 
 pub trait InteractiveMethods<'a>: Debug {
@@ -52,7 +53,7 @@ impl<'a, T: Debug> Interactive<'a> for T {
     default fn __interactive_get_interactive_field(
         &'a mut self,
         field_name: &'a str,
-    ) -> Result<'a, &mut dyn Interactive<'a>> {
+    ) -> Result<'a, &dyn Interactive<'a>> {
         Err(InteractiveError::AttributeNotFound {
             struct_name: type_name::<T>(),
             field_name,
