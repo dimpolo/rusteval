@@ -34,6 +34,7 @@ impl Repl for GenRepl {
     }
 }
 
+#[cfg(feature = "std")]
 fn main() -> std::io::Result<()> {
     use std::io;
     use std::io::Write;
@@ -49,6 +50,9 @@ fn main() -> std::io::Result<()> {
         println!("{}", repl.eval_to_debug_string(&input));
     }
 }
+
+#[cfg(not(feature = "std"))]
+fn main() {}
 
 #[derive(Interactive, Default, Debug)]
 struct TestStruct {

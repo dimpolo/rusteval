@@ -1,5 +1,6 @@
 #![feature(min_specialization)]
 #![feature(str_split_once)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 mod repl;
 

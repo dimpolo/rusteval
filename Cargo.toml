@@ -11,3 +11,7 @@ repl_derive = {path = "repl_derive"}
 
 [dev-dependencies]
 trybuild = "1"
+
+[features]
+default = ["std"]
+std = []

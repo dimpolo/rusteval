@@ -11,6 +11,7 @@ pub trait Repl {
     where
         F: Fn(Result<&dyn Debug>) -> R;
 
+    #[cfg(feature = "std")]
     fn eval_to_debug_string(&mut self, expression: &str) -> String {
         self.try_eval(expression, |result| format!("{:?}", result))
     }
