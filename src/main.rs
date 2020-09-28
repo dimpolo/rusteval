@@ -35,6 +35,9 @@ impl TestStruct {
     pub fn answer(&self) {
         println!("42");
     }
+    pub fn add(&self, a: f32, b: f32) -> f32 {
+        a + b
+    }
 }
 
 #[derive(Interactive, Debug, Default)]

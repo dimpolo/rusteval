@@ -72,9 +72,12 @@ fn gen_method_match_expr(method: &ImplItemMethod) -> Option<TokenStream2> {
             }));
         }
     };
-
-    let method_call = quote! {
-        f(Ok(&self.#method_ident()))
+    let method_call = if expected_arg_len > 1 {
+        quote! { unimplemented!()}
+    } else {
+        quote! {
+            f(Ok(&self.#method_ident()))
+        }
     };
 
     Some(quote! {
