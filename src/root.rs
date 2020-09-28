@@ -2,42 +2,45 @@ use core::fmt::Debug;
 
 use crate::{Interactive, Result};
 
+#[derive(Debug)]
+enum AccessType<'a> {
+    FieldAccess(&'a str),
+    MethodAccess(&'a str, &'a str),
+}
+
 pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> {
     fn try_eval(&'a mut self, expression: &'a str, f: F) -> R
     where
         F: Fn(Result<&dyn Debug>) -> R,
+        Self: Sized,
     {
-        // split off the root object name
-        if let Some((root_object_name, expression_remainder)) = expression.split_once('.') {
-            // get the root object
-            let root_object = match self.__interactive_get_field(root_object_name.trim()) {
-                Ok(root_object) => root_object,
+        let (mut object_path, access_type) = parse_expression(expression);
+
+        dbg!(&object_path, &access_type);
+
+        let mut current = self as &mut dyn Interactive<'a, F, R>;
+
+        while !object_path.is_empty() {
+            let (field_name, object_path_remainder) = object_path
+                .rsplit_once('.')
+                .unwrap_or((object_path.trim(), ""));
+            object_path = object_path_remainder;
+
+            current = match current.__interactive_get_field(field_name.trim()) {
+                Ok(current) => current,
                 Err(e) => {
                     return f(Err(e));
                 }
             };
+        }
 
-            // split off field access or method call
-            if let Some((object_path, command)) = expression_remainder.rsplit_once('.') {
-                // walk the object_path to find the target object
-                let mut current_object = root_object;
-                for field_name in object_path.split('.') {
-                    current_object = match current_object.__interactive_get_field(field_name.trim())
-                    {
-                        Ok(current_object) => current_object,
-                        Err(e) => {
-                            return f(Err(e));
-                        }
-                    };
-                }
-
-                get_or_call(current_object, command, f)
-            } else {
-                get_or_call(root_object, expression_remainder, f)
+        match access_type {
+            AccessType::FieldAccess(field_name) => {
+                (&*current).__interactive_eval_field(field_name, f)
             }
-        } else {
-            // eval a root object
-            (&*self).__interactive_eval_field(expression.trim(), f)
+            AccessType::MethodAccess(method_name, args) => {
+                current.__interactive_eval_method(method_name, args, f)
+            }
         }
     }
 
@@ -49,13 +52,22 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> {
     */
 }
 
-fn get_or_call<'a, F, R>(object: &'a mut dyn Interactive<'a, F, R>, command: &'a str, f: F) -> R
-where
-    F: Fn(Result<&dyn Debug>) -> R,
-{
-    if let Some(method_name) = command.trim().strip_suffix("()") {
-        object.__interactive_eval_method(method_name.trim(), "", f)
+fn parse_expression(expression: &str) -> (&str, AccessType) {
+    let expression = expression.trim();
+
+    if let Some(Some(((object_path, method_name), args))) = expression.strip_suffix(')').map(|s| {
+        s.split_once('(')
+            .map(|(path, args)| (path.rsplit_once('.').unwrap_or(("", path)), args))
+    }) {
+        (
+            object_path.trim(),
+            AccessType::MethodAccess(method_name.trim(), args),
+        )
     } else {
-        (&*object).__interactive_eval_field(command.trim(), f)
+        let (object_path, field_name) = expression.rsplit_once('.').unwrap_or(("", expression));
+        (
+            object_path.trim(),
+            AccessType::FieldAccess(field_name.trim()),
+        )
     }
 }
