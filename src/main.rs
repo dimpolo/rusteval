@@ -46,10 +46,3 @@ struct ParentStruct {
 struct GenRepl {
     pub parent: ParentStruct,
 }
-
-impl GenRepl {
-    #[cfg(feature = "std")]
-    fn eval_to_debug_string(&mut self, expression: &str) -> String {
-        self.try_eval(expression, |result| format!("{:?}", result))
-    }
-}

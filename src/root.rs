@@ -31,18 +31,25 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> {
                     };
                 }
 
-                call_or_get(current_object, command, f)
+                get_or_call(current_object, command, f)
             } else {
-                call_or_get(root_object, expression_remainder, f)
+                get_or_call(root_object, expression_remainder, f)
             }
         } else {
             // eval a root object
             (&*self).__interactive_eval_field(expression.trim(), f)
         }
     }
+
+    /* TODO make this work instead of inside proc macro
+    #[cfg(feature = "std")]
+    fn eval_to_debug_string(&mut self, expression: &str) -> String {
+        self.try_eval(expression, |result| format!("{:?}", result))
+    }
+    */
 }
 
-fn call_or_get<'a, F, R>(object: &'a mut dyn Interactive<'a, F, R>, command: &'a str, f: F) -> R
+fn get_or_call<'a, F, R>(object: &'a mut dyn Interactive<'a, F, R>, command: &'a str, f: F) -> R
 where
     F: Fn(Result<&dyn Debug>) -> R,
 {

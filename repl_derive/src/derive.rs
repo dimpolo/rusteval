@@ -1,8 +1,8 @@
 use proc_macro::TokenStream;
 
 use quote::quote;
-use syn::{DeriveInput, parse_macro_input, Visibility};
 use syn::export::TokenStream2;
+use syn::{parse_macro_input, DeriveInput, Visibility};
 
 pub fn derive_interactive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
@@ -20,6 +20,13 @@ pub fn derive_interactive_root(input: TokenStream) -> TokenStream {
         #interactive_impl
 
         impl<'a, F: 'a, R: 'a> InteractiveRoot<'a, F, R> for #struct_name {}
+
+        #[cfg(feature = "std")]
+        impl #struct_name {
+            fn eval_to_debug_string(&mut self, expression: &str) -> String {
+                self.try_eval(expression, |result| format!("{:?}", result))
+            }
+        }
     };
 
     expanded.into()
