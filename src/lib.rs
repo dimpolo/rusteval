@@ -2,16 +2,15 @@
 #![feature(str_split_once)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
-mod repl;
-
-pub use repl::Repl;
-pub use repl_derive::{repl, Interactive, InteractiveMethods};
-
 use core::any::type_name;
 use core::fmt::Debug;
 
+pub use repl_derive::{Interactive, InteractiveMethods, InteractiveRoot};
+pub use root::InteractiveRoot;
+
+mod root;
+
 pub type Result<'a, T> = core::result::Result<T, InteractiveError<'a>>;
-pub type InteractiveClosure<'a, T> = core::result::Result<T, InteractiveError<'a>>;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum InteractiveError<'a> {

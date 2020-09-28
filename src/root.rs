@@ -1,29 +1,16 @@
-use crate::{Interactive, Result};
 use core::fmt::Debug;
 
-pub trait Repl {
-    fn get_root_object<'a, F, R>(
-        &mut self,
-        object_name: &'a str,
-    ) -> Result<&mut dyn Interactive<'a, F, R>>;
+use crate::{Interactive, Result};
 
-    fn eval_root_object<'a, F, R>(&'a self, object_name: &'a str, f: F) -> R
-    where
-        F: Fn(Result<&dyn Debug>) -> R;
-
-    #[cfg(feature = "std")]
-    fn eval_to_debug_string(&mut self, expression: &str) -> String {
-        self.try_eval(expression, |result| format!("{:?}", result))
-    }
-
-    fn try_eval<'a, F, R>(&'a mut self, expression: &'a str, f: F) -> R
+pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> {
+    fn try_eval(&'a mut self, expression: &'a str, f: F) -> R
     where
         F: Fn(Result<&dyn Debug>) -> R,
     {
         // split off the root object name
         if let Some((root_object_name, expression_remainder)) = expression.split_once('.') {
             // get the root object
-            let root_object = match self.get_root_object(root_object_name.trim()) {
+            let root_object = match self.__interactive_get_field(root_object_name.trim()) {
                 Ok(root_object) => root_object,
                 Err(e) => {
                     return f(Err(e));
@@ -50,7 +37,7 @@ pub trait Repl {
             }
         } else {
             // eval a root object
-            self.eval_root_object(expression.trim(), f)
+            (&*self).__interactive_eval_field(expression.trim(), f)
         }
     }
 }

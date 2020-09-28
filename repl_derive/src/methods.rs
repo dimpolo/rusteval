@@ -1,10 +1,11 @@
 use proc_macro::TokenStream;
 
 use quote::quote;
+use syn::export::TokenStream2;
 use syn::{parse_macro_input, FnArg, ImplItem, ImplItemMethod, ItemImpl, Visibility};
 
 pub fn interactive_methods(input: TokenStream) -> TokenStream {
-    let original_impl = proc_macro2::TokenStream::from(input.clone());
+    let original_impl = TokenStream2::from(input.clone());
     let ast = parse_macro_input!(input as ItemImpl);
 
     let struct_name = &ast.self_ty;
@@ -47,7 +48,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
     expanded.into()
 }
 
-fn gen_method_match_expr(method: &ImplItemMethod) -> Option<proc_macro2::TokenStream> {
+fn gen_method_match_expr(method: &ImplItemMethod) -> Option<TokenStream2> {
     // skip methods that are not pub
     if !matches!(method.vis, Visibility::Public(_)) {
         return None;

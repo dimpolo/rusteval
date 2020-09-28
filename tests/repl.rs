@@ -2,7 +2,7 @@
 #![feature(str_split_once)]
 
 use core::fmt::Debug;
-use repl::{Interactive, InteractiveMethods, Repl, Result};
+use repl::{Interactive, InteractiveMethods, InteractiveRoot};
 
 #[derive(Interactive, Debug, Default)]
 struct TestStruct {
@@ -67,29 +67,14 @@ fn test_call_with_float() {
     );
 }
 
-#[derive(Default)]
+#[derive(InteractiveRoot, Default, Debug)]
 struct GenRepl {
-    parent: ParentStruct,
+    pub parent: ParentStruct,
 }
 
-impl Repl for GenRepl {
-    fn get_root_object<'a, F, R>(
-        &mut self,
-        object_name: &str,
-    ) -> Result<&mut dyn Interactive<'a, F, R>> {
-        match object_name {
-            "parent" => Ok(&mut self.parent),
-            _ => unimplemented!("{}", object_name),
-        }
-    }
-
-    fn eval_root_object<F, R>(&self, object_name: &str, f: F) -> R
-    where
-        F: Fn(Result<&dyn Debug>) -> R,
-    {
-        match object_name {
-            "parent" => f(Ok(&self.parent)),
-            _ => unimplemented!("{}", object_name),
-        }
+impl GenRepl {
+    #[cfg(feature = "std")]
+    fn eval_to_debug_string(&mut self, expression: &str) -> String {
+        self.try_eval(expression, |result| format!("{:?}", result))
     }
 }
