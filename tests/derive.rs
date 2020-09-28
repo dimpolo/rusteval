@@ -1,7 +1,7 @@
 #![feature(min_specialization)]
 
+use core::fmt::Debug;
 use repl::Interactive;
-use std::fmt::Debug;
 
 #[derive(Default, Debug)]
 struct Inner(bool, Option<String>);
@@ -55,7 +55,7 @@ fn test_private_field() {
         test_struct
             .__interactive_get_field("private_field")
             .unwrap_err(),
-        InteractiveError::AttributeNotFound {
+        InteractiveError::FieldNotFound {
             struct_name: "TestStruct",
             field_name: "private_field"
         }

@@ -3,12 +3,14 @@
 
 mod repl;
 
+pub use repl::Repl;
 pub use repl_derive::{repl, Interactive, InteractiveMethods};
 
+use core::any::type_name;
 use core::fmt::Debug;
-use std::any::type_name;
 
 pub type Result<'a, T> = core::result::Result<T, InteractiveError<'a>>;
+pub type InteractiveClosure<'a, T> = core::result::Result<T, InteractiveError<'a>>;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum InteractiveError<'a> {
@@ -16,7 +18,7 @@ pub enum InteractiveError<'a> {
         struct_name: &'a str,
         method_name: &'a str,
     },
-    AttributeNotFound {
+    FieldNotFound {
         struct_name: &'a str,
         field_name: &'a str,
     },
@@ -52,7 +54,7 @@ impl<'a, F, R, T: Debug + InteractiveMethods<'a, F, R>> Interactive<'a, F, R> fo
         &'a mut self,
         field_name: &'a str,
     ) -> Result<'a, &mut dyn Interactive<'a, F, R>> {
-        Err(InteractiveError::AttributeNotFound {
+        Err(InteractiveError::FieldNotFound {
             struct_name: type_name::<T>(),
             field_name,
         })
@@ -62,7 +64,7 @@ impl<'a, F, R, T: Debug + InteractiveMethods<'a, F, R>> Interactive<'a, F, R> fo
     where
         F: Fn(Result<&dyn Debug>) -> R,
     {
-        f(Err(InteractiveError::AttributeNotFound {
+        f(Err(InteractiveError::FieldNotFound {
             struct_name: type_name::<T>(),
             field_name,
         }))
