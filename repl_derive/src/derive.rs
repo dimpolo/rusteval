@@ -17,38 +17,41 @@ pub fn derive_interactive(input: TokenStream) -> TokenStream {
         unimplemented!();
     };
 
+    let eval_attr_matches = fields
+        .iter()
+        .filter(|field| matches!(field.vis, Visibility::Public(_)))
+        .map(|field| {
+            let name = &field.ident;
+            quote! {
+                stringify!(#name) => f(Ok(&self.#name)),
+            }
+        });
+
     let attr_matches = fields
         .iter()
         .filter(|field| matches!(field.vis, Visibility::Public(_)))
         .map(|field| {
             let name = &field.ident;
             quote! {
-                stringify!(#name) => Ok(&self.#name as &dyn ::core::fmt::Debug),
-            }
-        });
-
-    let interactive_attr_matches = fields
-        .iter()
-        .filter(|field| matches!(field.vis, Visibility::Public(_)))
-        .map(|field| {
-            let name = &field.ident;
-            quote! {
-                stringify!(#name) => Ok(&mut self.#name as &mut dyn repl::Interactive),
+                stringify!(#name) => Ok(&mut self.#name),
             }
         });
 
     let expanded = quote! {
-        impl<'a> repl::Interactive<'a> for #name {
-            fn __interactive_get_field(&'a self, field_name: &'a str) -> repl::Result<'a, &dyn ::core::fmt::Debug>{
+        impl<'a, F, R> repl::Interactive<'a, F, R> for #name {
+            fn __interactive_get_field(&'a mut self, field_name: &'a str) -> repl::Result<'a, &mut dyn repl::Interactive<'a, F, R>>{
                 match field_name {
                     #(#attr_matches)*
                     _ => Err(repl::InteractiveError::AttributeNotFound{struct_name: stringify!(#name), field_name}),
                 }
             }
-            fn __interactive_get_interactive_field(&'a mut self, field_name: &'a str) -> repl::Result<&'a mut dyn repl::Interactive>{
+            fn __interactive_eval_field(&'a self, field_name: &'a str, f: F) -> R
+            where
+                F: Fn(repl::Result<'a, &dyn ::core::fmt::Debug>) -> R,
+            {
                 match field_name {
-                    #(#interactive_attr_matches)*
-                    _ => Err(repl::InteractiveError::AttributeNotFound{struct_name: stringify!(#name), field_name}),
+                    #(#eval_attr_matches)*
+                    _ => f(Err(repl::InteractiveError::AttributeNotFound{struct_name: stringify!(#name), field_name})),
                 }
             }
         }

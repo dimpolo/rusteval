@@ -23,42 +23,29 @@ struct ParentStruct {
 fn test_get_child() {
     let parent_struct = ParentStruct::default();
 
-    assert_eq!(
-        format!(
-            "{:?}",
-            parent_struct.__interactive_get_field("child").unwrap()
-        ),
-        "TestStruct { a: false }"
-    );
+    parent_struct.__interactive_eval_field("child", |result| {
+        assert_eq!(format!("{:?}", result.unwrap()), "TestStruct { a: false }")
+    });
 }
 
 #[test]
 fn test_get_child_field() {
     let mut parent_struct = ParentStruct::default();
 
-    let child = parent_struct
-        .__interactive_get_interactive_field("child")
-        .unwrap();
+    let child = parent_struct.__interactive_get_field("child").unwrap();
 
-    assert_eq!(
-        format!("{:?}", (&*child).__interactive_get_field("a").unwrap()),
-        "false"
-    );
+    (&*child).__interactive_eval_field("a", |result| {
+        assert_eq!(format!("{:?}", result.unwrap()), "false")
+    });
 }
 
 #[test]
 fn test_call_child_method() {
     let mut parent_struct = ParentStruct::default();
 
-    let child = parent_struct
-        .__interactive_get_interactive_field("child")
-        .unwrap();
+    let child = parent_struct.__interactive_get_field("child").unwrap();
 
-    assert_eq!(
-        format!(
-            "{:?}",
-            child.__interactive_call_method("try_ping", "").unwrap()
-        ),
-        "Some(Ok(\"pong\"))"
-    );
+    child.__interactive_eval_method("try_ping", "", |result| {
+        assert_eq!(format!("{:?}", result.unwrap()), "Ok(\"pong\")")
+    });
 }

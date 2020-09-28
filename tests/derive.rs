@@ -18,7 +18,7 @@ struct TestStruct {
 struct TestStruct {}
 */
 
-#[test]
+/*#[test]
 fn test_primitive_field() {
     let test_struct = TestStruct::default();
 
@@ -61,3 +61,4 @@ fn test_private_field() {
         }
     );
 }
+*/

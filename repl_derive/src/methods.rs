@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 
 use quote::quote;
-use syn::{parse_macro_input, FnArg, ImplItem, ImplItemMethod, ItemImpl, ReturnType, Visibility};
+use syn::{parse_macro_input, FnArg, ImplItem, ImplItemMethod, ItemImpl, Visibility};
 
 pub fn interactive_methods(input: TokenStream) -> TokenStream {
     let original_impl = proc_macro2::TokenStream::from(input.clone());
@@ -19,19 +19,25 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #original_impl
 
-        impl<'a> repl::InteractiveMethods<'a> for #struct_name {
-            fn __interactive_call_method(
+        impl<'a, F, R> repl::InteractiveMethods<'a, F, R> for #struct_name {
+            fn __interactive_eval_method(
                 &'a mut self,
                 method_name: &'a str,
                 args: &'a str,
-            ) -> repl::Result<'a, ::core::option::Option<Box<dyn ::core::fmt::Debug>>> {
+                f: F,
+            ) -> R
+            where
+                F: Fn(repl::Result<'a, &dyn ::core::fmt::Debug>) -> R,
+            {
+                let args = args.split_terminator(',');
+                let args_count = args.count();
                 match method_name {
                     #(#method_matches)*
 
-                    _ => Err(repl::InteractiveError::MethodNotFound {
+                    _ => f(Err(repl::InteractiveError::MethodNotFound {
                         struct_name: stringify!(#struct_name),
                         method_name,
-                    }),
+                    })),
                 }
             }
         }
@@ -58,24 +64,16 @@ fn gen_method_match_expr(method: &ImplItemMethod) -> Option<proc_macro2::TokenSt
     let expected_arg_len = method.sig.inputs.len() - 1;
 
     let args_len_check = quote! {
-        let args = args.split_terminator(',');
-        let args_count = args.count();
         if args_count != #expected_arg_len{
-            return Err(repl::InteractiveError::WrongNumberOfArguments{
+            return f(Err(repl::InteractiveError::WrongNumberOfArguments{
                 expected: #expected_arg_len,
                 found: args_count,
-            })
+            }));
         }
     };
 
-    let method_call = match method.sig.output {
-        ReturnType::Default => quote! {
-            self.#method_ident();
-            Ok(None)
-        },
-        ReturnType::Type(_, _) => quote! {
-            Ok(Some(Box::new(self.#method_ident()) as Box<dyn ::core::fmt::Debug>))
-        },
+    let method_call = quote! {
+        f(Ok(&self.#method_ident()))
     };
 
     Some(quote! {
