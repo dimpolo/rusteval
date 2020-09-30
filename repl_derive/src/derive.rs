@@ -45,25 +45,32 @@ fn interactive_impl(ast: &DeriveInput) -> TokenStream2 {
         unimplemented!();
     };
 
-    let eval_field_matches = fields
-        .iter()
-        .filter(|field| matches!(field.vis, Visibility::Public(_)))
-        .map(|field| {
-            let name = &field.ident;
-            quote! {
-                stringify!(#name) => f(Ok(&self.#name)),
-            }
-        });
+    let get_interactive_fields = || {
+        fields
+            .iter()
+            .filter(|field| matches!(field.vis, Visibility::Public(_)))
+    };
 
-    let get_field_matches = fields
-        .iter()
-        .filter(|field| matches!(field.vis, Visibility::Public(_)))
-        .map(|field| {
-            let name = &field.ident;
-            quote! {
-                stringify!(#name) => Ok(&mut self.#name),
-            }
-        });
+    let eval_field_matches = get_interactive_fields().map(|field| {
+        let name = &field.ident;
+        quote! {
+            stringify!(#name) => f(Ok(&self.#name)),
+        }
+    });
+
+    let get_field_matches = get_interactive_fields().map(|field| {
+        let name = &field.ident;
+        quote! {
+            stringify!(#name) => Ok(&mut self.#name),
+        }
+    });
+
+    let all_field_names = get_interactive_fields().map(|field| {
+        let name = &field.ident;
+        quote! {
+            stringify!(#name),
+        }
+    });
 
     quote! {
         impl<'a, F, R> repl::Interactive<'a, F, R> for #struct_name {
@@ -81,6 +88,12 @@ fn interactive_impl(ast: &DeriveInput) -> TokenStream2 {
                     #(#eval_field_matches)*
                     _ => f(Err(repl::InteractiveError::FieldNotFound{struct_name: stringify!(#struct_name), field_name})),
                 }
+            }
+        }
+
+        impl repl::InteractiveHelper for #struct_name {
+            fn get_all_interactive_field_names(&self) -> &'static [&'static str]{
+                &[#(#all_field_names)*]
             }
         }
     }

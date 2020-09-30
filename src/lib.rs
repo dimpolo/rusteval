@@ -12,6 +12,7 @@ mod root;
 
 pub type Result<'a, T> = core::result::Result<T, InteractiveError<'a>>;
 
+#[non_exhaustive]
 #[derive(Debug, PartialEq, Eq)]
 pub enum InteractiveError<'a> {
     MethodNotFound {
@@ -32,7 +33,7 @@ pub enum InteractiveError<'a> {
     SyntaxError,
 }
 
-pub trait Interactive<'a, F, R>: Debug + InteractiveMethods<'a, F, R> {
+pub trait Interactive<'a, F, R>: Debug + InteractiveMethods<'a, F, R> + InteractiveHelper {
     fn __interactive_get_field(
         &'a mut self,
         field_name: &'a str,
@@ -85,5 +86,15 @@ impl<'a, F, R, T: Debug> InteractiveMethods<'a, F, R> for T {
             struct_name: type_name::<T>(),
             method_name,
         }))
+    }
+}
+
+pub trait InteractiveHelper {
+    fn get_all_interactive_field_names(&self) -> &'static [&'static str];
+}
+
+impl<T: Debug> InteractiveHelper for T {
+    default fn get_all_interactive_field_names(&self) -> &'static [&'static str] {
+        &[]
     }
 }
