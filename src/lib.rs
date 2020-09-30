@@ -31,6 +31,9 @@ pub enum InteractiveError<'a> {
         found: usize,
     },
     SyntaxError,
+    ArgsError {
+        given_args: &'a str,
+    },
 }
 
 pub trait Interactive<'a, F, R>:

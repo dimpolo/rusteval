@@ -8,31 +8,32 @@ use repl::{Interactive, InteractiveMethods, InteractiveRoot};
 use rustyline::completion::Completer;
 use rustyline::hint::Hinter;
 
-#[derive(Interactive, Default, Debug)]
-struct TestStruct {
-    pub inner: bool,
+#[derive(Interactive, Debug, Default)]
+struct ChildStruct {
+    pub last_sum: f32,
 }
 
 #[InteractiveMethods]
-impl TestStruct {
-    pub fn try_ping(&self) -> Result<String, ()> {
-        Ok("pong".into())
-    }
-    pub fn answer(&self) {
-        println!("42");
-    }
-    pub fn add(&self, a: f32, b: f32) -> f32 {
-        a + b
+impl ChildStruct {
+    pub fn add(&mut self, a: f32, b: f32) -> f32 {
+        self.last_sum = a + b;
+        self.last_sum
     }
 }
 
-#[derive(InteractiveRoot, Default, Debug)]
-struct MyInteractiveRoot {
-    pub test: TestStruct,
+#[derive(Interactive, Debug, Default)]
+struct ParentStruct {
+    pub child1: ChildStruct,
+    pub child2: ChildStruct,
+}
+
+#[derive(InteractiveRoot, Debug, Default)]
+struct Root {
+    pub parent: ParentStruct,
 }
 
 fn main() -> rustyline::Result<()> {
-    let root = MyInteractiveRoot::default();
+    let root = Root::default();
     let h = RustyLine { root };
 
     let mut rl = Editor::new();
@@ -49,7 +50,7 @@ fn main() -> rustyline::Result<()> {
 
 #[derive(Helper, Validator, Highlighter)]
 struct RustyLine {
-    pub root: MyInteractiveRoot,
+    pub root: Root,
 }
 
 impl Hinter for RustyLine {

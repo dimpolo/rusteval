@@ -1,8 +1,8 @@
 use proc_macro::TokenStream;
 
 use quote::quote;
-use syn::export::TokenStream2;
-use syn::{parse_macro_input, FnArg, ImplItem, ImplItemMethod, ItemImpl, Visibility};
+use syn::export::{Span, TokenStream2};
+use syn::{parse_macro_input, FnArg, Ident, ImplItem, ImplItemMethod, ItemImpl, Visibility};
 
 pub fn interactive_methods(input: TokenStream) -> TokenStream {
     let original_impl = TokenStream2::from(input.clone());
@@ -39,8 +39,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
             where
                 F: Fn(repl::Result<'a, &dyn ::core::fmt::Debug>) -> R,
             {
-                let args = args.split_terminator(',');
-                let args_count = args.count();
+                let args_count = args.split_terminator(',').count();
                 match method_name {
                     #(#method_matches)*
 
@@ -65,6 +64,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
 
 fn is_interactive_method(method: &&ImplItemMethod) -> bool {
     // skip methods that are not pub and associated functions
+    // TODO check if args are parseable
 
     matches!(method.vis, Visibility::Public(_))
         && matches!(method.sig.inputs.first(), Some(FnArg::Receiver(_)))
@@ -84,8 +84,46 @@ fn gen_method_match_expr(method: &&ImplItemMethod) -> TokenStream2 {
             }));
         }
     };
-    let method_call = if expected_arg_len > 1 {
-        quote! { unimplemented!()}
+
+    let args_error = quote! {
+        repl::InteractiveError::ArgsError { given_args: args }
+    };
+
+    let get_arg_names =
+        || (0..expected_arg_len).map(|num| Ident::new(&format!("arg{}", num), Span::call_site()));
+
+    let args_parse = get_arg_names().map(|arg_name| {
+        quote! {
+            let #arg_name = args_iterator
+                .next()
+                .ok_or(#args_error)?
+                .trim()
+                .parse()
+                .map_err(|_|#args_error)?;
+        }
+    });
+
+    let args_call: Vec<_> = get_arg_names()
+        .map(|arg_name| {
+            quote! {
+                #arg_name,
+            }
+        })
+        .collect();
+
+    let method_call = if expected_arg_len > 0 {
+        quote! {
+            let parse = || {
+                let mut args_iterator = args.split_terminator(','); // TODO doesn't work on types like str
+                #(#args_parse)*
+                Ok((#(#args_call)*))
+            };
+
+            match parse(){
+                Ok((#(#args_call)*)) => f(Ok(&self.#method_ident(#(#args_call)*))),
+                Err(e) => f(Err(e)),
+            }
+        }
     } else {
         quote! {
             f(Ok(&self.#method_ident()))
