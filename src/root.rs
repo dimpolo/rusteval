@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 
-use crate::{Interactive, Result};
+use crate::{Interactive, InteractiveError, Result};
 
 #[derive(Debug)]
 enum AccessType<'a> {
@@ -14,9 +14,53 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> {
         F: Fn(Result<&dyn Debug>) -> R,
         Self: Sized,
     {
-        let (mut object_path, access_type) = parse_expression(expression);
+        match self.get_queried_object_mut(expression) {
+            Ok((object, rest_expression)) => {
+                let access_type = parse_access_type(rest_expression);
+                match access_type {
+                    Ok(AccessType::FieldAccess(field_name)) => {
+                        (&*object).__interactive_eval_field(field_name, f)
+                    }
+                    Ok(AccessType::MethodAccess(method_name, args)) => {
+                        object.__interactive_eval_method(method_name, args, f)
+                    }
+                    Err(e) => f(Err(e)),
+                }
+            }
+            Err(e) => f(Err(e)),
+        }
+    }
 
-        dbg!(&object_path, &access_type);
+    fn get_queried_object(
+        &'a self,
+        expression: &'a str,
+    ) -> Result<(&dyn Interactive<'a, F, R>, &str)>
+    where
+        Self: Sized,
+    {
+        let (mut object_path, rest_expression) = parse_object_path(expression);
+
+        let mut current = self as &dyn Interactive<'a, F, R>;
+
+        while !object_path.is_empty() {
+            let (field_name, object_path_remainder) = object_path
+                .rsplit_once('.')
+                .unwrap_or((object_path.trim(), ""));
+            object_path = object_path_remainder;
+
+            current = current.__interactive_get_field(field_name.trim())?
+        }
+        Ok((current, rest_expression))
+    }
+
+    fn get_queried_object_mut(
+        &'a mut self,
+        expression: &'a str,
+    ) -> Result<(&mut dyn Interactive<'a, F, R>, &str)>
+    where
+        Self: Sized,
+    {
+        let (mut object_path, rest_expression) = parse_object_path(expression);
 
         let mut current = self as &mut dyn Interactive<'a, F, R>;
 
@@ -26,48 +70,49 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> {
                 .unwrap_or((object_path.trim(), ""));
             object_path = object_path_remainder;
 
-            current = match current.__interactive_get_field(field_name.trim()) {
-                Ok(current) => current,
-                Err(e) => {
-                    return f(Err(e));
-                }
-            };
+            current = current.__interactive_get_field_mut(field_name.trim())?
         }
-
-        match access_type {
-            AccessType::FieldAccess(field_name) => {
-                (&*current).__interactive_eval_field(field_name, f)
-            }
-            AccessType::MethodAccess(method_name, args) => {
-                current.__interactive_eval_method(method_name, args, f)
-            }
-        }
+        Ok((current, rest_expression))
     }
-
-    /* TODO make this work instead of inside proc macro
-    #[cfg(feature = "std")]
-    fn eval_to_debug_string(&mut self, expression: &str) -> String {
-        self.try_eval(expression, |result| format!("{:?}", result))
-    }
-    */
 }
 
-fn parse_expression(expression: &str) -> (&str, AccessType) {
+fn parse_access_type(expression: &str) -> Result<AccessType> {
     let expression = expression.trim();
-
-    if let Some(Some(((object_path, method_name), args))) = expression.strip_suffix(')').map(|s| {
-        s.split_once('(')
-            .map(|(path, args)| (path.rsplit_once('.').unwrap_or(("", path)), args))
-    }) {
-        (
-            object_path.trim(),
-            AccessType::MethodAccess(method_name.trim(), args),
-        )
-    } else {
-        let (object_path, field_name) = expression.rsplit_once('.').unwrap_or(("", expression));
-        (
-            object_path.trim(),
-            AccessType::FieldAccess(field_name.trim()),
-        )
+    match expression.strip_suffix(')').map(|s| s.split_once('(')) {
+        Some(Some((method_name, args))) => Ok(AccessType::MethodAccess(method_name.trim(), args)),
+        Some(None) => Err(InteractiveError::SyntaxError),
+        None => Ok(AccessType::FieldAccess(expression)),
     }
+}
+
+fn parse_object_path(expression: &str) -> (&str, &str) {
+    let args_start_index = expression.find('(').unwrap_or_else(|| expression.len());
+    match expression[..args_start_index].rfind('.') {
+        Some(last_dot_index) => {
+            let (object_path, rest_expression) = expression.split_at(last_dot_index);
+            (object_path.trim(), &rest_expression.get(1..).unwrap_or(""))
+        }
+        None => ("", expression),
+    }
+}
+
+#[test]
+fn test_parse_object_path0() {
+    assert_eq!(parse_object_path(""), ("", ""));
+}
+#[test]
+fn test_parse_object_path1() {
+    assert_eq!(parse_object_path("foo"), ("", "foo"));
+}
+#[test]
+fn test_parse_object_path2() {
+    assert_eq!(parse_object_path("foo."), ("foo", ""));
+}
+#[test]
+fn test_parse_object_path3() {
+    assert_eq!(parse_object_path("foo.bar"), ("foo", "bar"));
+}
+#[test]
+fn test_parse_object_path4() {
+    assert_eq!(parse_object_path("foo.frob(1.5)"), ("foo", "frob(1.5)"));
 }

@@ -33,8 +33,15 @@ pub enum InteractiveError<'a> {
     SyntaxError,
 }
 
-pub trait Interactive<'a, F, R>: Debug + InteractiveMethods<'a, F, R> + InteractiveHelper {
+pub trait Interactive<'a, F, R>:
+    Debug + InteractiveMethods<'a, F, R> + InteractiveFieldNames + InteractiveMethodNames
+{
     fn __interactive_get_field(
+        &'a self,
+        field_name: &'a str,
+    ) -> crate::Result<'a, &dyn crate::Interactive<'a, F, R>>;
+
+    fn __interactive_get_field_mut(
         &'a mut self,
         field_name: &'a str,
     ) -> crate::Result<'a, &mut dyn crate::Interactive<'a, F, R>>;
@@ -52,6 +59,16 @@ pub trait InteractiveMethods<'a, F, R>: Debug {
 
 impl<'a, F, R, T: Debug + InteractiveMethods<'a, F, R>> Interactive<'a, F, R> for T {
     default fn __interactive_get_field(
+        &'a self,
+        field_name: &'a str,
+    ) -> Result<'a, &dyn Interactive<'a, F, R>> {
+        Err(InteractiveError::FieldNotFound {
+            struct_name: type_name::<T>(),
+            field_name,
+        })
+    }
+
+    default fn __interactive_get_field_mut(
         &'a mut self,
         field_name: &'a str,
     ) -> Result<'a, &mut dyn Interactive<'a, F, R>> {
@@ -89,12 +106,22 @@ impl<'a, F, R, T: Debug> InteractiveMethods<'a, F, R> for T {
     }
 }
 
-pub trait InteractiveHelper {
+pub trait InteractiveFieldNames {
     fn get_all_interactive_field_names(&self) -> &'static [&'static str];
 }
 
-impl<T: Debug> InteractiveHelper for T {
+impl<T: Debug> InteractiveFieldNames for T {
     default fn get_all_interactive_field_names(&self) -> &'static [&'static str] {
+        &[]
+    }
+}
+
+pub trait InteractiveMethodNames {
+    fn get_all_interactive_method_names(&self) -> &'static [&'static str];
+}
+
+impl<T: Debug> InteractiveMethodNames for T {
+    default fn get_all_interactive_method_names(&self) -> &'static [&'static str] {
         &[]
     }
 }

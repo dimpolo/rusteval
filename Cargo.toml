@@ -9,9 +9,15 @@ edition = "2018"
 [dependencies]
 repl_derive = {path = "repl_derive"}
 
-[dev-dependencies]
-trybuild = "1"
-
 [features]
 default = ["std"]
 std = []
+
+
+[[example]]
+name = "tab_completion"
+path = "examples/tab_completion.rs"
+
+[dev_dependencies]
+rustyline = "6"
+rustyline-derive = "0.3"

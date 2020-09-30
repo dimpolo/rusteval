@@ -15,7 +15,16 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
         _ => None,
     });
 
-    let method_matches = methods.filter_map(gen_method_match_expr);
+    let interactive_methods: Vec<_> = methods.filter(is_interactive_method).collect();
+
+    let method_matches = interactive_methods.iter().map(gen_method_match_expr);
+
+    let all_method_names = interactive_methods.iter().map(|method| {
+        let name = &method.sig.ident;
+        quote! {
+            stringify!(#name),
+        }
+    });
 
     let expanded = quote! {
         #original_impl
@@ -42,23 +51,26 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
                 }
             }
         }
+
+        impl repl::InteractiveMethodNames for #struct_name {
+            fn get_all_interactive_method_names(&self) -> &'static [&'static str]{
+                &[#(#all_method_names)*]
+            }
+        }
     };
 
     // eprintln!("{}", expanded);
     expanded.into()
 }
 
-fn gen_method_match_expr(method: &ImplItemMethod) -> Option<TokenStream2> {
-    // skip methods that are not pub
-    if !matches!(method.vis, Visibility::Public(_)) {
-        return None;
-    }
+fn is_interactive_method(method: &&ImplItemMethod) -> bool {
+    // skip methods that are not pub and associated functions
 
-    // skip associated functions
-    if !matches!(method.sig.inputs.first(), Some(FnArg::Receiver(_))) {
-        return None;
-    }
+    matches!(method.vis, Visibility::Public(_))
+        && matches!(method.sig.inputs.first(), Some(FnArg::Receiver(_)))
+}
 
+fn gen_method_match_expr(method: &&ImplItemMethod) -> TokenStream2 {
     let method_ident = &method.sig.ident;
 
     // don't count self
@@ -80,10 +92,10 @@ fn gen_method_match_expr(method: &ImplItemMethod) -> Option<TokenStream2> {
         }
     };
 
-    Some(quote! {
+    quote! {
         stringify!(#method_ident) => {
             #args_len_check
             #method_call
         }
-    })
+    }
 }

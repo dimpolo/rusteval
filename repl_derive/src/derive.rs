@@ -61,6 +61,13 @@ fn interactive_impl(ast: &DeriveInput) -> TokenStream2 {
     let get_field_matches = get_interactive_fields().map(|field| {
         let name = &field.ident;
         quote! {
+            stringify!(#name) => Ok(&self.#name),
+        }
+    });
+
+    let get_field_mut_matches = get_interactive_fields().map(|field| {
+        let name = &field.ident;
+        quote! {
             stringify!(#name) => Ok(&mut self.#name),
         }
     });
@@ -74,9 +81,15 @@ fn interactive_impl(ast: &DeriveInput) -> TokenStream2 {
 
     quote! {
         impl<'a, F, R> repl::Interactive<'a, F, R> for #struct_name {
-            fn __interactive_get_field(&'a mut self, field_name: &'a str) -> repl::Result<'a, &mut dyn repl::Interactive<'a, F, R>>{
+            fn __interactive_get_field(&'a self, field_name: &'a str) -> repl::Result<'a, &dyn repl::Interactive<'a, F, R>>{
                 match field_name {
                     #(#get_field_matches)*
+                    _ => Err(repl::InteractiveError::FieldNotFound{struct_name: stringify!(#struct_name), field_name}),
+                }
+            }
+            fn __interactive_get_field_mut(&'a mut self, field_name: &'a str) -> repl::Result<'a, &mut dyn repl::Interactive<'a, F, R>>{
+                match field_name {
+                    #(#get_field_mut_matches)*
                     _ => Err(repl::InteractiveError::FieldNotFound{struct_name: stringify!(#struct_name), field_name}),
                 }
             }
@@ -91,7 +104,7 @@ fn interactive_impl(ast: &DeriveInput) -> TokenStream2 {
             }
         }
 
-        impl repl::InteractiveHelper for #struct_name {
+        impl repl::InteractiveFieldNames for #struct_name {
             fn get_all_interactive_field_names(&self) -> &'static [&'static str]{
                 &[#(#all_field_names)*]
             }

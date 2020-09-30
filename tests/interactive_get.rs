@@ -30,7 +30,7 @@ fn test_get_child() {
 
 #[test]
 fn test_get_child_field() {
-    let mut parent_struct = ParentStruct::default();
+    let parent_struct = ParentStruct::default();
 
     let child = parent_struct.__interactive_get_field("child").unwrap();
 
@@ -43,7 +43,7 @@ fn test_get_child_field() {
 fn test_call_child_method() {
     let mut parent_struct = ParentStruct::default();
 
-    let child = parent_struct.__interactive_get_field("child").unwrap();
+    let child = parent_struct.__interactive_get_field_mut("child").unwrap();
 
     child.__interactive_eval_method("try_ping", "", |result| {
         assert_eq!(format!("{:?}", result.unwrap()), "Ok(\"pong\")")

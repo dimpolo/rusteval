@@ -29,6 +29,11 @@ struct ParentStruct {
     pub child: TestStruct,
 }
 
+#[derive(InteractiveRoot, Default, Debug)]
+struct GenRepl {
+    pub parent: ParentStruct,
+}
+
 #[test]
 fn test_get_root_object() {
     let mut repl = GenRepl::default();
@@ -69,9 +74,4 @@ fn test_call_with_float() {
         repl.eval_to_debug_string("parent.child.add(4.20, 6.9)"),
         "Ok(false)"
     );
-}
-
-#[derive(InteractiveRoot, Default, Debug)]
-struct GenRepl {
-    pub parent: ParentStruct,
 }
