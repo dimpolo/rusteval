@@ -30,7 +30,7 @@ fn main() -> std::io::Result<()> {
     use std::io;
     use std::io::Write;
 
-    let mut repl = Root::default();
+    let mut root = Root::default();
 
     loop {
         let mut input = String::new();
@@ -38,6 +38,6 @@ fn main() -> std::io::Result<()> {
         io::stdout().flush()?;
 
         io::stdin().read_line(&mut input)?;
-        println!("{}", repl.eval_to_debug_string(&input));
+        println!("{}", root.eval_to_debug_string(&input));
     }
 }

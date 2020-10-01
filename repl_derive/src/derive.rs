@@ -2,7 +2,7 @@ use proc_macro::TokenStream;
 
 use quote::quote;
 use syn::export::TokenStream2;
-use syn::{parse_macro_input, DeriveInput, Visibility};
+use syn::{parse_macro_input, DeriveInput, Field, Visibility};
 
 pub fn derive_interactive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
@@ -45,11 +45,7 @@ fn interactive_impl(ast: &DeriveInput) -> TokenStream2 {
         unimplemented!();
     };
 
-    let get_interactive_fields = || {
-        fields
-            .iter()
-            .filter(|field| matches!(field.vis, Visibility::Public(_)))
-    };
+    let get_interactive_fields = || fields.iter().filter(is_interactive_field);
 
     let eval_field_matches = get_interactive_fields().map(|field| {
         let name = &field.ident;
@@ -114,4 +110,8 @@ fn interactive_impl(ast: &DeriveInput) -> TokenStream2 {
             }
         }
     }
+}
+
+fn is_interactive_field(field: &&Field) -> bool {
+    matches!(field.vis, Visibility::Public(_))
 }

@@ -4,8 +4,6 @@ version = "0.1.0"
 authors = ["Dimitri Polonski <d.polonski@wmt.team>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 repl_derive = {path = "repl_derive"}
 
@@ -13,6 +11,9 @@ repl_derive = {path = "repl_derive"}
 default = ["std"]
 std = []
 
+[[example]]
+name = "minimal"
+path = "examples/minimal.rs"
 
 [[example]]
 name = "tab_completion"

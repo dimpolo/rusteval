@@ -67,7 +67,12 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
         }
         Ok((current, rest_expression))
     }
-    fn do_it(&self) {}
+    /* TODO make this work
+    #[cfg(feature = "std")]
+    fn eval_to_debug_string(&mut self, expression: &str) -> String {
+        self.try_eval(expression, |result| format!("{:?}", result))
+    }
+    */
 }
 
 fn parse_access_type(expression: &str) -> Result<AccessType> {
