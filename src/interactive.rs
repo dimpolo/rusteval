@@ -28,7 +28,7 @@ pub enum InteractiveError<'a> {
 
 /// The main trait of this crate TODO
 ///
-/// Note:
+/// # Note:
 /// It is currently not possible to check if a trait is implemented at runtime.
 /// This means that all members of an [`Interactive`] struct need to also implement [`Interactive`], which is why
 /// a default blanket implementation for all `T: Debug` is provided.
@@ -82,7 +82,7 @@ where
 ///
 /// This trait gets implemented automatically when you derive [`Interactive`].
 ///
-/// Note:
+/// # Note:
 /// It is currently not possible to check if a trait is implemented at runtime.
 /// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
 /// a default blanket implementation for all `T: Debug` is provided.
@@ -119,7 +119,7 @@ where
 ///
 /// This trait gets implemented automatically when you use the [`InteractiveMethods`] attribute.
 ///
-/// Note:
+/// # Note:
 /// It is currently not possible to check if a trait is implemented at runtime.
 /// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
 /// a default blanket implementation for all `T: Debug` is provided.
@@ -164,7 +164,7 @@ where
 ///
 /// This trait gets implemented automatically when you derive [`Interactive`].
 ///
-/// Note:
+/// # Note:
 /// It is currently not possible to check if a trait is implemented at runtime.
 /// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
 /// a default blanket implementation for all `T: Debug` is provided.
@@ -188,7 +188,7 @@ where
 ///
 /// This trait gets implemented automatically when you use the [`InteractiveMethods`] attribute.
 ///
-/// Note:
+/// # Note:
 /// It is currently not possible to check if a trait is implemented at runtime.
 /// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
 /// a default blanket implementation for all `T: Debug` is provided.

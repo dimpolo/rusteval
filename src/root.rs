@@ -8,7 +8,36 @@ enum AccessType<'a> {
     MethodAccess(&'a str, &'a str),
 }
 
+/// Docs and stuff TODO
 pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
+    /// Evaluates the given expression, calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>` and returns what the closure returned.
+    /// # Example
+    ///
+    /// ```
+    /// # #![feature(min_specialization)]
+    /// # use repl::{Interactive, InteractiveMethods, InteractiveRoot};
+    /// # use std::fmt::Debug;
+    /// #
+    /// #[derive(Interactive, Debug, Default)]
+    /// struct Child {
+    ///     pub field1: bool
+    /// }
+    /// #[InteractiveMethods]
+    /// impl Child {
+    ///     pub fn add(&mut self, a: u8, b: u8) -> u8 {
+    ///         a + b
+    ///     }
+    /// }
+    ///
+    /// #[derive(InteractiveRoot, Debug, Default)]
+    /// struct Root {
+    ///     pub child: Child,
+    /// }
+    ///
+    /// let mut root = Root::default();
+    /// assert_eq!(root.try_eval("child.add(1, 2)", |result| format!("{:?}", result)), "Ok(3)");
+    /// assert_eq!(root.try_eval("child.field1", |result| format!("{:?}", result)), "Ok(false)");
+    /// ```
     fn try_eval(&'a mut self, expression: &'a str, f: F) -> R
     where
         F: Fn(Result<'a, &dyn Debug>) -> R,
@@ -30,6 +59,40 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
         }
     }
 
+    /// Splits the given expression into an object path and a rest expression.
+    /// The object path is the part of the given expression before the last `.`
+    /// Then recursively looks for an object matching the given object path
+    /// and if successful returns a shared reference to it together with the rest expression.
+    ///
+    /// # Note:
+    /// Currently you might have to use the associated function syntax
+    /// [`InteractiveRoot`]`::<(), ()>::`[`get_queried_object`]`(&instance, expression)`
+    /// if rust complains about not being able to infer a type.
+    ///
+    /// [`get_queried_object`]: ./trait.InteractiveRoot.html#method.get_queried_object
+
+    /// # Example
+    ///
+    /// ```
+    /// # #![feature(min_specialization)]
+    /// # use repl::{Interactive, InteractiveRoot};
+    /// # use std::fmt::Debug;
+    /// #
+    /// #[derive(Interactive, Debug, Default)]
+    /// struct Child {
+    ///     pub field1: bool
+    /// }
+    ///
+    /// #[derive(InteractiveRoot, Debug, Default)]
+    /// struct Root {
+    ///     pub child: Child,
+    /// }
+    ///
+    /// let root = Root::default();
+    /// let (child, rest_expression) = InteractiveRoot::<(), ()>::get_queried_object(&root, "child.rest").unwrap();
+    /// assert_eq!(child.get_all_interactive_field_names(), &["field1"]);
+    /// assert_eq!(rest_expression, "rest");
+    /// ```
     fn get_queried_object(
         &'a self,
         expression: &'a str,
@@ -49,6 +112,9 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
         Ok((current, rest_expression))
     }
 
+    /// Same as [`get_queried_object`] but returning a mutable reference.
+    ///
+    /// [`get_queried_object`]: ./trait.InteractiveRoot.html#method.get_queried_object
     fn get_queried_object_mut(
         &'a mut self,
         expression: &'a str,

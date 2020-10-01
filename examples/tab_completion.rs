@@ -54,8 +54,8 @@ struct RustyLine {
 /// This object then is used to feed the RustyLine Completer with
 /// get_all_interactive_field_names and get_all_interactive_method_names
 ///
-/// Note:
-/// I couldn't make self.root.get_queried_object(line) work, maybe someone will figure this out
+/// # Note:
+/// I couldn't make self.root.get_queried_object(line) work, maybe someone will figure this out.
 /// Until then you can use InteractiveRoot::<(), ()>::get_queried_object(&self.root, line)
 /// as the type arguments don't matter for this call
 impl Completer for RustyLine {

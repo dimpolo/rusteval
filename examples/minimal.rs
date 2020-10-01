@@ -31,9 +31,9 @@ fn main() -> std::io::Result<()> {
     use std::io::Write;
 
     let mut root = Root::default();
+    let mut input = String::new();
 
     loop {
-        let mut input = String::new();
         print!(">>> ");
         io::stdout().flush()?;
 
