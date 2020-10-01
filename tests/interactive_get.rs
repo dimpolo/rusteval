@@ -1,6 +1,6 @@
 #![feature(min_specialization)]
 
-use repl::{Interactive, InteractiveMethods};
+use repl::{Interactive, InteractiveFields, InteractiveMethods};
 
 #[derive(Interactive, Debug, Default)]
 struct TestStruct {

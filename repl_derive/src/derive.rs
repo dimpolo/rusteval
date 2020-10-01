@@ -93,6 +93,10 @@ fn interactive_impl(ast: &DeriveInput) -> TokenStream2 {
                     _ => Err(repl::InteractiveError::FieldNotFound{struct_name: stringify!(#struct_name), field_name}),
                 }
             }
+
+        }
+
+        impl<'a, F, R> repl::InteractiveFields<'a, F, R> for #struct_name {
             fn __interactive_eval_field(&'a self, field_name: &'a str, f: F) -> R
             where
                 F: Fn(repl::Result<'a, &dyn ::core::fmt::Debug>) -> R,

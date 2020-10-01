@@ -37,7 +37,11 @@ pub enum InteractiveError<'a> {
 }
 
 pub trait Interactive<'a, F, R>:
-    Debug + InteractiveMethods<'a, F, R> + InteractiveFieldNames + InteractiveMethodNames
+    Debug
+    + InteractiveMethods<'a, F, R>
+    + InteractiveFields<'a, F, R>
+    + InteractiveFieldNames
+    + InteractiveMethodNames
 {
     fn __interactive_get_field(
         &'a self,
@@ -48,19 +52,12 @@ pub trait Interactive<'a, F, R>:
         &'a mut self,
         field_name: &'a str,
     ) -> crate::Result<'a, &mut dyn crate::Interactive<'a, F, R>>;
-
-    fn __interactive_eval_field(&'a self, field_name: &'a str, f: F) -> R
-    where
-        F: Fn(Result<&dyn Debug>) -> R;
 }
 
-pub trait InteractiveMethods<'a, F, R>: Debug {
-    fn __interactive_eval_method(&'a mut self, method_name: &'a str, args: &'a str, f: F) -> R
-    where
-        F: Fn(Result<&dyn Debug>) -> R;
-}
-
-impl<'a, F, R, T: Debug + InteractiveMethods<'a, F, R>> Interactive<'a, F, R> for T {
+impl<'a, F, R, T> Interactive<'a, F, R> for T
+where
+    T: Debug,
+{
     default fn __interactive_get_field(
         &'a self,
         field_name: &'a str,
@@ -80,7 +77,18 @@ impl<'a, F, R, T: Debug + InteractiveMethods<'a, F, R>> Interactive<'a, F, R> fo
             field_name,
         })
     }
+}
 
+pub trait InteractiveFields<'a, F, R>: Debug {
+    fn __interactive_eval_field(&'a self, field_name: &'a str, f: F) -> R
+    where
+        F: Fn(Result<&dyn Debug>) -> R;
+}
+
+impl<'a, F, R, T> InteractiveFields<'a, F, R> for T
+where
+    T: Debug,
+{
     default fn __interactive_eval_field(&'a self, field_name: &'a str, f: F) -> R
     where
         F: Fn(Result<&dyn Debug>) -> R,
@@ -92,7 +100,16 @@ impl<'a, F, R, T: Debug + InteractiveMethods<'a, F, R>> Interactive<'a, F, R> fo
     }
 }
 
-impl<'a, F, R, T: Debug> InteractiveMethods<'a, F, R> for T {
+pub trait InteractiveMethods<'a, F, R>: Debug {
+    fn __interactive_eval_method(&'a mut self, method_name: &'a str, args: &'a str, f: F) -> R
+    where
+        F: Fn(Result<&dyn Debug>) -> R;
+}
+
+impl<'a, F, R, T> InteractiveMethods<'a, F, R> for T
+where
+    T: Debug,
+{
     default fn __interactive_eval_method(
         &'a mut self,
         method_name: &'a str,
@@ -109,21 +126,27 @@ impl<'a, F, R, T: Debug> InteractiveMethods<'a, F, R> for T {
     }
 }
 
-pub trait InteractiveFieldNames {
+pub trait InteractiveFieldNames: Debug {
     fn get_all_interactive_field_names(&self) -> &'static [&'static str];
 }
 
-impl<T: Debug> InteractiveFieldNames for T {
+impl<T> InteractiveFieldNames for T
+where
+    T: Debug,
+{
     default fn get_all_interactive_field_names(&self) -> &'static [&'static str] {
         &[]
     }
 }
 
-pub trait InteractiveMethodNames {
+pub trait InteractiveMethodNames: Debug {
     fn get_all_interactive_method_names(&self) -> &'static [&'static str];
 }
 
-impl<T: Debug> InteractiveMethodNames for T {
+impl<T> InteractiveMethodNames for T
+where
+    T: Debug,
+{
     default fn get_all_interactive_method_names(&self) -> &'static [&'static str] {
         &[]
     }
