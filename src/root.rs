@@ -11,7 +11,7 @@ enum AccessType<'a> {
 pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
     fn try_eval(&'a mut self, expression: &'a str, f: F) -> R
     where
-        F: Fn(Result<&dyn Debug>) -> R,
+        F: Fn(Result<'a, &dyn Debug>) -> R,
     {
         match self.get_queried_object_mut(expression) {
             Ok((object, rest_expression)) => {
@@ -33,7 +33,7 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
     fn get_queried_object(
         &'a self,
         expression: &'a str,
-    ) -> Result<(&dyn Interactive<'a, F, R>, &str)> {
+    ) -> Result<'a, (&dyn Interactive<'a, F, R>, &str)> {
         let (mut object_path, rest_expression) = parse_object_path(expression);
 
         let mut current = self as &dyn Interactive<'a, F, R>;
@@ -52,7 +52,7 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
     fn get_queried_object_mut(
         &'a mut self,
         expression: &'a str,
-    ) -> Result<(&mut dyn Interactive<'a, F, R>, &str)> {
+    ) -> Result<'a, (&mut dyn Interactive<'a, F, R>, &str)> {
         let (mut object_path, rest_expression) = parse_object_path(expression);
 
         let mut current = self as &mut dyn Interactive<'a, F, R>;
@@ -75,7 +75,7 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
     */
 }
 
-fn parse_access_type(expression: &str) -> Result<AccessType> {
+fn parse_access_type(expression: &str) -> Result<'_, AccessType<'_>> {
     let expression = expression.trim();
     match expression.strip_suffix(')').map(|s| s.split_once('(')) {
         Some(Some((method_name, args))) => Ok(AccessType::MethodAccess(method_name.trim(), args)),

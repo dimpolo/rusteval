@@ -97,7 +97,7 @@ pub trait InteractiveFields<'a, F, R>: Debug {
     /// The return value of the closure is also returned by this method.
     fn __interactive_eval_field(&'a self, field_name: &'a str, f: F) -> R
     where
-        F: Fn(Result<&dyn Debug>) -> R;
+        F: Fn(Result<'a, &dyn Debug>) -> R;
 }
 
 impl<'a, F, R, T> InteractiveFields<'a, F, R> for T
@@ -106,7 +106,7 @@ where
 {
     default fn __interactive_eval_field(&'a self, field_name: &'a str, f: F) -> R
     where
-        F: Fn(Result<&dyn Debug>) -> R,
+        F: Fn(Result<'a, &dyn Debug>) -> R,
     {
         f(Err(InteractiveError::FieldNotFound {
             struct_name: type_name::<T>(),
@@ -137,7 +137,7 @@ pub trait InteractiveMethods<'a, F, R>: Debug {
     /// The return value of the closure is also returned by this method.
     fn __interactive_eval_method(&'a mut self, method_name: &'a str, args: &'a str, f: F) -> R
     where
-        F: Fn(Result<&dyn Debug>) -> R;
+        F: Fn(Result<'a, &dyn Debug>) -> R;
 }
 
 impl<'a, F, R, T> InteractiveMethods<'a, F, R> for T
@@ -151,7 +151,7 @@ where
         f: F,
     ) -> R
     where
-        F: Fn(Result<&dyn Debug>) -> R,
+        F: Fn(Result<'a, &dyn Debug>) -> R,
     {
         f(Err(InteractiveError::MethodNotFound {
             struct_name: type_name::<T>(),
