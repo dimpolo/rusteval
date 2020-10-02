@@ -2,7 +2,6 @@ use core::fmt::Debug;
 
 use crate::{Interactive, InteractiveError, Result};
 
-#[derive(Debug)]
 enum AccessType<'a> {
     FieldAccess(&'a str),
     MethodAccess(&'a str, &'a str),
@@ -161,23 +160,32 @@ fn parse_object_path(expression: &str) -> (&str, &str) {
     }
 }
 
-#[test]
-fn test_parse_object_path0() {
-    assert_eq!(parse_object_path(""), ("", ""));
-}
-#[test]
-fn test_parse_object_path1() {
-    assert_eq!(parse_object_path("foo"), ("", "foo"));
-}
-#[test]
-fn test_parse_object_path2() {
-    assert_eq!(parse_object_path("foo."), ("foo", ""));
-}
-#[test]
-fn test_parse_object_path3() {
-    assert_eq!(parse_object_path("foo.bar"), ("foo", "bar"));
-}
-#[test]
-fn test_parse_object_path4() {
-    assert_eq!(parse_object_path("foo.frob(1.5)"), ("foo", "frob(1.5)"));
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_object_path0() {
+        assert_eq!(parse_object_path(""), ("", ""));
+    }
+
+    #[test]
+    fn test_parse_object_path1() {
+        assert_eq!(parse_object_path("foo"), ("", "foo"));
+    }
+
+    #[test]
+    fn test_parse_object_path2() {
+        assert_eq!(parse_object_path("foo."), ("foo", ""));
+    }
+
+    #[test]
+    fn test_parse_object_path3() {
+        assert_eq!(parse_object_path("foo.bar"), ("foo", "bar"));
+    }
+
+    #[test]
+    fn test_parse_object_path4() {
+        assert_eq!(parse_object_path("foo.frob(1.5)"), ("foo", "frob(1.5)"));
+    }
 }
