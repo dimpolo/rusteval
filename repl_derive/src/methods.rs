@@ -44,7 +44,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
                     #(#method_matches)*
 
                     _ => f(Err(repl::InteractiveError::MethodNotFound {
-                        struct_name: stringify!(#struct_name),
+                        type_name: stringify!(#struct_name),
                         method_name,
                     })),
                 }

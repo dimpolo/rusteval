@@ -10,12 +10,12 @@ pub type Result<'a, T> = core::result::Result<T, InteractiveError<'a>>;
 pub enum InteractiveError<'a> {
     #[allow(missing_docs)]
     MethodNotFound {
-        struct_name: &'a str,
+        type_name: &'a str,
         method_name: &'a str,
     },
     #[allow(missing_docs)]
     FieldNotFound {
-        struct_name: &'a str,
+        type_name: &'a str,
         field_name: &'a str,
     },
     #[allow(missing_docs)]
@@ -62,7 +62,7 @@ where
         field_name: &'a str,
     ) -> Result<'a, &dyn Interactive<'a, F, R>> {
         Err(InteractiveError::FieldNotFound {
-            struct_name: type_name::<T>(),
+            type_name: type_name::<T>(),
             field_name,
         })
     }
@@ -72,7 +72,7 @@ where
         field_name: &'a str,
     ) -> Result<'a, &mut dyn Interactive<'a, F, R>> {
         Err(InteractiveError::FieldNotFound {
-            struct_name: type_name::<T>(),
+            type_name: type_name::<T>(),
             field_name,
         })
     }
@@ -109,7 +109,7 @@ where
         F: Fn(Result<'a, &dyn Debug>) -> R,
     {
         f(Err(InteractiveError::FieldNotFound {
-            struct_name: type_name::<T>(),
+            type_name: type_name::<T>(),
             field_name,
         }))
     }
@@ -154,7 +154,7 @@ where
         F: Fn(Result<'a, &dyn Debug>) -> R,
     {
         f(Err(InteractiveError::MethodNotFound {
-            struct_name: type_name::<T>(),
+            type_name: type_name::<T>(),
             method_name,
         }))
     }

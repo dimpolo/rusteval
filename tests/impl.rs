@@ -56,7 +56,7 @@ fn test_method_not_found() {
         assert_eq!(
             result.unwrap_err(),
             InteractiveError::MethodNotFound {
-                struct_name: "TestStruct",
+                type_name: "TestStruct",
                 method_name: "yeet"
             }
         )
@@ -80,7 +80,7 @@ fn test_private_method() {
         assert_eq!(
             result.unwrap_err(),
             InteractiveError::MethodNotFound {
-                struct_name: "TestStruct",
+                type_name: "TestStruct",
                 method_name: "_private_method"
             }
         )
@@ -95,7 +95,7 @@ fn test_associated_function() {
         assert_eq!(
             result.unwrap_err(),
             InteractiveError::MethodNotFound {
-                struct_name: "TestStruct",
+                type_name: "TestStruct",
                 method_name: "_new"
             }
         )
