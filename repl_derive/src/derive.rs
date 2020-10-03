@@ -2,15 +2,15 @@ use proc_macro::TokenStream;
 
 use quote::quote;
 use syn::export::TokenStream2;
-use syn::{parse_macro_input, DeriveInput, Field, Visibility};
+use syn::{parse_macro_input, Field, ItemStruct, Visibility};
 
 pub fn derive_interactive(input: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(input as DeriveInput);
+    let ast = parse_macro_input!(input as ItemStruct);
     interactive_impl(&ast).into()
 }
 
 pub fn derive_interactive_root(input: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(input as DeriveInput);
+    let ast = parse_macro_input!(input as ItemStruct);
 
     let struct_name = &ast.ident;
 
@@ -32,25 +32,15 @@ pub fn derive_interactive_root(input: TokenStream) -> TokenStream {
     expanded.into()
 }
 
-fn interactive_impl(ast: &DeriveInput) -> TokenStream2 {
+fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
     let struct_name = &ast.ident;
 
-    let fields = if let syn::Data::Struct(syn::DataStruct {
-        fields: syn::Fields::Named(syn::FieldsNamed { ref named, .. }),
-        ..
-    }) = ast.data
-    {
-        named
-    } else {
-        unimplemented!();
-    };
-
-    let get_interactive_fields = || fields.iter().filter(is_interactive_field);
+    let get_interactive_fields = || ast.fields.iter().filter(is_interactive_field);
 
     let eval_field_matches = get_interactive_fields().map(|field| {
         let name = &field.ident;
         quote! {
-            stringify!(#name) => f(Ok(&self.#name)),
+            stringify!(#name) => f(Ok(&self.#name.as_debug())),
         }
     });
 
@@ -110,6 +100,34 @@ fn interactive_impl(ast: &DeriveInput) -> TokenStream2 {
             }
         }
     }
+}
+
+pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
+    let ast = parse_macro_input!(input as ItemStruct);
+
+    let struct_name = &ast.ident;
+    let (impl_generics, ty_generics, _where_clause) = ast.generics.split_for_impl();
+
+    let get_interactive_fields = || ast.fields.iter().filter(is_interactive_field);
+
+    let as_debug_all_fields = get_interactive_fields().map(|field| {
+        let name = &field.ident;
+        quote! {
+            .field(stringify!(#name), self.#name.as_debug())
+        }
+    });
+
+    let expanded = quote! {
+        impl #impl_generics ::core::fmt::Debug for #struct_name #ty_generics{
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                f.debug_struct(stringify!(#struct_name))
+                    #(#as_debug_all_fields)*
+                    .finish()
+    }
+        }
+    };
+
+    expanded.into()
 }
 
 fn is_interactive_field(field: &&Field) -> bool {

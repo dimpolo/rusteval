@@ -1,11 +1,13 @@
 //! Docs and stuff TODO
 //! Default not neccessary
+//! # Known Limitations:
+//! * Enums
 //!
 //! # Example
 //! ```no_run
 //! #![feature(min_specialization)]
 //!
-//! use repl::{Interactive, InteractiveMethods, InteractiveRoot};
+//! use repl::{Interactive, InteractiveMethods, InteractiveRoot, AsDebug};
 //!
 //! #[derive(Interactive, Debug, Default)]
 //! struct ChildStruct {
@@ -48,17 +50,20 @@
 //! }
 //! ```
 
-#![feature(min_specialization)]
+#![allow(incomplete_features)] // TODO re-enable warning
+#![feature(specialization)]
 #![feature(str_split_once)]
 #![warn(missing_docs, rust_2018_idioms)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+pub use as_debug::AsDebug;
 pub use interactive::{
     Interactive, InteractiveError, InteractiveFieldNames, InteractiveFields,
     InteractiveMethodNames, InteractiveMethods, Result,
 };
-pub use repl_derive::{Interactive, InteractiveMethods, InteractiveRoot};
+pub use repl_derive::{Interactive, InteractiveMethods, InteractiveRoot, PartialDebug};
 pub use root::InteractiveRoot;
 
+mod as_debug;
 mod interactive;
 mod root;

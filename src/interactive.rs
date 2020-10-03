@@ -24,6 +24,8 @@ pub enum InteractiveError<'a> {
     ArgsError { given_args: &'a str },
     #[allow(missing_docs)]
     SyntaxError,
+    #[allow(missing_docs)]
+    DebugNotImplemented,
 }
 
 /// The main trait of this crate TODO
@@ -31,11 +33,10 @@ pub enum InteractiveError<'a> {
 /// # Note:
 /// It is currently not possible to check if a trait is implemented at runtime.
 /// This means that all members of an [`Interactive`] struct need to also implement [`Interactive`], which is why
-/// a default blanket implementation for all `T: Debug` is provided.
+/// a default blanket implementation for all `T` is provided.
 ///
 pub trait Interactive<'a, F, R>:
-    Debug
-    + InteractiveMethods<'a, F, R>
+    InteractiveMethods<'a, F, R>
     + InteractiveFields<'a, F, R>
     + InteractiveFieldNames
     + InteractiveMethodNames
@@ -53,10 +54,7 @@ pub trait Interactive<'a, F, R>:
     ) -> crate::Result<'a, &mut dyn crate::Interactive<'a, F, R>>;
 }
 
-impl<'a, F, R, T> Interactive<'a, F, R> for T
-where
-    T: Debug,
-{
+impl<'a, F, R, T> Interactive<'a, F, R> for T {
     default fn __interactive_get_field(
         &'a self,
         field_name: &'a str,
@@ -85,10 +83,10 @@ where
 /// # Note:
 /// It is currently not possible to check if a trait is implemented at runtime.
 /// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
-/// a default blanket implementation for all `T: Debug` is provided.
+/// a default blanket implementation for all `T` is provided.
 ///
 /// [`Interactive`]: ./derive.Interactive.html
-pub trait InteractiveFields<'a, F, R>: Debug {
+pub trait InteractiveFields<'a, F, R> {
     /// Looks for a field with the given name,
     /// and passes it as a `Ok(&dyn Debug)` to the given closure.
     ///
@@ -100,10 +98,7 @@ pub trait InteractiveFields<'a, F, R>: Debug {
         F: Fn(Result<'a, &dyn Debug>) -> R;
 }
 
-impl<'a, F, R, T> InteractiveFields<'a, F, R> for T
-where
-    T: Debug,
-{
+impl<'a, F, R, T> InteractiveFields<'a, F, R> for T {
     default fn __interactive_eval_field(&'a self, field_name: &'a str, f: F) -> R
     where
         F: Fn(Result<'a, &dyn Debug>) -> R,
@@ -122,11 +117,11 @@ where
 /// # Note:
 /// It is currently not possible to check if a trait is implemented at runtime.
 /// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
-/// a default blanket implementation for all `T: Debug` is provided.
+/// a default blanket implementation for all `T` is provided.
 ///
 /// [`Interactive`]: ./derive.Interactive.html
 /// [`InteractiveMethods`]: ./attr.InteractiveMethods.html
-pub trait InteractiveMethods<'a, F, R>: Debug {
+pub trait InteractiveMethods<'a, F, R> {
     /// Looks for a method with the given name,
     /// parses the args string into the expected arguments of the method,
     /// executes the method and
@@ -140,10 +135,7 @@ pub trait InteractiveMethods<'a, F, R>: Debug {
         F: Fn(Result<'a, &dyn Debug>) -> R;
 }
 
-impl<'a, F, R, T> InteractiveMethods<'a, F, R> for T
-where
-    T: Debug,
-{
+impl<'a, F, R, T> InteractiveMethods<'a, F, R> for T {
     default fn __interactive_eval_method(
         &'a mut self,
         method_name: &'a str,
@@ -167,18 +159,15 @@ where
 /// # Note:
 /// It is currently not possible to check if a trait is implemented at runtime.
 /// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
-/// a default blanket implementation for all `T: Debug` is provided.
+/// a default blanket implementation for all `T` is provided.
 ///
 /// [`Interactive`]: ./derive.Interactive.html
-pub trait InteractiveFieldNames: Debug {
+pub trait InteractiveFieldNames {
     /// Returns all interactive field names of this type.
     fn get_all_interactive_field_names(&self) -> &'static [&'static str];
 }
 
-impl<T> InteractiveFieldNames for T
-where
-    T: Debug,
-{
+impl<T> InteractiveFieldNames for T {
     default fn get_all_interactive_field_names(&self) -> &'static [&'static str] {
         &[]
     }
@@ -191,19 +180,16 @@ where
 /// # Note:
 /// It is currently not possible to check if a trait is implemented at runtime.
 /// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
-/// a default blanket implementation for all `T: Debug` is provided.
+/// a default blanket implementation for all `T` is provided.
 ///
 /// [`Interactive`]: ./derive.Interactive.html
 /// [`InteractiveMethods`]: ./attr.InteractiveMethods.html
-pub trait InteractiveMethodNames: Debug {
+pub trait InteractiveMethodNames {
     /// Returns all interactive field names of this type.
     fn get_all_interactive_method_names(&self) -> &'static [&'static str];
 }
 
-impl<T> InteractiveMethodNames for T
-where
-    T: Debug,
-{
+impl<T> InteractiveMethodNames for T {
     default fn get_all_interactive_method_names(&self) -> &'static [&'static str] {
         &[]
     }
