@@ -66,35 +66,35 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
     });
 
     quote! {
-        impl<'a, F, R> repl::Interactive<'a, F, R> for #struct_name {
-            fn __interactive_get_field(&'a self, field_name: &'a str) -> repl::Result<'a, &dyn repl::Interactive<'a, F, R>>{
+        impl<'a, F, R> minus_i::Interactive<'a, F, R> for #struct_name {
+            fn __interactive_get_field(&'a self, field_name: &'a str) -> minus_i::Result<'a, &dyn minus_i::Interactive<'a, F, R>>{
                 match field_name {
                     #(#get_field_matches)*
-                    _ => Err(repl::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
+                    _ => Err(minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
                 }
             }
-            fn __interactive_get_field_mut(&'a mut self, field_name: &'a str) -> repl::Result<'a, &mut dyn repl::Interactive<'a, F, R>>{
+            fn __interactive_get_field_mut(&'a mut self, field_name: &'a str) -> minus_i::Result<'a, &mut dyn minus_i::Interactive<'a, F, R>>{
                 match field_name {
                     #(#get_field_mut_matches)*
-                    _ => Err(repl::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
+                    _ => Err(minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
                 }
             }
 
         }
 
-        impl<'a, F, R> repl::InteractiveFields<'a, F, R> for #struct_name {
+        impl<'a, F, R> minus_i::InteractiveFields<'a, F, R> for #struct_name {
             fn __interactive_eval_field(&'a self, field_name: &'a str, f: F) -> R
             where
-                F: Fn(repl::Result<'a, &dyn ::core::fmt::Debug>) -> R,
+                F: Fn(minus_i::Result<'a, &dyn ::core::fmt::Debug>) -> R,
             {
                 match field_name {
                     #(#eval_field_matches)*
-                    _ => f(Err(repl::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name})),
+                    _ => f(Err(minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name})),
                 }
             }
         }
 
-        impl repl::InteractiveFieldNames for #struct_name {
+        impl minus_i::InteractiveFieldNames for #struct_name {
             fn get_all_interactive_field_names(&self) -> &'static [&'static str]{
                 &[#(#all_field_names)*]
             }

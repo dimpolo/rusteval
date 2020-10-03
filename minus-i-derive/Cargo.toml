@@ -1,5 +1,5 @@
 [package]
-name = "repl_derive"
+name = "minus-i-derive"
 version = "0.1.0"
 authors = ["Dimitri Polonski <d.polonski@wmt.team>"]
 edition = "2018"

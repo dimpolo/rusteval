@@ -1,11 +1,11 @@
 [package]
-name = "repl"
+name = "minus-i"
 version = "0.1.0"
 authors = ["Dimitri Polonski <d.polonski@wmt.team>"]
 edition = "2018"
 
 [dependencies]
-repl_derive = {path = "repl_derive"}
+minus-i-derive = {path = "minus-i-derive" }
 
 [features]
 default = ["std"]

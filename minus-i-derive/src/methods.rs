@@ -29,7 +29,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #original_impl
 
-        impl<'a, F, R> repl::InteractiveMethods<'a, F, R> for #struct_name {
+        impl<'a, F, R> minus_i::InteractiveMethods<'a, F, R> for #struct_name {
             fn __interactive_eval_method(
                 &'a mut self,
                 method_name: &'a str,
@@ -37,13 +37,13 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
                 f: F,
             ) -> R
             where
-                F: Fn(repl::Result<'a, &dyn ::core::fmt::Debug>) -> R,
+                F: Fn(minus_i::Result<'a, &dyn ::core::fmt::Debug>) -> R,
             {
                 let args_count = args.split_terminator(',').count();
                 match method_name {
                     #(#method_matches)*
 
-                    _ => f(Err(repl::InteractiveError::MethodNotFound {
+                    _ => f(Err(minus_i::InteractiveError::MethodNotFound {
                         type_name: stringify!(#struct_name),
                         method_name,
                     })),
@@ -51,7 +51,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
             }
         }
 
-        impl repl::InteractiveMethodNames for #struct_name {
+        impl minus_i::InteractiveMethodNames for #struct_name {
             fn get_all_interactive_method_names(&self) -> &'static [&'static str]{
                 &[#(#all_method_names)*]
             }
@@ -78,7 +78,7 @@ fn gen_method_match_expr(method: &&ImplItemMethod) -> TokenStream2 {
 
     let args_len_check = quote! {
         if args_count != #expected_arg_len{
-            return f(Err(repl::InteractiveError::WrongNumberOfArguments{
+            return f(Err(minus_i::InteractiveError::WrongNumberOfArguments{
                 expected: #expected_arg_len,
                 found: args_count,
             }));
@@ -86,7 +86,7 @@ fn gen_method_match_expr(method: &&ImplItemMethod) -> TokenStream2 {
     };
 
     let args_error = quote! {
-        repl::InteractiveError::ArgsError { given_args: args }
+        minus_i::InteractiveError::ArgsError { given_args: args }
     };
 
     let get_arg_names =

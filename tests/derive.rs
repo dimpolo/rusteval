@@ -1,7 +1,7 @@
 #![feature(min_specialization)]
 
 use core::fmt::Debug;
-use repl::{AsDebug, Interactive};
+use minus_i::{AsDebug, Interactive};
 
 #[derive(Default, Debug)]
 struct Inner(bool, Option<String>);

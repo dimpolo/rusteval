@@ -14,7 +14,7 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
     ///
     /// ```
     /// # #![feature(min_specialization)]
-    /// # use repl::{Interactive, InteractiveMethods, InteractiveRoot, AsDebug};
+    /// # use minus_i::{Interactive, InteractiveMethods, InteractiveRoot, AsDebug};
     /// # use std::fmt::Debug;
     /// #
     /// #[derive(Interactive, Debug, Default)]
@@ -74,7 +74,7 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
     ///
     /// ```
     /// # #![feature(min_specialization)]
-    /// # use repl::{Interactive, InteractiveRoot, AsDebug};
+    /// # use minus_i::{Interactive, InteractiveRoot, AsDebug};
     /// # use std::fmt::Debug;
     /// #
     /// #[derive(Interactive, Debug, Default)]

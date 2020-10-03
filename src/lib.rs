@@ -1,13 +1,15 @@
 //! Docs and stuff TODO
 //! Default not neccessary
 //! # Known Limitations:
-//! * Enums
+//! * derive not implemented for Enums
+//! * interactive method args must implement parse
+//! * don't use 'a, F, R
 //!
 //! # Example
 //! ```no_run
 //! #![feature(min_specialization)]
 //!
-//! use repl::{Interactive, InteractiveMethods, InteractiveRoot, AsDebug};
+//! use minus_i::{Interactive, InteractiveMethods, InteractiveRoot, AsDebug};
 //!
 //! #[derive(Interactive, Debug, Default)]
 //! struct ChildStruct {
@@ -61,7 +63,7 @@ pub use interactive::{
     Interactive, InteractiveError, InteractiveFieldNames, InteractiveFields,
     InteractiveMethodNames, InteractiveMethods, Result,
 };
-pub use repl_derive::{Interactive, InteractiveMethods, InteractiveRoot, PartialDebug};
+pub use minus_i_derive::{Interactive, InteractiveMethods, InteractiveRoot, PartialDebug};
 pub use root::InteractiveRoot;
 
 mod as_debug;

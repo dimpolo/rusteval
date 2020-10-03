@@ -1,6 +1,6 @@
 #![feature(min_specialization)]
 
-use repl::{InteractiveError, InteractiveMethods};
+use minus_i::{InteractiveError, InteractiveMethods};
 
 #[derive(Debug, Default)]
 struct TestStruct {
@@ -48,7 +48,7 @@ fn test_call_no_args_no_return() {
 
 #[test]
 fn test_method_not_found() {
-    use repl::InteractiveError;
+    use minus_i::InteractiveError;
 
     let mut test_struct = TestStruct::default();
 
