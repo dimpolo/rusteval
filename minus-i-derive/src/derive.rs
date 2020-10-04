@@ -39,7 +39,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
     let eval_field_matches = get_interactive_fields().map(|field| {
         let name = &field.ident;
 
-        if is_trait_object_reference(&field) {
+        if is_reference(&field) {
             quote! {
                 stringify!(#name) => f(Ok(&(&*self.#name).as_debug())),
             }
@@ -52,7 +52,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
     let get_field_matches = get_interactive_fields().map(|field| {
         let name = &field.ident;
-        if is_trait_object_reference(&field) {
+        if is_reference(&field) {
             quote! {
                 stringify!(#name) => Ok(&*self.#name),
             }
@@ -63,19 +63,21 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
         }
     });
 
-    let get_field_mut_matches = get_interactive_fields().map(|field| {
-        let name = &field.ident;
+    let get_field_mut_matches = get_interactive_fields()
+        .filter(is_owned_or_mut_referece)
+        .map(|field| {
+            let name = &field.ident;
 
-        if is_trait_object_reference(&field) {
-            quote! {
-                stringify!(#name) => Ok(&mut *self.#name),
+            if is_reference(&field) {
+                quote! {
+                    stringify!(#name) => Ok(&mut *self.#name),
+                }
+            } else {
+                quote! {
+                    stringify!(#name) => Ok(&mut self.#name),
+                }
             }
-        } else {
-            quote! {
-                stringify!(#name) => Ok(&mut self.#name),
-            }
-        }
-    });
+        });
 
     let all_field_names = get_interactive_fields().map(|field| {
         let name = &field.ident;
@@ -152,42 +154,17 @@ fn is_interactive_field(field: &&Field) -> bool {
     matches!(field.vis, Visibility::Public(_))
 }
 
-fn is_trait_object_reference(field: &Field) -> bool {
-    // TODO maybe check for reference in general
-
-    if let Type::Reference(TypeReference {
-        elem,
-        mutability: _,
-        ..
-    }) = &field.ty
-    {
-        if let Type::TraitObject(TypeTraitObject { .. }) = **elem {
-            return true;
-        }
-    }
-
-    false
+fn is_reference(field: &Field) -> bool {
+    matches!(field.ty, Type::Reference(_))
 }
 
-fn _is_interactive_trait_object(field: &Field) -> bool {
-    if let Type::Reference(TypeReference {
-        elem,
-        mutability: _,
-        ..
-    }) = &field.ty
-    {
-        if let Type::TraitObject(TypeTraitObject {
-            dyn_token: Some(_),
-            ref bounds,
-            ..
-        }) = **elem
-        {
-            if let Some(TypeParamBound::Trait(TraitBound { path: _, .. })) = bounds.first() {
-                // TODO check if interactive
-                return true;
-            }
-        }
-    }
-
-    false
+fn is_owned_or_mut_referece(field: &&Field) -> bool {
+    !matches!(field.ty, Type::Reference(_))
+        || matches!(
+            field.ty,
+            Type::Reference(TypeReference {
+                mutability: Some(_),
+                ..
+            })
+        )
 }
