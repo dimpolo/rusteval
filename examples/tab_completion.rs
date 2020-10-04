@@ -53,11 +53,6 @@ struct RustyLine {
 /// Uses get_queried_object to get a reference to the object before the last entered '.'
 /// This object then is used to feed the RustyLine Completer with
 /// get_all_interactive_field_names and get_all_interactive_method_names
-///
-/// # Note:
-/// I couldn't make self.root.get_queried_object(line) work, maybe someone will figure this out.
-/// Until then you can use InteractiveRoot::<(), ()>::get_queried_object(&self.root, line)
-/// as the type arguments don't matter for this call
 impl Completer for RustyLine {
     type Candidate = String;
 
@@ -67,9 +62,7 @@ impl Completer for RustyLine {
         pos: usize,
         _ctx: &Context<'_>,
     ) -> rustyline::Result<(usize, Vec<Self::Candidate>)> {
-        if let Ok((current_object, rest_line)) =
-            InteractiveRoot::<(), ()>::get_queried_object(&self.root, line)
-        {
+        if let Ok((current_object, rest_line)) = self.root.get_queried_object(line) {
             let start_len = line.len() - rest_line.len();
 
             let candidates = current_object

@@ -37,41 +37,37 @@ pub enum InteractiveError<'a> {
 /// This means that all members of an [`Interactive`] struct need to also implement [`Interactive`], which is why
 /// a default blanket implementation for all `T` is provided.
 ///
-pub trait Interactive<'a, F, R>:
-    AsDebug
-    + InteractiveMethods<'a, F, R>
-    + InteractiveFields<'a, F, R>
-    + InteractiveFieldNames
-    + InteractiveMethodNames
+pub trait Interactive:
+    AsDebug + InteractiveMethods + InteractiveFields + InteractiveFieldNames + InteractiveMethodNames
 {
     /// Looks for a field with the given name and on success return a shared reference to it.
-    fn __interactive_get_field(
-        &'a self,
+    fn __interactive_get_field<'a>(
+        &self,
         field_name: &'a str,
-    ) -> crate::Result<'a, &dyn crate::Interactive<'a, F, R>>;
+    ) -> crate::Result<'a, &dyn crate::Interactive>;
 
     /// Looks for a field with the given name and on success return a mutable reference to it.
-    fn __interactive_get_field_mut(
-        &'a mut self,
+    fn __interactive_get_field_mut<'a>(
+        &mut self,
         field_name: &'a str,
-    ) -> crate::Result<'a, &mut dyn crate::Interactive<'a, F, R>>;
+    ) -> crate::Result<'a, &mut dyn crate::Interactive>;
 }
 
-impl<'a, F, R, T> Interactive<'a, F, R> for T {
-    default fn __interactive_get_field(
-        &'a self,
+impl<T> Interactive for T {
+    default fn __interactive_get_field<'a>(
+        &self,
         field_name: &'a str,
-    ) -> Result<'a, &dyn Interactive<'a, F, R>> {
+    ) -> Result<'a, &dyn Interactive> {
         Err(InteractiveError::FieldNotFound {
             type_name: type_name::<T>(),
             field_name,
         })
     }
 
-    default fn __interactive_get_field_mut(
-        &'a mut self,
+    default fn __interactive_get_field_mut<'a>(
+        &mut self,
         field_name: &'a str,
-    ) -> Result<'a, &mut dyn Interactive<'a, F, R>> {
+    ) -> Result<'a, &mut dyn Interactive> {
         Err(InteractiveError::FieldNotFound {
             type_name: type_name::<T>(),
             field_name,
@@ -89,27 +85,24 @@ impl<'a, F, R, T> Interactive<'a, F, R> for T {
 /// a default blanket implementation for all `T` is provided.
 ///
 /// [`Interactive`]: ./derive.Interactive.html
-pub trait InteractiveFields<'a, F, R> {
+pub trait InteractiveFields {
     /// Looks for a field with the given name,
     /// and passes it as a `Ok(&dyn Debug)` to the given closure.
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
-    ///
-    /// The return value of the closure is also returned by this method.
-    fn __interactive_eval_field(&'a self, field_name: &'a str, f: F) -> R
-    where
-        F: Fn(Result<'a, &dyn Debug>) -> R;
+    fn __interactive_eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>));
 }
 
-impl<'a, F, R, T> InteractiveFields<'a, F, R> for T {
-    default fn __interactive_eval_field(&'a self, field_name: &'a str, f: F) -> R
-    where
-        F: Fn(Result<'a, &dyn Debug>) -> R,
-    {
+impl<T> InteractiveFields for T {
+    default fn __interactive_eval_field(
+        &self,
+        field_name: &str,
+        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
+    ) {
         f(Err(InteractiveError::FieldNotFound {
             type_name: type_name::<T>(),
             field_name,
-        }))
+        }));
     }
 }
 
@@ -124,34 +117,32 @@ impl<'a, F, R, T> InteractiveFields<'a, F, R> for T {
 ///
 /// [`Interactive`]: ./derive.Interactive.html
 /// [`InteractiveMethods`]: ./attr.InteractiveMethods.html
-pub trait InteractiveMethods<'a, F, R> {
+pub trait InteractiveMethods {
     /// Looks for a method with the given name,
     /// parses the args string into the expected arguments of the method,
     /// executes the method and
     /// passes the result as a `Ok(&dyn Debug)` to the given closure.
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
-    ///
-    /// The return value of the closure is also returned by this method.
-    fn __interactive_eval_method(&'a mut self, method_name: &'a str, args: &'a str, f: F) -> R
-    where
-        F: Fn(Result<'a, &dyn Debug>) -> R;
+    fn __interactive_eval_method(
+        &mut self,
+        method_name: &str,
+        args: &str,
+        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
+    );
 }
 
-impl<'a, F, R, T> InteractiveMethods<'a, F, R> for T {
+impl<T> InteractiveMethods for T {
     default fn __interactive_eval_method(
-        &'a mut self,
-        method_name: &'a str,
-        _args: &'a str,
-        f: F,
-    ) -> R
-    where
-        F: Fn(Result<'a, &dyn Debug>) -> R,
-    {
+        &mut self,
+        method_name: &str,
+        _args: &str,
+        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
+    ) {
         f(Err(InteractiveError::MethodNotFound {
             type_name: type_name::<T>(),
             method_name,
-        }))
+        }));
     }
 }
 

@@ -29,15 +29,13 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #original_impl
 
-        impl<'a, F, R> minus_i::InteractiveMethods<'a, F, R> for #struct_name {
+        impl minus_i::InteractiveMethods for #struct_name {
             fn __interactive_eval_method(
-                &'a mut self,
-                method_name: &'a str,
-                args: &'a str,
-                f: F,
-            ) -> R
-            where
-                F: Fn(minus_i::Result<'a, &dyn ::core::fmt::Debug>) -> R,
+                &mut self,
+                method_name: &str,
+                args: &str,
+                f: &mut dyn FnMut(minus_i::Result<'_, &dyn ::core::fmt::Debug>),
+            )
             {
                 let args_count = args.split_terminator(',').count();
                 match method_name {

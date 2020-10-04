@@ -23,7 +23,7 @@ struct ParentStruct {
 fn test_get_child() {
     let parent_struct = ParentStruct::default();
 
-    parent_struct.__interactive_eval_field("child", |result| {
+    parent_struct.__interactive_eval_field("child", &mut |result| {
         assert_eq!(format!("{:?}", result.unwrap()), "TestStruct { a: false }")
     });
 }
@@ -34,7 +34,7 @@ fn test_get_child_field() {
 
     let child = parent_struct.__interactive_get_field("child").unwrap();
 
-    (&*child).__interactive_eval_field("a", |result| {
+    (&*child).__interactive_eval_field("a", &mut |result| {
         assert_eq!(format!("{:?}", result.unwrap()), "false")
     });
 }
@@ -45,7 +45,7 @@ fn test_call_child_method() {
 
     let child = parent_struct.__interactive_get_field_mut("child").unwrap();
 
-    child.__interactive_eval_method("try_ping", "", |result| {
+    child.__interactive_eval_method("try_ping", "", &mut |result| {
         assert_eq!(format!("{:?}", result.unwrap()), "Ok(\"pong\")")
     });
 }

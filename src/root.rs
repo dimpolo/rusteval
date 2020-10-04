@@ -8,8 +8,8 @@ enum AccessType<'a> {
 }
 
 /// Docs and stuff TODO
-pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
-    /// Evaluates the given expression, calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>` and returns what the closure returned.
+pub trait InteractiveRoot: Interactive + Sized {
+    /// Evaluates the given expression and calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>`.
     /// # Example
     ///
     /// ```
@@ -34,13 +34,10 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
     /// }
     ///
     /// let mut root = Root::default();
-    /// assert_eq!(root.try_eval("child.add(1, 2)", |result| format!("{:?}", result)), "Ok(3)");
-    /// assert_eq!(root.try_eval("child.field1", |result| format!("{:?}", result)), "Ok(false)");
+    /// root.try_eval("child.add(1, 2)", &mut |result| assert_eq!(format!("{:?}", result), "Ok(3)"));
+    /// root.try_eval("child.field1", &mut |result| assert_eq!(format!("{:?}", result), "Ok(false)"));
     /// ```
-    fn try_eval(&'a mut self, expression: &'a str, f: F) -> R
-    where
-        F: Fn(Result<'a, &dyn Debug>) -> R,
-    {
+    fn try_eval(&mut self, expression: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
         match self.get_queried_object_mut(expression) {
             Ok((object, rest_expression)) => {
                 let access_type = parse_access_type(rest_expression);
@@ -62,13 +59,6 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
     /// The object path is the part of the given expression before the last `.`
     /// Then recursively looks for an object matching the given object path
     /// and if successful returns a shared reference to it together with the rest expression.
-    ///
-    /// # Note:
-    /// Currently you might have to use the associated function syntax
-    /// [`InteractiveRoot`]`::<(), ()>::`[`get_queried_object`]`(&instance, expression)`
-    /// if rust complains about not being able to infer a type.
-    ///
-    /// [`get_queried_object`]: ./trait.InteractiveRoot.html#method.get_queried_object
 
     /// # Example
     ///
@@ -88,17 +78,17 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
     /// }
     ///
     /// let root = Root::default();
-    /// let (child, rest_expression) = InteractiveRoot::<(), ()>::get_queried_object(&root, "child.rest").unwrap();
+    /// let (child, rest_expression) = root.get_queried_object("child.rest").unwrap();
     /// assert_eq!(child.get_all_interactive_field_names(), &["field1"]);
     /// assert_eq!(rest_expression, "rest");
     /// ```
-    fn get_queried_object(
+    fn get_queried_object<'a>(
         &'a self,
         expression: &'a str,
-    ) -> Result<'a, (&dyn Interactive<'a, F, R>, &str)> {
+    ) -> Result<'_, (&dyn Interactive, &str)> {
         let (mut object_path, rest_expression) = parse_object_path(expression);
 
-        let mut current = self as &dyn Interactive<'a, F, R>;
+        let mut current = self as &dyn Interactive;
 
         while !object_path.is_empty() {
             let (field_name, object_path_remainder) = object_path
@@ -114,13 +104,13 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
     /// Same as [`get_queried_object`] but returning a mutable reference.
     ///
     /// [`get_queried_object`]: ./trait.InteractiveRoot.html#method.get_queried_object
-    fn get_queried_object_mut(
+    fn get_queried_object_mut<'a>(
         &'a mut self,
         expression: &'a str,
-    ) -> Result<'a, (&mut dyn Interactive<'a, F, R>, &str)> {
+    ) -> Result<'_, (&mut dyn Interactive, &str)> {
         let (mut object_path, rest_expression) = parse_object_path(expression);
 
-        let mut current = self as &mut dyn Interactive<'a, F, R>;
+        let mut current = self as &mut dyn Interactive;
 
         while !object_path.is_empty() {
             let (field_name, object_path_remainder) = object_path
@@ -132,12 +122,14 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
         }
         Ok((current, rest_expression))
     }
-    /* TODO make this work
+
     #[cfg(feature = "std")]
+    /// Docs and Stuff TODO
     fn eval_to_debug_string(&mut self, expression: &str) -> String {
-        self.try_eval(expression, |result| format!("{:?}", result))
+        let mut buffer = String::new();
+        self.try_eval(expression, &mut |result| buffer = format!("{:?}", result));
+        buffer
     }
-    */
 }
 
 fn parse_access_type(expression: &str) -> Result<'_, AccessType<'_>> {
