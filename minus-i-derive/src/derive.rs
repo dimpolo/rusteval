@@ -32,26 +32,48 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
     let (impl_generics, ty_generics, _) = ast.generics.split_for_impl();
 
+    let tick_a = quote! {'unused}; // TODO check that unused
+
     let get_interactive_fields = || ast.fields.iter().filter(is_interactive_field);
 
     let eval_field_matches = get_interactive_fields().map(|field| {
         let name = &field.ident;
-        quote! {
-            stringify!(#name) => f(Ok(&self.#name.as_debug())),
+
+        if is_trait_object_reference(&field) {
+            quote! {
+                stringify!(#name) => f(Ok(&(&*self.#name).as_debug())),
+            }
+        } else {
+            quote! {
+                stringify!(#name) => f(Ok(&self.#name.as_debug())),
+            }
         }
     });
 
     let get_field_matches = get_interactive_fields().map(|field| {
         let name = &field.ident;
-        quote! {
-            stringify!(#name) => Ok(&self.#name),
+        if is_trait_object_reference(&field) {
+            quote! {
+                stringify!(#name) => Ok(&*self.#name),
+            }
+        } else {
+            quote! {
+                stringify!(#name) => Ok(&self.#name),
+            }
         }
     });
 
     let get_field_mut_matches = get_interactive_fields().map(|field| {
         let name = &field.ident;
-        quote! {
-            stringify!(#name) => Ok(&mut self.#name),
+
+        if is_trait_object_reference(&field) {
+            quote! {
+                stringify!(#name) => Ok(&mut *self.#name),
+            }
+        } else {
+            quote! {
+                stringify!(#name) => Ok(&mut self.#name),
+            }
         }
     });
 
@@ -64,13 +86,13 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
     quote! {
         impl #impl_generics minus_i::Interactive for #struct_name #ty_generics {
-            fn __interactive_get_field<'a>(&self, field_name: &'a str) -> minus_i::Result<'a, &dyn minus_i::Interactive>{
+            fn __interactive_get_field<#tick_a>(&self, field_name: &#tick_a str) -> minus_i::Result<#tick_a, &dyn minus_i::Interactive>{
                 match field_name {
                     #(#get_field_matches)*
                     _ => Err(minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
                 }
             }
-            fn __interactive_get_field_mut<'a>(&mut self, field_name: &'a str) -> minus_i::Result<'a, &mut dyn minus_i::Interactive>{
+            fn __interactive_get_field_mut<#tick_a>(&mut self, field_name: &#tick_a str) -> minus_i::Result<#tick_a, &mut dyn minus_i::Interactive>{
                 match field_name {
                     #(#get_field_mut_matches)*
                     _ => Err(minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
@@ -131,6 +153,8 @@ fn is_interactive_field(field: &&Field) -> bool {
 }
 
 fn is_trait_object_reference(field: &Field) -> bool {
+    // TODO maybe check for reference in general
+
     if let Type::Reference(TypeReference {
         elem,
         mutability: _,
