@@ -88,7 +88,7 @@ pub trait InteractiveRoot: Interactive + Sized {
     ) -> Result<'_, (&dyn Interactive, &str)> {
         let (mut object_path, rest_expression) = parse_object_path(expression);
 
-        let mut current = self as &dyn Interactive;
+        let mut current: &dyn Interactive = self;
 
         while !object_path.is_empty() {
             let (field_name, object_path_remainder) = object_path
@@ -110,7 +110,7 @@ pub trait InteractiveRoot: Interactive + Sized {
     ) -> Result<'_, (&mut dyn Interactive, &str)> {
         let (mut object_path, rest_expression) = parse_object_path(expression);
 
-        let mut current = self as &mut dyn Interactive;
+        let mut current: &mut dyn Interactive = self;
 
         while !object_path.is_empty() {
             let (field_name, object_path_remainder) = object_path

@@ -55,7 +55,13 @@
 #![allow(incomplete_features)] // TODO re-enable warning
 #![feature(specialization)]
 #![feature(str_split_once)]
-#![warn(missing_docs, rust_2018_idioms)]
+#![warn(
+    missing_copy_implementations,
+    missing_debug_implementations,
+    missing_docs,
+    trivial_casts,
+    rust_2018_idioms
+)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use as_debug::AsDebug;

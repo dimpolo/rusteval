@@ -8,7 +8,7 @@ pub type Result<'a, T> = core::result::Result<T, InteractiveError<'a>>;
 
 /// The main error type of this crate
 #[non_exhaustive]
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum InteractiveError<'a> {
     #[allow(missing_docs)]
     MethodNotFound {
