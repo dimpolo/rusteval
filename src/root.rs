@@ -15,7 +15,7 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
     /// ```
     /// # #![feature(min_specialization)]
     /// # use minus_i::{Interactive, InteractiveMethods, InteractiveRoot, AsDebug};
-    /// # use std::fmt::Debug;
+    /// # use core::fmt::Debug;
     /// #
     /// #[derive(Interactive, Debug, Default)]
     /// struct Child {
@@ -75,7 +75,7 @@ pub trait InteractiveRoot<'a, F: 'a, R: 'a>: Interactive<'a, F, R> + Sized {
     /// ```
     /// # #![feature(min_specialization)]
     /// # use minus_i::{Interactive, InteractiveRoot, AsDebug};
-    /// # use std::fmt::Debug;
+    /// # use core::fmt::Debug;
     /// #
     /// #[derive(Interactive, Debug, Default)]
     /// struct Child {

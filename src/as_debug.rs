@@ -1,5 +1,6 @@
+use core::fmt::Debug;
+
 use crate::InteractiveError;
-use std::fmt::Debug;
 
 /// Docs and Stuff TODO
 pub trait AsDebug {

@@ -1,6 +1,8 @@
 use core::any::type_name;
 use core::fmt::Debug;
 
+use crate::AsDebug;
+
 /// The result type of most interactive methods
 pub type Result<'a, T> = core::result::Result<T, InteractiveError<'a>>;
 
@@ -36,7 +38,8 @@ pub enum InteractiveError<'a> {
 /// a default blanket implementation for all `T` is provided.
 ///
 pub trait Interactive<'a, F, R>:
-    InteractiveMethods<'a, F, R>
+    AsDebug
+    + InteractiveMethods<'a, F, R>
     + InteractiveFields<'a, F, R>
     + InteractiveFieldNames
     + InteractiveMethodNames
