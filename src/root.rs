@@ -46,7 +46,7 @@ pub trait InteractiveRoot: Interactive + Sized {
                         (&*object).interactive_eval_field(field_name, f)
                     }
                     Ok(AccessType::MethodAccess(method_name, args)) => {
-                        object.interactive_eval_method(method_name, args, f)
+                        object.interactive_eval_method_mut(method_name, args, f)
                     }
                     Err(e) => f(Err(e)),
                 }

@@ -159,6 +159,13 @@ pub trait InteractiveMethods {
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
     fn interactive_eval_method(
+        &self,
+        method_name: &str,
+        args: &str,
+        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
+    );
+
+    fn interactive_eval_method_mut(
         &mut self,
         method_name: &str,
         args: &str,
@@ -168,6 +175,18 @@ pub trait InteractiveMethods {
 
 impl<T> InteractiveMethods for T {
     default fn interactive_eval_method(
+        &self,
+        method_name: &str,
+        _args: &str,
+        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
+    ) {
+        f(Err(InteractiveError::MethodNotFound {
+            type_name: type_name::<T>(),
+            method_name,
+        }));
+    }
+
+    default fn interactive_eval_method_mut(
         &mut self,
         method_name: &str,
         _args: &str,

@@ -17,7 +17,11 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
 
     let interactive_methods: Vec<_> = methods.filter(is_interactive_method).collect();
 
-    let method_matches = interactive_methods.iter().map(gen_method_match_expr);
+    let method_matches = interactive_methods
+        .iter()
+        .filter(|_| false) // TODO filter out non mut methods
+        .map(gen_method_match_expr);
+    let method_mut_matches = interactive_methods.iter().map(gen_method_match_expr);
 
     let all_method_names = interactive_methods.iter().map(|method| {
         let name = &method.sig.ident;
@@ -31,7 +35,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
 
         impl minus_i::InteractiveMethods for #struct_name {
             fn interactive_eval_method(
-                &mut self,
+                &self,
                 method_name: &str,
                 args: &str,
                 f: &mut dyn FnMut(minus_i::Result<'_, &dyn ::core::fmt::Debug>),
@@ -40,6 +44,24 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
                 let args_count = args.split_terminator(',').count();
                 match method_name {
                     #(#method_matches)*
+
+                    _ => f(Err(minus_i::InteractiveError::MethodNotFound {
+                        type_name: stringify!(#struct_name),
+                        method_name,
+                    })),
+                }
+            }
+
+            fn interactive_eval_method_mut(
+                &mut self,
+                method_name: &str,
+                args: &str,
+                f: &mut dyn FnMut(minus_i::Result<'_, &dyn ::core::fmt::Debug>),
+            )
+            {
+                let args_count = args.split_terminator(',').count();
+                match method_name {
+                    #(#method_mut_matches)*
 
                     _ => f(Err(minus_i::InteractiveError::MethodNotFound {
                         type_name: stringify!(#struct_name),

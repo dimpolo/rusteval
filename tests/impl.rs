@@ -32,7 +32,7 @@ impl TestStruct {
 fn test_call_no_args_primitive_return() {
     let mut test_struct = TestStruct::default();
 
-    test_struct.interactive_eval_method("get_field", "", &mut |result| {
+    test_struct.interactive_eval_method_mut("get_field", "", &mut |result| {
         assert_eq!(format!("{:?}", result.unwrap()), "0")
     });
 }
@@ -41,7 +41,7 @@ fn test_call_no_args_primitive_return() {
 fn test_call_no_args_no_return() {
     let mut test_struct = TestStruct::default();
 
-    test_struct.interactive_eval_method("answer", "", &mut |result| {
+    test_struct.interactive_eval_method_mut("answer", "", &mut |result| {
         assert_eq!(format!("{:?}", result.unwrap()), "()")
     });
 }
@@ -52,7 +52,7 @@ fn test_method_not_found() {
 
     let mut test_struct = TestStruct::default();
 
-    test_struct.interactive_eval_method("yeet", "", &mut |result| {
+    test_struct.interactive_eval_method_mut("yeet", "", &mut |result| {
         assert_eq!(
             result.unwrap_err(),
             InteractiveError::MethodNotFound {
@@ -67,7 +67,7 @@ fn test_method_not_found() {
 fn test_clone_method() {
     let mut test_struct = TestStruct::default();
 
-    test_struct.interactive_eval_method("clone", "", &mut |result| {
+    test_struct.interactive_eval_method_mut("clone", "", &mut |result| {
         assert_eq!(format!("{:?}", result.unwrap()), "TestStruct { field: 0 }")
     });
 }
@@ -76,7 +76,7 @@ fn test_clone_method() {
 fn test_private_method() {
     let mut test_struct = TestStruct::default();
 
-    test_struct.interactive_eval_method("_private_method", "", &mut |result| {
+    test_struct.interactive_eval_method_mut("_private_method", "", &mut |result| {
         assert_eq!(
             result.unwrap_err(),
             InteractiveError::MethodNotFound {
@@ -91,7 +91,7 @@ fn test_private_method() {
 fn test_associated_function() {
     let mut test_struct = TestStruct::default();
 
-    test_struct.interactive_eval_method("_new", "", &mut |result| {
+    test_struct.interactive_eval_method_mut("_new", "", &mut |result| {
         assert_eq!(
             result.unwrap_err(),
             InteractiveError::MethodNotFound {
@@ -106,7 +106,7 @@ fn test_associated_function() {
 fn test_too_many_args() {
     let mut test_struct = TestStruct::default();
 
-    test_struct.interactive_eval_method("answer", "43", &mut |result| {
+    test_struct.interactive_eval_method_mut("answer", "43", &mut |result| {
         assert_eq!(
             result.unwrap_err(),
             InteractiveError::WrongNumberOfArguments {

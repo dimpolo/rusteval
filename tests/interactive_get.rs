@@ -45,7 +45,7 @@ fn test_call_child_method() {
 
     let child = parent_struct.interactive_get_field_mut("child").unwrap();
 
-    child.interactive_eval_method("try_ping", "", &mut |result| {
+    child.interactive_eval_method_mut("try_ping", "", &mut |result| {
         assert_eq!(format!("{:?}", result.unwrap()), "Ok(\"pong\")")
     });
 }
