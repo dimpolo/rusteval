@@ -42,20 +42,54 @@ pub trait Interactive:
 {
     /// Looks for a field with the given name and on success return a shared reference to it.
     fn __interactive_get_field<'a>(
-        &self,
+        &'a self,
         field_name: &'a str,
     ) -> crate::Result<'a, &dyn crate::Interactive>;
 
     /// Looks for a field with the given name and on success return a mutable reference to it.
+    ///
+    /// # Note:
+    /// Be careful when calling methods on the returned trait object that require only a shared reference.
+    /// Since there is a default implementation for all T for those methods
+    /// Rust will use the trait object as a `& &mut dyn Interactive`
+    /// and you'll get the default implementation instead of the concrete one.
+    ///
+    /// See below example on how to circumvent this.
+    /// ```
+    /// # #![feature(min_specialization)]
+    /// # use minus_i::{Interactive, AsDebug};
+    /// #
+    /// #[derive(Interactive, Default)]
+    /// struct Struct {
+    ///     pub field: u8
+    /// }
+    ///
+    /// let mut obj = Struct::default();
+    ///
+    /// assert_eq!(
+    ///     format!(
+    ///         "{:?}",
+    ///         obj.__interactive_get_field_mut("field").unwrap().as_debug()
+    ///     ),
+    ///     "DebugNotImplemented"
+    /// );
+    /// assert_eq!(
+    ///     format!(
+    ///         "{:?}",
+    ///         (&*obj.__interactive_get_field_mut("field").unwrap()).as_debug()
+    ///     ),
+    ///     "0"
+    /// );
+    /// ```
     fn __interactive_get_field_mut<'a>(
-        &mut self,
+        &'a mut self,
         field_name: &'a str,
     ) -> crate::Result<'a, &mut dyn crate::Interactive>;
 }
 
 impl<T> Interactive for T {
     default fn __interactive_get_field<'a>(
-        &self,
+        &'a self,
         field_name: &'a str,
     ) -> Result<'a, &dyn Interactive> {
         Err(InteractiveError::FieldNotFound {
@@ -65,7 +99,7 @@ impl<T> Interactive for T {
     }
 
     default fn __interactive_get_field_mut<'a>(
-        &mut self,
+        &'a mut self,
         field_name: &'a str,
     ) -> Result<'a, &mut dyn Interactive> {
         Err(InteractiveError::FieldNotFound {

@@ -39,7 +39,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
     let eval_field_matches = get_interactive_fields().map(|field| {
         let name = &field.ident;
 
-        if is_reference(&field) {
+        if needs_dereference(&field) {
             quote! {
                 stringify!(#name) => f(Ok(&(&*self.#name).as_debug())),
             }
@@ -52,7 +52,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
     let get_field_matches = get_interactive_fields().map(|field| {
         let name = &field.ident;
-        if is_reference(&field) {
+        if needs_dereference(&field) {
             quote! {
                 stringify!(#name) => Ok(&*self.#name),
             }
@@ -68,7 +68,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
         .map(|field| {
             let name = &field.ident;
 
-            if is_reference(&field) {
+            if needs_dereference(&field) {
                 quote! {
                     stringify!(#name) => Ok(&mut *self.#name),
                 }
@@ -88,13 +88,13 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
     quote! {
         impl #impl_generics minus_i::Interactive for #struct_name #ty_generics {
-            fn __interactive_get_field<#tick_a>(&self, field_name: &#tick_a str) -> minus_i::Result<#tick_a, &dyn minus_i::Interactive>{
+            fn __interactive_get_field<#tick_a>(&#tick_a self, field_name: &#tick_a str) -> minus_i::Result<#tick_a, &dyn minus_i::Interactive>{
                 match field_name {
                     #(#get_field_matches)*
                     _ => Err(minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
                 }
             }
-            fn __interactive_get_field_mut<#tick_a>(&mut self, field_name: &#tick_a str) -> minus_i::Result<#tick_a, &mut dyn minus_i::Interactive>{
+            fn __interactive_get_field_mut<#tick_a>(&#tick_a mut self, field_name: &#tick_a str) -> minus_i::Result<#tick_a, &mut dyn minus_i::Interactive>{
                 match field_name {
                     #(#get_field_mut_matches)*
                     _ => Err(minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
@@ -154,8 +154,20 @@ fn is_interactive_field(field: &&Field) -> bool {
     matches!(field.vis, Visibility::Public(_))
 }
 
-fn is_reference(field: &Field) -> bool {
-    matches!(field.ty, Type::Reference(_))
+fn needs_dereference(field: &Field) -> bool {
+    // TODO check who needs this
+    if let Type::Reference(TypeReference {
+        elem,
+        mutability: _,
+        ..
+    }) = &field.ty
+    {
+        if let Type::TraitObject(TypeTraitObject { .. }) = **elem {
+            return true;
+        }
+    }
+
+    false
 }
 
 fn is_owned_or_mut_referece(field: &&Field) -> bool {
