@@ -122,13 +122,23 @@ pub trait InteractiveRoot: Interactive + Sized {
         }
         Ok((current, rest_expression))
     }
+     
+    /// Docs and Stuff TODO
+    fn eval_and_write<T>(&mut self, expression: &str, buf: &mut T) -> core::fmt::Result
+    where
+        T: core::fmt::Write,
+    {
+        let mut r = Ok(());
+        self.try_eval(expression, &mut |result| r = write!(buf, "{:?}", result));
+        r
+    }
 
     #[cfg(feature = "std")]
     /// Docs and Stuff TODO
     fn eval_to_string(&mut self, expression: &str) -> String {
-        let mut buffer = String::new();
-        self.try_eval(expression, &mut |result| buffer = format!("{:?}", result));
-        buffer
+        let mut s = String::new();
+        self.try_eval(expression, &mut |result| s = format!("{:?}", result));
+        s
     }
 }
 

@@ -158,6 +158,8 @@ pub trait InteractiveMethods {
     /// passes the result as a `Ok(&dyn Debug)` to the given closure.
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
+    ///
+    /// TODO explain difference
     fn interactive_eval_method(
         &self,
         method_name: &str,
@@ -165,6 +167,12 @@ pub trait InteractiveMethods {
         f: &mut dyn FnMut(Result<'_, &dyn Debug>),
     );
 
+    /// Looks for a method with the given name,
+    /// parses the args string into the expected arguments of the method,
+    /// executes the method and
+    /// passes the result as a `Ok(&dyn Debug)` to the given closure.
+    ///
+    /// On error the an `Err(InteractiveError)` is passed to the closure instead.
     fn interactive_eval_method_mut(
         &mut self,
         method_name: &str,
