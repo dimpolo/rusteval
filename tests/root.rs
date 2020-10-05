@@ -42,7 +42,7 @@ struct Root {
 fn test_get_root_object() {
     let mut root = Root::default();
     assert_eq!(
-        root.eval_to_debug_string("parent"),
+        root.eval_to_string("parent"),
         "Ok(ParentStruct { child: TestStruct { a: false } })"
     );
 }
@@ -51,7 +51,7 @@ fn test_get_root_object() {
 fn test_get_child() {
     let mut root = Root::default();
     assert_eq!(
-        root.eval_to_debug_string("parent.child"),
+        root.eval_to_string("parent.child"),
         "Ok(TestStruct { a: false })"
     );
 }
@@ -59,14 +59,14 @@ fn test_get_child() {
 #[test]
 fn test_get_child_field() {
     let mut root = Root::default();
-    assert_eq!(root.eval_to_debug_string("parent.child.a"), "Ok(false)");
+    assert_eq!(root.eval_to_string("parent.child.a"), "Ok(false)");
 }
 
 #[test]
 fn test_call_child_method() {
     let mut root = Root::default();
     assert_eq!(
-        root.eval_to_debug_string("parent.child.try_ping()"),
+        root.eval_to_string("parent.child.try_ping()"),
         "Ok(Ok(\"pong\"))"
     );
 }
@@ -75,7 +75,7 @@ fn test_call_child_method() {
 fn test_call_with_float() {
     let mut root = Root::default();
     assert_eq!(
-        root.eval_to_debug_string("parent.child.add(4.20, 6.9)"),
+        root.eval_to_string("parent.child.add(4.20, 6.9)"),
         "Ok(11.1)"
     );
 }
@@ -84,7 +84,7 @@ fn test_call_with_float() {
 fn test_call_with_different_arg_types() {
     let mut root = Root::default();
     assert_eq!(
-        root.eval_to_debug_string("parent.child.frob(420, 6.9, -7)"),
+        root.eval_to_string("parent.child.frob(420, 6.9, -7)"),
         "Ok((420, 6.9, -7))"
     );
 }
@@ -93,7 +93,7 @@ fn test_call_with_different_arg_types() {
 fn test_call_with_bad_args() {
     let mut root = Root::default();
     assert_eq!(
-        root.eval_to_debug_string("parent.child.add(nope, 1)"),
+        root.eval_to_string("parent.child.add(nope, 1)"),
         "Err(ArgsError { given_args: \"nope, 1\" })"
     );
 }

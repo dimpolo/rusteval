@@ -41,7 +41,7 @@ fn main() -> rustyline::Result<()> {
     loop {
         let input = rl.readline(">>> ")?;
         let root = &mut rl.helper_mut().unwrap().root;
-        println!("{}", root.eval_to_debug_string(&input));
+        println!("{}", root.eval_to_string(&input));
     }
 }
 

@@ -3,7 +3,7 @@
 //! # Known Limitations:
 //! * derive not implemented for Enums
 //! * interactive method args must implement parse
-//! * don't use 'a, F, R
+//! * don't use 'unused
 //!
 //! # Example
 //! ```no_run
@@ -47,7 +47,7 @@
 //!         io::stdout().flush()?;
 //!
 //!         io::stdin().read_line(&mut input)?;
-//!         println!("{}", root.eval_to_debug_string(&input));
+//!         println!("{}", root.eval_to_string(&input));
 //!     }
 //! }
 //! ```

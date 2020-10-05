@@ -125,7 +125,7 @@ pub trait InteractiveRoot: Interactive + Sized {
 
     #[cfg(feature = "std")]
     /// Docs and Stuff TODO
-    fn eval_to_debug_string(&mut self, expression: &str) -> String {
+    fn eval_to_string(&mut self, expression: &str) -> String {
         let mut buffer = String::new();
         self.try_eval(expression, &mut |result| buffer = format!("{:?}", result));
         buffer
