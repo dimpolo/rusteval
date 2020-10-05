@@ -88,13 +88,13 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
     quote! {
         impl #impl_generics minus_i::Interactive for #struct_name #ty_generics {
-            fn __interactive_get_field<#tick_a>(&#tick_a self, field_name: &#tick_a str) -> minus_i::Result<#tick_a, &dyn minus_i::Interactive>{
+            fn interactive_get_field<#tick_a>(&#tick_a self, field_name: &#tick_a str) -> minus_i::Result<#tick_a, &dyn minus_i::Interactive>{
                 match field_name {
                     #(#get_field_matches)*
                     _ => Err(minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
                 }
             }
-            fn __interactive_get_field_mut<#tick_a>(&#tick_a mut self, field_name: &#tick_a str) -> minus_i::Result<#tick_a, &mut dyn minus_i::Interactive>{
+            fn interactive_get_field_mut<#tick_a>(&#tick_a mut self, field_name: &#tick_a str) -> minus_i::Result<#tick_a, &mut dyn minus_i::Interactive>{
                 match field_name {
                     #(#get_field_mut_matches)*
                     _ => Err(minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
@@ -104,7 +104,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
         }
 
         impl #impl_generics minus_i::InteractiveFields for #struct_name #ty_generics{
-            fn __interactive_eval_field(&self, field_name: &str, f: &mut dyn FnMut(minus_i::Result<'_, &dyn ::core::fmt::Debug>))
+            fn interactive_eval_field(&self, field_name: &str, f: &mut dyn FnMut(minus_i::Result<'_, &dyn ::core::fmt::Debug>))
             {
                 match field_name {
                     #(#eval_field_matches)*

@@ -41,7 +41,7 @@ pub trait Interactive:
     AsDebug + InteractiveMethods + InteractiveFields + InteractiveFieldNames + InteractiveMethodNames
 {
     /// Looks for a field with the given name and on success return a shared reference to it.
-    fn __interactive_get_field<'a>(
+    fn interactive_get_field<'a>(
         &'a self,
         field_name: &'a str,
     ) -> crate::Result<'a, &dyn crate::Interactive>;
@@ -54,7 +54,7 @@ pub trait Interactive:
     /// Rust will use the trait object as a `& &mut dyn Interactive`
     /// and you'll get the default implementation instead of the concrete one.
     ///
-    /// See below example on how to circumvent this.
+    /// See the below example on how to circumvent this.
     /// ```
     /// # #![feature(min_specialization)]
     /// # use minus_i::{Interactive, AsDebug};
@@ -69,26 +69,26 @@ pub trait Interactive:
     /// assert_eq!(
     ///     format!(
     ///         "{:?}",
-    ///         obj.__interactive_get_field_mut("field").unwrap().as_debug()
+    ///         obj.interactive_get_field_mut("field").unwrap().as_debug()
     ///     ),
     ///     "DebugNotImplemented"
     /// );
     /// assert_eq!(
     ///     format!(
     ///         "{:?}",
-    ///         (&*obj.__interactive_get_field_mut("field").unwrap()).as_debug()
+    ///         (&*obj.interactive_get_field_mut("field").unwrap()).as_debug()
     ///     ),
     ///     "0"
     /// );
     /// ```
-    fn __interactive_get_field_mut<'a>(
+    fn interactive_get_field_mut<'a>(
         &'a mut self,
         field_name: &'a str,
     ) -> crate::Result<'a, &mut dyn crate::Interactive>;
 }
 
 impl<T> Interactive for T {
-    default fn __interactive_get_field<'a>(
+    default fn interactive_get_field<'a>(
         &'a self,
         field_name: &'a str,
     ) -> Result<'a, &dyn Interactive> {
@@ -98,7 +98,7 @@ impl<T> Interactive for T {
         })
     }
 
-    default fn __interactive_get_field_mut<'a>(
+    default fn interactive_get_field_mut<'a>(
         &'a mut self,
         field_name: &'a str,
     ) -> Result<'a, &mut dyn Interactive> {
@@ -124,11 +124,11 @@ pub trait InteractiveFields {
     /// and passes it as a `Ok(&dyn Debug)` to the given closure.
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
-    fn __interactive_eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>));
+    fn interactive_eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>));
 }
 
 impl<T> InteractiveFields for T {
-    default fn __interactive_eval_field(
+    default fn interactive_eval_field(
         &self,
         field_name: &str,
         f: &mut dyn FnMut(Result<'_, &dyn Debug>),
@@ -158,7 +158,7 @@ pub trait InteractiveMethods {
     /// passes the result as a `Ok(&dyn Debug)` to the given closure.
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
-    fn __interactive_eval_method(
+    fn interactive_eval_method(
         &mut self,
         method_name: &str,
         args: &str,
@@ -167,7 +167,7 @@ pub trait InteractiveMethods {
 }
 
 impl<T> InteractiveMethods for T {
-    default fn __interactive_eval_method(
+    default fn interactive_eval_method(
         &mut self,
         method_name: &str,
         _args: &str,

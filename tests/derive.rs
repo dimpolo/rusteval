@@ -31,7 +31,7 @@ fn test_primitive_field() {
         format!(
             "{:?}",
             test_struct
-                .__interactive_get_field("field1")
+                .interactive_get_field("field1")
                 .unwrap()
                 .as_debug()
         ),
@@ -47,7 +47,7 @@ fn test_complex_field() {
         format!(
             "{:?}",
             test_struct
-                .__interactive_get_field("field2")
+                .interactive_get_field("field2")
                 .unwrap()
                 .as_debug()
         ),
@@ -64,7 +64,7 @@ fn test_private_field() {
 
     assert_eq!(
         test_struct
-            .__interactive_get_field("private_field")
+            .interactive_get_field("private_field")
             .map(|_| ()) // unwrap_err requires that Ok value implements Debug
             .unwrap_err(),
         InteractiveError::FieldNotFound {
@@ -86,14 +86,14 @@ fn test_references() {
         format!(
             "{:?}",
             ref_struct
-                .__interactive_get_field("test_struct_ref")
+                .interactive_get_field("test_struct_ref")
                 .unwrap()
                 .as_debug()
         ),
         "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
     );
 
-    ref_struct.__interactive_eval_field("test_struct_ref", &mut |field| {
+    ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
             "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
@@ -113,14 +113,14 @@ fn test_mut_references_as_shared_references() {
         format!(
             "{:?}",
             ref_struct
-                .__interactive_get_field("test_struct_ref")
+                .interactive_get_field("test_struct_ref")
                 .unwrap()
                 .as_debug()
         ),
         "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
     );
 
-    ref_struct.__interactive_eval_field("test_struct_ref", &mut |field| {
+    ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
             "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
@@ -136,7 +136,7 @@ fn test_mut_references() {
         test_struct_ref: &mut test_struct,
     };
 
-    ref_struct.__interactive_eval_field("test_struct_ref", &mut |field| {
+    ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
             "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
@@ -147,7 +147,7 @@ fn test_mut_references() {
         format!(
             "{:?}",
             (&*ref_struct
-                .__interactive_get_field_mut("test_struct_ref")
+                .interactive_get_field_mut("test_struct_ref")
                 .unwrap())
                 .as_debug()
         ),

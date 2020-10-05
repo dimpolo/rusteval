@@ -30,7 +30,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
         #original_impl
 
         impl minus_i::InteractiveMethods for #struct_name {
-            fn __interactive_eval_method(
+            fn interactive_eval_method(
                 &mut self,
                 method_name: &str,
                 args: &str,
