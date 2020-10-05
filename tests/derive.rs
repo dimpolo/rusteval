@@ -102,6 +102,33 @@ fn test_references() {
 }
 
 #[test]
+fn test_mut_references() {
+    let mut test_struct = TestStruct::default();
+
+    let mut ref_struct = RefMutStruct {
+        test_struct_ref: &mut test_struct,
+    };
+
+    ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
+        assert_eq!(
+            format!("{:?}", field.unwrap()),
+            "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+        )
+    });
+
+    assert_eq!(
+        format!(
+            "{:?}",
+            (&*ref_struct
+                .interactive_get_field_mut("test_struct_ref")
+                .unwrap())
+                .as_debug()
+        ),
+        "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+    );
+}
+
+#[test]
 fn test_mut_references_as_shared_references() {
     let mut test_struct = TestStruct::default();
 
@@ -129,28 +156,25 @@ fn test_mut_references_as_shared_references() {
 }
 
 #[test]
-fn test_mut_references() {
-    let mut test_struct = TestStruct::default();
+fn test_shared_references_as_mut_references() {
+    use minus_i::InteractiveError;
 
-    let mut ref_struct = RefMutStruct {
-        test_struct_ref: &mut test_struct,
+    let test_struct = TestStruct::default();
+
+    let mut ref_struct = RefStruct {
+        test_struct_ref: &test_struct,
     };
 
-    ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
-        assert_eq!(
-            format!("{:?}", field.unwrap()),
-            "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
-        )
-    });
+    // TODO custom mutability error
 
     assert_eq!(
-        format!(
-            "{:?}",
-            (&*ref_struct
-                .interactive_get_field_mut("test_struct_ref")
-                .unwrap())
-                .as_debug()
-        ),
-        "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+        ref_struct
+            .interactive_get_field_mut("test_struct_ref")
+            .map(|_| ()) // unwrap_err requires that Ok value implements Debug
+            .unwrap_err(),
+        InteractiveError::FieldNotFound {
+            type_name: "RefStruct",
+            field_name: "test_struct_ref"
+        }
     );
 }

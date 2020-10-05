@@ -64,7 +64,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
     });
 
     let get_field_mut_matches = get_interactive_fields()
-        .filter(is_owned_or_mut_referece)
+        .filter(is_owned_or_mut_reference)
         .map(|field| {
             let name = &field.ident;
 
@@ -156,21 +156,10 @@ fn is_interactive_field(field: &&Field) -> bool {
 
 fn needs_dereference(field: &Field) -> bool {
     // TODO check who needs this
-    if let Type::Reference(TypeReference {
-        elem,
-        mutability: _,
-        ..
-    }) = &field.ty
-    {
-        if let Type::TraitObject(TypeTraitObject { .. }) = **elem {
-            return true;
-        }
-    }
-
-    false
+    matches!(field.ty, Type::Reference(_))
 }
 
-fn is_owned_or_mut_referece(field: &&Field) -> bool {
+fn is_owned_or_mut_reference(field: &&Field) -> bool {
     !matches!(field.ty, Type::Reference(_))
         || matches!(
             field.ty,
