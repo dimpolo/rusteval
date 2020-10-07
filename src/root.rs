@@ -34,19 +34,22 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// }
     ///
     /// let mut root = Root::default();
-    /// root.try_eval("child.add(1, 2)", &mut |result| assert_eq!(format!("{:?}", result), "Ok(3)"));
-    /// root.try_eval("child.field1", &mut |result| assert_eq!(format!("{:?}", result), "Ok(false)"));
+    /// root.try_eval("child.add(1, 2)", |result| assert_eq!(format!("{:?}", result), "Ok(3)"));
+    /// root.try_eval("child.field1", |result| assert_eq!(format!("{:?}", result), "Ok(false)"));
     /// ```
-    fn try_eval(&mut self, expression: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
+    fn try_eval<F>(&mut self, expression: &str, mut f: F)
+    where
+        F: FnMut(Result<'_, &dyn Debug>),
+    {
         match self.get_queried_object_mut(expression) {
             Ok((object, rest_expression)) => {
                 let access_type = parse_access_type(rest_expression);
                 match access_type {
                     Ok(AccessType::FieldAccess(field_name)) => {
-                        (&*object).interactive_eval_field(field_name, f)
+                        (&*object).interactive_eval_field(field_name, &mut f)
                     }
                     Ok(AccessType::MethodAccess(method_name, args)) => {
-                        object.interactive_eval_method_mut(method_name, args, f)
+                        object.interactive_eval_method_mut(method_name, args, &mut f)
                     }
                     Err(e) => f(Err(e)),
                 }
@@ -122,14 +125,14 @@ pub trait InteractiveRoot: Interactive + Sized {
         }
         Ok((current, rest_expression))
     }
-     
+
     /// Docs and Stuff TODO
     fn eval_and_write<T>(&mut self, expression: &str, buf: &mut T) -> core::fmt::Result
     where
         T: core::fmt::Write,
     {
         let mut r = Ok(());
-        self.try_eval(expression, &mut |result| r = write!(buf, "{:?}", result));
+        self.try_eval(expression, |result| r = write!(buf, "{:?}", result));
         r
     }
 
@@ -137,7 +140,7 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// Docs and Stuff TODO
     fn eval_to_string(&mut self, expression: &str) -> String {
         let mut s = String::new();
-        self.try_eval(expression, &mut |result| s = format!("{:?}", result));
+        self.try_eval(expression, |result| s = format!("{:?}", result));
         s
     }
 }
