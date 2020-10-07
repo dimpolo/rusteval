@@ -2,7 +2,7 @@ use proc_macro::TokenStream;
 
 use quote::quote;
 use syn::export::{Span, TokenStream2};
-use syn::{parse_macro_input, FnArg, Ident, ImplItem, ImplItemMethod, ItemImpl, Visibility};
+use syn::*;
 
 pub fn interactive_methods(input: TokenStream) -> TokenStream {
     let original_impl = TokenStream2::from(input.clone());
@@ -19,9 +19,18 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
 
     let method_matches = interactive_methods
         .iter()
-        .filter(|_| false) // TODO filter out non mut methods
+        .filter(|method| {
+            matches!(
+                method.sig.receiver(),
+                Some(FnArg::Receiver(Receiver {
+                    mutability: None, ..
+                }))
+            )
+        })
         .map(gen_method_match_expr);
+
     let method_mut_matches = interactive_methods.iter().map(gen_method_match_expr);
+    // TODO don't duplicate &self methods
 
     let all_method_names = interactive_methods.iter().map(|method| {
         let name = &method.sig.ident;
@@ -30,6 +39,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
         }
     });
 
+    // TODO add generics
     let expanded = quote! {
         #original_impl
 

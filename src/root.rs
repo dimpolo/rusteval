@@ -23,7 +23,7 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// }
     /// #[InteractiveMethods]
     /// impl Child {
-    ///     pub fn add(&mut self, a: u8, b: u8) -> u8 {
+    ///     pub fn add(&self, a: u8, b: u8) -> u8 {
     ///         a + b
     ///     }
     /// }
@@ -37,7 +37,29 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// root.try_eval("child.add(1, 2)", |result| assert_eq!(format!("{:?}", result), "Ok(3)"));
     /// root.try_eval("child.field1", |result| assert_eq!(format!("{:?}", result), "Ok(false)"));
     /// ```
-    fn try_eval<F>(&mut self, expression: &str, mut f: F)
+    fn try_eval<F>(&self, expression: &str, mut f: F)
+    where
+        F: FnMut(Result<'_, &dyn Debug>),
+    {
+        match self.get_queried_object(expression) {
+            Ok((object, rest_expression)) => {
+                let access_type = parse_access_type(rest_expression);
+                match access_type {
+                    Ok(AccessType::FieldAccess(field_name)) => {
+                        (&*object).interactive_eval_field(field_name, &mut f)
+                    }
+                    Ok(AccessType::MethodAccess(method_name, args)) => {
+                        object.interactive_eval_method(method_name, args, &mut f)
+                    }
+                    Err(e) => f(Err(e)),
+                }
+            }
+            Err(e) => f(Err(e)),
+        }
+    }
+
+    /// Docs and Stuff TODO
+    fn try_eval_mut<F>(&mut self, expression: &str, mut f: F)
     where
         F: FnMut(Result<'_, &dyn Debug>),
     {
@@ -54,6 +76,7 @@ pub trait InteractiveRoot: Interactive + Sized {
                     Err(e) => f(Err(e)),
                 }
             }
+            Err(InteractiveError::FieldNotFound { .. }) => self.try_eval(expression, f), // field might be behind shared reference
             Err(e) => f(Err(e)),
         }
     }
@@ -126,21 +149,23 @@ pub trait InteractiveRoot: Interactive + Sized {
         Ok((current, rest_expression))
     }
 
-    /// Docs and Stuff TODO
+    /// Evaluates the expression and writes the result into the provided buffer.
+    /// Useful in no_std contexts.
     fn eval_and_write<T>(&mut self, expression: &str, buf: &mut T) -> core::fmt::Result
     where
         T: core::fmt::Write,
     {
         let mut r = Ok(());
-        self.try_eval(expression, |result| r = write!(buf, "{:?}", result));
+        self.try_eval_mut(expression, |result| r = write!(buf, "{:?}", result));
         r
     }
 
     #[cfg(feature = "std")]
-    /// Docs and Stuff TODO
+    /// Evaluates the expression and returns the result as a String.
+    /// Not available in no_std contexts.
     fn eval_to_string(&mut self, expression: &str) -> String {
         let mut s = String::new();
-        self.try_eval(expression, |result| s = format!("{:?}", result));
+        self.try_eval_mut(expression, |result| s = format!("{:?}", result));
         s
     }
 }

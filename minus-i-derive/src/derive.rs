@@ -30,7 +30,7 @@ pub fn derive_interactive_root(input: TokenStream) -> TokenStream {
 fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
     let struct_name = &ast.ident;
 
-    let (impl_generics, ty_generics, _) = ast.generics.split_for_impl();
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
     let tick_a = quote! {'unused}; // TODO check that unused
 
@@ -87,7 +87,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
     });
 
     quote! {
-        impl #impl_generics minus_i::Interactive for #struct_name #ty_generics {
+        impl #impl_generics minus_i::Interactive for #struct_name #ty_generics #where_clause {
             fn interactive_get_field<#tick_a>(&#tick_a self, field_name: &#tick_a str) -> minus_i::Result<#tick_a, &dyn minus_i::Interactive>{
                 match field_name {
                     #(#get_field_matches)*
@@ -103,7 +103,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
         }
 
-        impl #impl_generics minus_i::InteractiveFields for #struct_name #ty_generics{
+        impl #impl_generics minus_i::InteractiveFields for #struct_name #ty_generics #where_clause{
             fn interactive_eval_field(&self, field_name: &str, f: &mut dyn FnMut(minus_i::Result<'_, &dyn ::core::fmt::Debug>))
             {
                 match field_name {
@@ -113,7 +113,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
             }
         }
 
-        impl #impl_generics minus_i::InteractiveFieldNames for #struct_name #ty_generics{
+        impl #impl_generics minus_i::InteractiveFieldNames for #struct_name #ty_generics #where_clause{
             fn get_all_interactive_field_names(&self) -> &'static [&'static str]{
                 &[#(#all_field_names)*]
             }
@@ -125,7 +125,7 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as ItemStruct);
 
     let struct_name = &ast.ident;
-    let (impl_generics, ty_generics, _where_clause) = ast.generics.split_for_impl();
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     // TODO where clause, generics in InteractiveMethods
 
     let get_interactive_fields = || ast.fields.iter().filter(is_interactive_field);
@@ -138,7 +138,7 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
     });
 
     let expanded = quote! {
-        impl #impl_generics ::core::fmt::Debug for #struct_name #ty_generics{
+        impl #impl_generics ::core::fmt::Debug for #struct_name #ty_generics #where_clause{
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 f.debug_struct(stringify!(#struct_name))
                     #(#as_debug_all_fields)*

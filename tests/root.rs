@@ -97,3 +97,27 @@ fn test_call_with_bad_args() {
         "Err(ArgsError { given_args: \"nope, 1\" })"
     );
 }
+
+#[test]
+fn test_shared_reference_field() {
+    #[derive(InteractiveRoot)]
+    struct RefStruct<'a> {
+        pub child: &'a TestStruct,
+    }
+
+    let child = TestStruct::default();
+    let mut root = RefStruct { child: &child };
+    assert_eq!(root.eval_to_string("child.a"), "Ok(false)");
+}
+
+#[test]
+fn test_shared_reference_method() {
+    #[derive(InteractiveRoot)]
+    struct RefStruct<'a> {
+        pub child: &'a TestStruct,
+    }
+
+    let child = TestStruct::default();
+    let mut root = RefStruct { child: &child };
+    assert_eq!(root.eval_to_string("child.add(1, 2)"), "Ok(3.0)");
+}
