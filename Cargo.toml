@@ -19,13 +19,11 @@ path = "examples/minimal.rs"
 name = "tab_completion"
 path = "examples/tab_completion.rs"
 
-[dev_dependencies]
-rustyline = "6"
-rustyline-derive = "0.3"
-
 [[example]]
 name = "no_std"
 path = "examples/no_std.rs"
 
-[dev-dependencies]
+[dev_dependencies]
+rustyline = "6"
+rustyline-derive = "0.3"
 arrayvec = "0.5"

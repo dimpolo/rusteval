@@ -37,6 +37,7 @@ fn main() -> std::io::Result<()> {
         print!(">>> ");
         io::stdout().flush()?;
 
+        input.clear();
         io::stdin().read_line(&mut input)?;
         println!("{}", root.eval_to_string(&input));
     }
