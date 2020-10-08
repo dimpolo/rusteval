@@ -14,14 +14,14 @@ pub fn derive_interactive_root(input: TokenStream) -> TokenStream {
 
     let struct_name = &ast.ident;
 
-    let (impl_generics, ty_generics, _) = ast.generics.split_for_impl();
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
     let interactive_impl = interactive_impl(&ast);
 
     let expanded = quote! {
         #interactive_impl
 
-        impl #impl_generics InteractiveRoot for #struct_name #ty_generics {}
+        impl #impl_generics InteractiveRoot for #struct_name #ty_generics #where_clause{}
     };
 
     expanded.into()
@@ -126,7 +126,6 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
 
     let struct_name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
-    // TODO where clause, generics in InteractiveMethods
 
     let get_interactive_fields = || ast.fields.iter().filter(is_interactive_field);
 

@@ -10,6 +10,8 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
 
     let struct_name = &ast.self_ty;
 
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
+
     let methods = ast.items.iter().filter_map(|item| match item {
         ImplItem::Method(method) => Some(method),
         _ => None,
@@ -43,7 +45,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #original_impl
 
-        impl minus_i::InteractiveMethods for #struct_name {
+        impl #impl_generics minus_i::InteractiveMethods for #struct_name #ty_generics #where_clause{
             fn interactive_eval_method(
                 &self,
                 method_name: &str,
@@ -81,14 +83,13 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
             }
         }
 
-        impl minus_i::InteractiveMethodNames for #struct_name {
+        impl #impl_generics minus_i::InteractiveMethodNames for #struct_name #ty_generics #where_clause{
             fn get_all_interactive_method_names(&self) -> &'static [&'static str]{
                 &[#(#all_method_names)*]
             }
         }
     };
 
-    // eprintln!("{}", expanded);
     expanded.into()
 }
 

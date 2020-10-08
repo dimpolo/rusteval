@@ -26,6 +26,10 @@ impl TestStruct {
     pub fn frob(&self, a: usize, b: f32, c: i32) -> (usize, f32, i32) {
         (a, b, c)
     }
+
+    pub fn toggle(&mut self) {
+        self.a = !self.a;
+    }
 }
 
 #[derive(Interactive, Debug, Default)]
@@ -120,4 +124,20 @@ fn test_shared_reference_method() {
     let child = TestStruct::default();
     let mut root = RefStruct { child: &child };
     assert_eq!(root.eval_to_string("child.add(1, 2)"), "Ok(3.0)");
+}
+
+#[test]
+fn test_shared_reference_mut_method() {
+    #[derive(InteractiveRoot)]
+    struct RefStruct<'a> {
+        pub child: &'a TestStruct,
+    }
+
+    let child = TestStruct::default();
+    let mut root = RefStruct { child: &child };
+    assert_eq!(
+        root.eval_to_string("child.toggle()"),
+        "Err(MethodNotFound { type_name: \"TestStruct\", method_name: \"toggle\" })"
+    );
+    // TODO custom mutability error
 }
