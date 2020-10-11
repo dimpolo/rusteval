@@ -176,10 +176,11 @@ fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> 
         ::minus_i::InteractiveError::ArgsError { given_args: args }
     };
 
-    let get_arg_names =
-        || (0..expected_arg_len).map(|num| Ident::new(&format!("arg{}", num), Span::call_site()));
+    let arg_names: Vec<_> = (0..expected_arg_len)
+        .map(|num| Ident::new(&format!("arg{}", num), Span::call_site()))
+        .collect();
 
-    let args_parse = get_arg_names().map(|arg_name| {
+    let args_parse = arg_names.iter().map(|arg_name| {
         quote! {
             let #arg_name = args_iterator
                 .next()
@@ -190,7 +191,8 @@ fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> 
         }
     });
 
-    let args_call: Vec<_> = get_arg_names()
+    let args_call: Vec<_> = arg_names
+        .iter()
         .map(|arg_name| {
             quote! {
                 #arg_name,

@@ -63,9 +63,9 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
     let tick_a = quote! {'unused}; // TODO check that unused
 
-    let get_interactive_fields = || ast.fields.iter().filter(is_interactive_field);
+    let interactive_fields: Vec<_> = ast.fields.iter().filter(is_interactive_field).collect();
 
-    let eval_field_matches = get_interactive_fields().map(|field| {
+    let eval_field_matches = interactive_fields.iter().map(|field| {
         let name = &field.ident;
 
         if needs_dereference(&field) {
@@ -79,7 +79,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
         }
     });
 
-    let get_field_matches = get_interactive_fields().map(|field| {
+    let get_field_matches = interactive_fields.iter().map(|field| {
         let name = &field.ident;
         if needs_dereference(&field) {
             quote! {
@@ -92,7 +92,8 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
         }
     });
 
-    let get_field_mut_matches = get_interactive_fields()
+    let get_field_mut_matches = interactive_fields
+        .iter()
         .filter(is_owned_or_mut_reference)
         .map(|field| {
             let name = &field.ident;
@@ -108,7 +109,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
             }
         });
 
-    let all_field_names = get_interactive_fields().map(|field| {
+    let all_field_names = interactive_fields.iter().map(|field| {
         let name = &field.ident;
         quote! {
             stringify!(#name),
@@ -156,9 +157,9 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
     let struct_name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
-    let get_interactive_fields = || ast.fields.iter().filter(is_interactive_field);
+    let interactive_fields = ast.fields.iter().filter(is_interactive_field);
 
-    let as_debug_all_fields = get_interactive_fields().map(|field| {
+    let as_debug_all_fields = interactive_fields.map(|field| {
         let name = &field.ident;
         quote! {
             .field(stringify!(#name), self.#name.as_debug())
@@ -187,7 +188,7 @@ fn needs_dereference(field: &Field) -> bool {
     matches!(field.ty, Type::Reference(_))
 }
 
-fn is_owned_or_mut_reference(field: &&Field) -> bool {
+fn is_owned_or_mut_reference(field: &&&Field) -> bool {
     !matches!(field.ty, Type::Reference(_))
         || matches!(
             field.ty,
