@@ -5,7 +5,7 @@ use rustyline::Context;
 use rustyline::Editor;
 use rustyline_derive::{Helper, Highlighter, Hinter, Validator};
 
-use minus_i::{AsDebug, Interactive, InteractiveMethods, InteractiveRoot};
+use minus_i::{AsDebug, Interactive, InteractiveFunction, InteractiveMethods, InteractiveRoot};
 
 #[derive(Interactive, Debug, Default)]
 struct ChildStruct {
@@ -29,6 +29,11 @@ struct ParentStruct {
 #[derive(InteractiveRoot, Debug, Default)]
 struct Root {
     pub parent: ParentStruct,
+}
+
+#[InteractiveFunction]
+fn add_one(a: u32) -> u32 {
+    a + 1
 }
 
 fn main() -> rustyline::Result<()> {

@@ -7,9 +7,10 @@ edition = "2018"
 [dependencies]
 minus-i-derive = { path = "minus-i-derive" }
 inventory = { version = "0.1.9", optional = true }
+lazy_static = { version = "1", optional = true }
 
 [features]
-default = ["std", "inventory"]
+default = ["std", "inventory", "lazy_static"]
 std = []
 
 [[example]]
@@ -23,6 +24,7 @@ path = "examples/tab_completion.rs"
 [[example]]
 name = "no_std"
 path = "examples/no_std.rs"
+default-features = false
 
 [dev_dependencies]
 rustyline = "6"

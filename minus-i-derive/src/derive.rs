@@ -51,6 +51,19 @@ pub fn derive_interactive_root(input: TokenStream) -> TokenStream {
                 (&*self).interactive_eval_method(function_name, args, f)
             }
         }
+
+        #[cfg(feature = "std")]
+        impl #impl_generics ::minus_i::InteractiveMethodNames for #struct_name #ty_generics #where_clause{
+            fn get_all_interactive_method_names(&self) -> &'static [&'static str]{
+                ::lazy_static::lazy_static! {
+                    static ref NAMES: ::std::vec::Vec<&'static str> = ::minus_i::inventory::iter::<&dyn ::minus_i::InteractiveFunction>
+                    .into_iter()
+                    .map(|function| function.function_name())
+                    .collect();
+                }
+                &*NAMES
+            }
+        }
     };
 
     expanded.into()
