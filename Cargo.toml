@@ -5,10 +5,11 @@ authors = ["Dimitri Polonski <d.polonski@wmt.team>"]
 edition = "2018"
 
 [dependencies]
-minus-i-derive = {path = "minus-i-derive" }
+minus-i-derive = { path = "minus-i-derive" }
+inventory = { version = "0.1.9", optional = true }
 
 [features]
-default = ["std"]
+default = ["std", "inventory"]
 std = []
 
 [[example]]

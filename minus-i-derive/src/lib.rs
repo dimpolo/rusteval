@@ -3,7 +3,7 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 
 mod derive;
-mod methods;
+mod functions;
 
 #[proc_macro_derive(Interactive)]
 pub fn derive_interactive(input: TokenStream) -> TokenStream {
@@ -23,5 +23,11 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
 pub fn InteractiveMethods(_attr: TokenStream, input: TokenStream) -> TokenStream {
-    methods::interactive_methods(input)
+    functions::interactive_methods(input)
+}
+
+#[allow(non_snake_case)]
+#[proc_macro_attribute]
+pub fn InteractiveFunction(_attr: TokenStream, input: TokenStream) -> TokenStream {
+    functions::interactive_function(input)
 }

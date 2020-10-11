@@ -170,6 +170,17 @@ pub trait InteractiveRoot: Interactive + Sized {
     }
 }
 
+/// TODO Docs and Stuff
+pub trait InteractiveFunction {
+    /// TODO Docs and Stuff
+    fn function_name(&self) -> &'static str;
+    /// TODO Docs and Stuff
+    fn eval(&self, function_name: &str, args: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>));
+}
+
+#[cfg(feature = "std")]
+inventory::collect!(&'static dyn InteractiveFunction);
+
 fn parse_access_type(expression: &str) -> Result<'_, AccessType<'_>> {
     let expression = expression.trim();
     match expression.strip_suffix(')').map(|s| s.split_once('(')) {

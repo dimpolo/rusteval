@@ -28,6 +28,9 @@ pub enum InteractiveError<'a> {
     SyntaxError,
     #[allow(missing_docs)]
     DebugNotImplemented,
+    #[cfg(feature = "std")]
+    #[allow(missing_docs)]
+    FunctionNotFound { function_name: &'a str },
 }
 
 /// The main trait of this crate TODO

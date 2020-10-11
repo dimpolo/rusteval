@@ -72,6 +72,15 @@ pub use interactive::{
 pub use minus_i_derive::{Interactive, InteractiveMethods, InteractiveRoot, PartialDebug};
 pub use root::InteractiveRoot;
 
+#[cfg(feature = "std")]
+pub use inventory;
+
+#[cfg(feature = "std")]
+pub use root::InteractiveFunction;
+
+#[cfg(feature = "std")]
+pub use minus_i_derive::InteractiveFunction;
+
 mod as_debug;
 mod interactive;
 mod root;
