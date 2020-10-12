@@ -1,8 +1,14 @@
 use proc_macro::TokenStream;
 
-use quote::quote;
+use quote::{quote, quote_spanned};
 use syn::export::{Span, TokenStream2};
+use syn::spanned::Spanned;
 use syn::*;
+
+static SUPPORTED_FUNC_ARGS: &[&str] = &[
+    "bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128", "isize", "u8", "u16", "u32",
+    "u64", "u128", "usize",
+];
 
 pub fn interactive_methods(input: TokenStream) -> TokenStream {
     let original_impl = TokenStream2::from(input.clone());
@@ -136,10 +142,11 @@ pub fn interactive_function(input: TokenStream) -> TokenStream {
 
 fn is_interactive_method(method: &&ImplItemMethod) -> bool {
     // skip methods that are not pub and associated functions
-    // TODO check if args are parseable
+    // skip methods with argument types that are not supported
 
     matches!(method.vis, Visibility::Public(_))
         && matches!(method.sig.inputs.first(), Some(FnArg::Receiver(_)))
+        && method.sig.inputs.iter().skip(1).all(is_supported_fn_arg)
 }
 
 fn gen_method_match_expr(method: &&ImplItemMethod) -> TokenStream2 {
@@ -166,10 +173,25 @@ fn get_expected_arg_len(method: &ImplItemMethod, receiver: &Option<TokenStream2>
     }
 }
 
+fn get_parse_method_spanned(
+    method: &ImplItemMethod,
+    arg_num: usize,
+    receiver: &Option<TokenStream2>,
+) -> TokenStream2 {
+    let index = if receiver.is_some() {
+        // skip self
+        arg_num + 1
+    } else {
+        arg_num
+    };
+
+    let span = method.sig.inputs[index].span();
+    quote_spanned! {span=> parse}
+}
+
 fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> TokenStream2 {
     let method_ident = &method.sig.ident;
 
-    // don't count self
     let expected_arg_len = get_expected_arg_len(method, receiver);
 
     let args_error = quote! {
@@ -180,13 +202,15 @@ fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> 
         .map(|num| Ident::new(&format!("arg{}", num), Span::call_site()))
         .collect();
 
-    let args_parse = arg_names.iter().map(|arg_name| {
+    let args_parse = arg_names.iter().enumerate().map(|(arg_num, arg_name)| {
+        let parse_spanned = get_parse_method_spanned(method, arg_num, receiver);
+
         quote! {
             let #arg_name = args_iterator
                 .next()
                 .ok_or(#args_error)?
                 .trim()
-                .parse()
+                .#parse_spanned()
                 .map_err(|_|#args_error)?;
         }
     });
@@ -224,6 +248,20 @@ fn gen_args_len_check(method: &ImplItemMethod, receiver: &Option<TokenStream2>) 
                 found: args_count,
             }));
         }
+    }
+}
+
+fn is_supported_fn_arg(arg: &FnArg) -> bool {
+    if let FnArg::Typed(arg_type) = arg {
+        if let Type::Path(type_path) = &*arg_type.ty {
+            SUPPORTED_FUNC_ARGS
+                .iter()
+                .any(|supported_arg| type_path.path.is_ident(supported_arg))
+        } else {
+            false
+        }
+    } else {
+        false
     }
 }
 
