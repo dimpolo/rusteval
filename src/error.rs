@@ -5,7 +5,7 @@ pub type Result<'a, T> = core::result::Result<T, InteractiveError<'a>>;
 
 /// The main error type of this crate
 #[non_exhaustive]
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum InteractiveError<'a> {
     #[allow(missing_docs)]
     MethodNotFound {
@@ -20,7 +20,10 @@ pub enum InteractiveError<'a> {
     #[allow(missing_docs)]
     WrongNumberOfArguments { expected: usize, found: usize },
     #[allow(missing_docs)]
-    ArgsError { given_args: &'a str }, // TODO add more detailed error
+    ArgParseError {
+        method_name: &'a str,
+        error: ArgParseError,
+    },
     #[allow(missing_docs)]
     SyntaxError,
     #[allow(missing_docs)]
@@ -56,9 +59,10 @@ impl Display for InteractiveError<'_> {
                     "This function takes {expected} {arguments_1} but {found} {arguments_2} {was_were} supplied",
                 )
             }
-            InteractiveError::ArgsError { given_args } => write!(
+            InteractiveError::ArgParseError { error, .. } => write!(
                 f,
-                "Could not parse `{given_args}` as method/function argument(s)." // TODO improve message
+                "Could not parse `{:?}` as method/function argument(s).",
+                error // TODO improve message
             ),
             InteractiveError::SyntaxError => write!(f, "Syntax Error"),
             InteractiveError::DebugNotImplemented { .. } => write!(f, "unimplemented!()"),
@@ -67,6 +71,22 @@ impl Display for InteractiveError<'_> {
             }
         }
     }
+}
+/// Contains information about function or method argument parsing errors.
+///
+/// It is used inside the [`InteractiveError::ArgParseError`] variant.
+#[derive(Debug, Eq, PartialEq, Clone)]
+pub enum ArgParseError {
+    /// TODO Docs and Stuff
+    Stuff,
+    #[allow(missing_docs)]
+    ParseIntError(core::num::ParseIntError),
+    #[allow(missing_docs)]
+    ParseCharError(core::char::ParseCharError),
+    #[allow(missing_docs)]
+    ParseFloatError(core::num::ParseFloatError),
+    #[allow(missing_docs)]
+    ParseBoolError(core::str::ParseBoolError),
 }
 
 impl core_error::Error for InteractiveError<'_> {}

@@ -92,13 +92,16 @@ fn test_call_with_different_arg_types() {
 
 #[test]
 fn test_call_with_bad_args() {
+    use minus_i::ArgParseError;
+
     let mut root = Root::default();
     assert_eq!(
         root.eval_to_string("parent.child.add(nope, 1)"),
         format!(
             "{}",
-            InteractiveError::ArgsError {
-                given_args: "nope, 1",
+            InteractiveError::ArgParseError {
+                method_name: "add",
+                error: ArgParseError::ParseFloatError("nope".parse::<f32>().unwrap_err())
             }
         )
     );
