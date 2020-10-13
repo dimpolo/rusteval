@@ -1,6 +1,6 @@
 #![feature(min_specialization)]
 
-use minus_i::{InteractiveFunction, InteractiveMethodNames, InteractiveRoot};
+use minus_i::{InteractiveError, InteractiveFunction, InteractiveMethodNames, InteractiveRoot};
 
 #[InteractiveFunction]
 fn add_one(a: u32) -> u32 {
@@ -21,7 +21,7 @@ fn test_free_function_names() {
 fn test_free_function_eval() {
     let mut root = Root;
 
-    assert_eq!(root.eval_to_string("add_one(2)"), "Ok(3)");
+    assert_eq!(root.eval_to_string("add_one(2)"), "3");
 }
 
 #[test]
@@ -30,6 +30,11 @@ fn test_free_function_not_there() {
 
     assert_eq!(
         root.eval_to_string("add_two(2)"),
-        "Err(FunctionNotFound { function_name: \"add_two\" })"
+        format!(
+            "{}",
+            InteractiveError::FunctionNotFound {
+                function_name: "add_two"
+            }
+        )
     );
 }

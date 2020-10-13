@@ -2,36 +2,7 @@ use core::any::type_name;
 use core::fmt::Debug;
 
 use crate::AsDebug;
-
-/// The result type of most interactive methods
-pub type Result<'a, T> = core::result::Result<T, InteractiveError<'a>>;
-
-/// The main error type of this crate
-#[non_exhaustive]
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
-pub enum InteractiveError<'a> {
-    #[allow(missing_docs)]
-    MethodNotFound {
-        type_name: &'a str,
-        method_name: &'a str,
-    },
-    #[allow(missing_docs)]
-    FieldNotFound {
-        type_name: &'a str,
-        field_name: &'a str,
-    },
-    #[allow(missing_docs)]
-    WrongNumberOfArguments { expected: usize, found: usize },
-    #[allow(missing_docs)]
-    ArgsError { given_args: &'a str },
-    #[allow(missing_docs)]
-    SyntaxError,
-    #[allow(missing_docs)]
-    DebugNotImplemented,
-    #[cfg(feature = "std")]
-    #[allow(missing_docs)]
-    FunctionNotFound { function_name: &'a str },
-}
+use crate::{InteractiveError, Result};
 
 /// The main trait of this crate TODO
 ///
@@ -72,16 +43,16 @@ pub trait Interactive:
     /// assert_eq!(
     ///     format!(
     ///         "{:?}",
-    ///         obj.interactive_get_field_mut("field").unwrap().as_debug()
+    ///         obj.interactive_get_field_mut("field").unwrap().try_as_debug()
     ///     ),
-    ///     "DebugNotImplemented"
+    ///     "Err(DebugNotImplemented { type_name: \"&mut dyn minus_i::interactive::Interactive\" })"
     /// );
     /// assert_eq!(
     ///     format!(
     ///         "{:?}",
-    ///         (&*obj.interactive_get_field_mut("field").unwrap()).as_debug()
+    ///         (&*obj.interactive_get_field_mut("field").unwrap()).try_as_debug()
     ///     ),
-    ///     "0"
+    ///     "Ok(0)"
     /// );
     /// ```
     fn interactive_get_field_mut<'a>(

@@ -55,6 +55,7 @@
 #![allow(incomplete_features)] // TODO re-enable warning
 #![feature(specialization)]
 #![feature(str_split_once)]
+#![feature(format_args_capture)]
 #![warn(
     missing_copy_implementations,
     missing_debug_implementations,
@@ -65,9 +66,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use as_debug::AsDebug;
+pub use error::{InteractiveError, Result};
 pub use interactive::{
-    Interactive, InteractiveError, InteractiveFieldNames, InteractiveFields,
-    InteractiveMethodNames, InteractiveMethods, Result,
+    Interactive, InteractiveFieldNames, InteractiveFields, InteractiveMethodNames,
+    InteractiveMethods,
 };
 pub use minus_i_derive::{Interactive, InteractiveMethods, InteractiveRoot, PartialDebug};
 pub use root::InteractiveRoot;
@@ -82,5 +84,6 @@ pub use root::InteractiveFunction;
 pub use minus_i_derive::InteractiveFunction;
 
 mod as_debug;
+mod error;
 mod interactive;
 mod root;

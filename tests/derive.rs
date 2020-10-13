@@ -33,7 +33,8 @@ fn test_primitive_field() {
             test_struct
                 .interactive_get_field("field1")
                 .unwrap()
-                .as_debug()
+                .try_as_debug()
+                .unwrap()
         ),
         "0"
     );
@@ -49,7 +50,8 @@ fn test_complex_field() {
             test_struct
                 .interactive_get_field("field2")
                 .unwrap()
-                .as_debug()
+                .try_as_debug()
+                .unwrap()
         ),
         "Inner(false, None)"
     );
@@ -88,7 +90,8 @@ fn test_references() {
             ref_struct
                 .interactive_get_field("test_struct_ref")
                 .unwrap()
-                .as_debug()
+                .try_as_debug()
+                .unwrap()
         ),
         "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
     );
@@ -122,7 +125,8 @@ fn test_mut_references() {
             (&*ref_struct
                 .interactive_get_field_mut("test_struct_ref")
                 .unwrap())
-                .as_debug()
+                .try_as_debug()
+                .unwrap()
         ),
         "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
     );
@@ -142,7 +146,8 @@ fn test_mut_references_as_shared_references() {
             ref_struct
                 .interactive_get_field("test_struct_ref")
                 .unwrap()
-                .as_debug()
+                .try_as_debug()
+                .unwrap()
         ),
         "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
     );

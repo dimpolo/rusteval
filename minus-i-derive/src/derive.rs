@@ -83,11 +83,11 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
         if needs_dereference(&field) {
             quote! {
-                stringify!(#name) => f(Ok(&(&*self.#name).as_debug())),
+                stringify!(#name) => f((&*self.#name).try_as_debug()),
             }
         } else {
             quote! {
-                stringify!(#name) => f(Ok(&self.#name.as_debug())),
+                stringify!(#name) => f(self.#name.try_as_debug()),
             }
         }
     });
@@ -172,10 +172,11 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
 
     let interactive_fields = ast.fields.iter().filter(is_interactive_field);
 
+    // TODO add tests
     let as_debug_all_fields = interactive_fields.map(|field| {
         let name = &field.ident;
         quote! {
-            .field(stringify!(#name), self.#name.as_debug())
+            .field(stringify!(#name), self.#name.try_as_debug())
         }
     });
 

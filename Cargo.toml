@@ -24,7 +24,6 @@ path = "examples/tab_completion.rs"
 [[example]]
 name = "no_std"
 path = "examples/no_std.rs"
-default-features = false
 
 [dev_dependencies]
 rustyline = "6"

@@ -2,7 +2,7 @@
 #![feature(str_split_once)]
 
 use core::fmt::Debug;
-use minus_i::{AsDebug, Interactive, InteractiveMethods, InteractiveRoot};
+use minus_i::{AsDebug, Interactive, InteractiveError, InteractiveMethods, InteractiveRoot};
 
 #[derive(Interactive, Debug, Default)]
 struct TestStruct {
@@ -47,7 +47,7 @@ fn test_get_root_object() {
     let mut root = Root::default();
     assert_eq!(
         root.eval_to_string("parent"),
-        "Ok(ParentStruct { child: TestStruct { a: false } })"
+        "ParentStruct { child: TestStruct { a: false } }"
     );
 }
 
@@ -56,14 +56,14 @@ fn test_get_child() {
     let mut root = Root::default();
     assert_eq!(
         root.eval_to_string("parent.child"),
-        "Ok(TestStruct { a: false })"
+        "TestStruct { a: false }"
     );
 }
 
 #[test]
 fn test_get_child_field() {
     let mut root = Root::default();
-    assert_eq!(root.eval_to_string("parent.child.a"), "Ok(false)");
+    assert_eq!(root.eval_to_string("parent.child.a"), "false");
 }
 
 #[test]
@@ -71,17 +71,14 @@ fn test_call_child_method() {
     let mut root = Root::default();
     assert_eq!(
         root.eval_to_string("parent.child.try_ping()"),
-        "Ok(Ok(\"pong\"))"
+        "Ok(\"pong\")"
     );
 }
 
 #[test]
 fn test_call_with_float() {
     let mut root = Root::default();
-    assert_eq!(
-        root.eval_to_string("parent.child.add(4.20, 6.9)"),
-        "Ok(11.1)"
-    );
+    assert_eq!(root.eval_to_string("parent.child.add(4.20, 6.9)"), "11.1");
 }
 
 #[test]
@@ -89,7 +86,7 @@ fn test_call_with_different_arg_types() {
     let mut root = Root::default();
     assert_eq!(
         root.eval_to_string("parent.child.frob(420, 6.9, -7)"),
-        "Ok((420, 6.9, -7))"
+        "(420, 6.9, -7)"
     );
 }
 
@@ -98,7 +95,12 @@ fn test_call_with_bad_args() {
     let mut root = Root::default();
     assert_eq!(
         root.eval_to_string("parent.child.add(nope, 1)"),
-        "Err(ArgsError { given_args: \"nope, 1\" })"
+        format!(
+            "{}",
+            InteractiveError::ArgsError {
+                given_args: "nope, 1",
+            }
+        )
     );
 }
 
@@ -111,7 +113,7 @@ fn test_shared_reference_field() {
 
     let child = TestStruct::default();
     let mut root = RefStruct { child: &child };
-    assert_eq!(root.eval_to_string("child.a"), "Ok(false)");
+    assert_eq!(root.eval_to_string("child.a"), "false");
 }
 
 #[test]
@@ -123,7 +125,7 @@ fn test_shared_reference_method() {
 
     let child = TestStruct::default();
     let mut root = RefStruct { child: &child };
-    assert_eq!(root.eval_to_string("child.add(1, 2)"), "Ok(3.0)");
+    assert_eq!(root.eval_to_string("child.add(1, 2)"), "3.0");
 }
 
 #[test]
@@ -137,7 +139,13 @@ fn test_shared_reference_mut_method() {
     let mut root = RefStruct { child: &child };
     assert_eq!(
         root.eval_to_string("child.toggle()"),
-        "Err(MethodNotFound { type_name: \"TestStruct\", method_name: \"toggle\" })"
+        format!(
+            "{}",
+            InteractiveError::MethodNotFound {
+                type_name: "TestStruct",
+                method_name: "toggle"
+            }
+        )
     );
     // TODO custom mutability error
 }

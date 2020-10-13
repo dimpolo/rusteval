@@ -28,6 +28,6 @@ fn main() -> core::fmt::Result {
     let mut buf = ArrayString::<[u8; 10]>::new();
 
     root.eval_and_write("parent.child.add(1, 2)", &mut buf)?;
-    assert_eq!(buf.as_str(), "Ok(3.0)");
+    assert_eq!(buf.as_str(), "3.0");
     Ok(())
 }

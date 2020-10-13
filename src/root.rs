@@ -156,7 +156,12 @@ pub trait InteractiveRoot: Interactive + Sized {
         T: core::fmt::Write,
     {
         let mut r = Ok(());
-        self.try_eval_mut(expression, |result| r = write!(buf, "{:?}", result));
+        self.try_eval_mut(expression, |result| {
+            r = match result {
+                Ok(r) => write!(buf, "{:?}", r),
+                Err(e) => write!(buf, "{}", e),
+            }
+        });
         r
     }
 
@@ -165,7 +170,12 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// Not available in no_std contexts.
     fn eval_to_string(&mut self, expression: &str) -> String {
         let mut s = String::new();
-        self.try_eval_mut(expression, |result| s = format!("{:?}", result));
+        self.try_eval_mut(expression, |result| {
+            s = match result {
+                Ok(r) => format!("{:?}", r),
+                Err(e) => format!("{}", e),
+            }
+        });
         s
     }
 }
