@@ -1,7 +1,7 @@
 #![feature(min_specialization)]
 
 use arrayvec::ArrayString;
-use minus_i::{AsDebug, Interactive, InteractiveMethods, InteractiveRoot};
+use minus_i::{Interactive, InteractiveMethods, InteractiveRoot};
 
 #[derive(Default)]
 struct ChildStruct {}

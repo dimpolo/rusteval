@@ -2,7 +2,7 @@
 #![feature(str_split_once)]
 
 use core::fmt::Debug;
-use minus_i::{AsDebug, Interactive, InteractiveError, InteractiveMethods, InteractiveRoot};
+use minus_i::{Interactive, InteractiveError, InteractiveMethods, InteractiveRoot};
 
 #[derive(Interactive, Debug, Default)]
 struct TestStruct {

@@ -14,7 +14,7 @@ pub trait InteractiveRoot: Interactive + Sized {
     ///
     /// ```
     /// # #![feature(min_specialization)]
-    /// # use minus_i::{Interactive, InteractiveMethods, InteractiveRoot, AsDebug};
+    /// # use minus_i::{Interactive, InteractiveMethods, InteractiveRoot};
     /// # use core::fmt::Debug;
     /// #
     /// #[derive(Interactive, Debug, Default)]
@@ -90,7 +90,7 @@ pub trait InteractiveRoot: Interactive + Sized {
     ///
     /// ```
     /// # #![feature(min_specialization)]
-    /// # use minus_i::{Interactive, InteractiveRoot, AsDebug};
+    /// # use minus_i::{Interactive, InteractiveRoot};
     /// # use core::fmt::Debug;
     /// #
     /// #[derive(Interactive, Debug, Default)]

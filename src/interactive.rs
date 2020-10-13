@@ -31,7 +31,7 @@ pub trait Interactive:
     /// See the below example on how to circumvent this.
     /// ```
     /// # #![feature(min_specialization)]
-    /// # use minus_i::{Interactive, AsDebug};
+    /// # use minus_i::Interactive;
     /// #
     /// #[derive(Interactive, Default)]
     /// struct Struct {

@@ -1,6 +1,6 @@
 #![feature(min_specialization)]
 
-use minus_i::{AsDebug, Interactive, InteractiveFunction, InteractiveMethods, InteractiveRoot};
+use minus_i::{Interactive, InteractiveFunction, InteractiveMethods, InteractiveRoot};
 
 #[derive(Interactive, Debug, Default)]
 struct ChildStruct {

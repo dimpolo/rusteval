@@ -1,7 +1,7 @@
 #![feature(min_specialization)]
 
 use core::fmt::Debug;
-use minus_i::{AsDebug, Interactive, InteractiveFields};
+use minus_i::{Interactive, InteractiveFields};
 
 #[derive(Default, Debug)]
 struct Inner(bool, Option<String>);

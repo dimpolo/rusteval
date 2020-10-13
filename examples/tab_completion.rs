@@ -5,7 +5,7 @@ use rustyline::Context;
 use rustyline::Editor;
 use rustyline_derive::{Helper, Highlighter, Hinter, Validator};
 
-use minus_i::{AsDebug, Interactive, InteractiveFunction, InteractiveMethods, InteractiveRoot};
+use minus_i::{Interactive, InteractiveFunction, InteractiveMethods, InteractiveRoot};
 
 #[derive(Interactive, Debug, Default)]
 struct ChildStruct {

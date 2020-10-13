@@ -83,11 +83,11 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
         if needs_dereference(&field) {
             quote! {
-                stringify!(#name) => f((&*self.#name).try_as_debug()),
+                stringify!(#name) => f(::minus_i::AsDebug::try_as_debug(&*self.#name)),
             }
         } else {
             quote! {
-                stringify!(#name) => f(self.#name.try_as_debug()),
+                stringify!(#name) => f(::minus_i::AsDebug::try_as_debug(&self.#name)),
             }
         }
     });

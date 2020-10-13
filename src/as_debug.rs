@@ -3,9 +3,8 @@ use core::fmt::Debug;
 use crate::{InteractiveError, Result};
 use core::any::type_name;
 
-/// Docs and Stuff TODO
+#[doc(hidden)]
 pub trait AsDebug {
-    /// Docs and Stuff TODO
     fn try_as_debug(&self) -> Result<'_, &dyn Debug>;
 }
 

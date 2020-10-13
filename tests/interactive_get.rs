@@ -1,6 +1,6 @@
 #![feature(min_specialization)]
 
-use minus_i::{AsDebug, Interactive, InteractiveFields, InteractiveMethods};
+use minus_i::{Interactive, InteractiveFields, InteractiveMethods};
 
 #[derive(Interactive, Debug, Default)]
 struct TestStruct {
