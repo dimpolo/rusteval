@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 
-use quote::{quote, quote_spanned};
+use quote::quote;
 use syn::export::{Span, TokenStream2};
 use syn::spanned::Spanned;
 use syn::*;
@@ -59,7 +59,6 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
                 f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>),
             )
             {
-                let args_count = args.split_terminator(',').count();
                 match method_name {
                     #(#method_matches)*
 
@@ -77,7 +76,6 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
                 f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>),
             )
             {
-                let args_count = args.split_terminator(',').count();
                 match method_name {
                     #(#method_mut_matches)*
 
@@ -111,7 +109,6 @@ pub fn interactive_function(input: TokenStream) -> TokenStream {
 
     let function_name = &ast.sig.ident;
 
-    let args_len_check = gen_args_len_check(&ast, &None);
     let method_call = gen_method_call(&ast, &None);
 
     let expanded = quote! {
@@ -124,10 +121,7 @@ pub fn interactive_function(input: TokenStream) -> TokenStream {
                 stringify!(#function_name)
             }
 
-            fn eval(&self, function_name: &str, args: &str, f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>)) {
-                let args_count = args.split_terminator(',').count();
-
-                #args_len_check
+            fn eval(&self, method_name: &str, args: &str, f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>)) {
                 #method_call
             }
         }
@@ -153,12 +147,10 @@ fn gen_method_match_expr(method: &&ImplItemMethod) -> TokenStream2 {
     let method_ident = &method.sig.ident;
     let receiver = Some(quote! {self.});
 
-    let args_len_check = gen_args_len_check(method, &receiver);
     let method_call = gen_method_call(method, &receiver);
 
     quote! {
         stringify!(#method_ident) => {
-            #args_len_check
             #method_call
         }
     }
@@ -173,49 +165,31 @@ fn get_expected_arg_len(method: &ImplItemMethod, receiver: &Option<TokenStream2>
     }
 }
 
-fn get_parse_method_spanned(
-    method: &ImplItemMethod,
-    arg_num: usize,
-    receiver: &Option<TokenStream2>,
-) -> TokenStream2 {
-    let index = if receiver.is_some() {
-        // skip self
-        arg_num + 1
-    } else {
-        arg_num
-    };
-
-    let span = method.sig.inputs[index].span();
-    quote_spanned! {span=> parse}
-}
-
 fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> TokenStream2 {
     let method_ident = &method.sig.ident;
 
     let expected_arg_len = get_expected_arg_len(method, receiver);
-
-    let args_error = quote! {
-        ::minus_i::InteractiveError::ArgsError { given_args: args }
-    };
+    let args = if expected_arg_len == 1 { "arg" } else { "args" };
+    let parse_func = Ident::new(
+        &format!("parse_{}_{}", expected_arg_len, args),
+        method.sig.inputs.span(),
+    );
 
     let arg_names: Vec<_> = (0..expected_arg_len)
-        .map(|num| Ident::new(&format!("arg{}", num), Span::call_site()))
+        .map(|arg_num| {
+            let index = if receiver.is_some() {
+                // skip self
+                arg_num + 1
+            } else {
+                arg_num
+            };
+
+            let span = method.sig.inputs[index].span();
+            Ident::new(&format!("arg{}", arg_num), span)
+        })
         .collect();
 
-    let args_parse = arg_names.iter().enumerate().map(|(arg_num, arg_name)| {
-        let parse_spanned = get_parse_method_spanned(method, arg_num, receiver);
-
-        quote! {
-            let #arg_name = args_iterator
-                .next()
-                .ok_or(#args_error)?
-                .trim()
-                .#parse_spanned()
-                .map_err(|_|#args_error)?;
-        }
-    });
-
-    let args_call: Vec<_> = arg_names
+    let args_punctuated: Vec<_> = arg_names
         .iter()
         .map(|arg_name| {
             quote! {
@@ -225,28 +199,9 @@ fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> 
         .collect();
 
     quote! {
-        let parse = || {
-            let mut args_iterator = args.split_terminator(','); // TODO doesn't work on types like str
-            #(#args_parse)*
-            Ok((#(#args_call)*))
-        };
-
-        match parse(){
-            Ok((#(#args_call)*)) => f(Ok(& #receiver #method_ident(#(#args_call)*))),
+        match ::minus_i::arg_parse::#parse_func(method_name, args){
+            Ok((#(#args_punctuated)*)) => f(Ok(& #receiver #method_ident(#(#args_punctuated)*))),
             Err(e) => f(Err(e)),
-        }
-    }
-}
-
-fn gen_args_len_check(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> TokenStream2 {
-    let expected_arg_len = get_expected_arg_len(method, receiver);
-
-    quote! {
-        if args_count != #expected_arg_len{
-            return f(Err(::minus_i::InteractiveError::WrongNumberOfArguments{
-                expected: #expected_arg_len,
-                found: args_count,
-            }));
         }
     }
 }

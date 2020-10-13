@@ -83,6 +83,7 @@ pub use root::InteractiveFunction;
 #[cfg(feature = "std")]
 pub use minus_i_derive::InteractiveFunction;
 
+pub mod arg_parse;
 mod as_debug;
 mod error;
 mod interactive;
