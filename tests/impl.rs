@@ -93,6 +93,7 @@ fn test_too_many_args() {
         assert_eq!(
             result.unwrap_err(),
             InteractiveError::WrongNumberOfArguments {
+                method_name: "answer",
                 expected: 0,
                 found: 1
             }

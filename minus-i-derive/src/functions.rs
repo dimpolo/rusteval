@@ -7,8 +7,8 @@ use syn::*;
 
 static SUPPORTED_FUNC_ARGS: &[&str] = &[
     "bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128", "isize", "u8", "u16", "u32",
-    "u64", "u128", "usize",
-]; // TODO add support for String types once arg parsing is better
+    "u64", "u128", "usize", "String",
+];
 
 pub fn interactive_methods(input: TokenStream) -> TokenStream {
     let original_impl = TokenStream2::from(input.clone());

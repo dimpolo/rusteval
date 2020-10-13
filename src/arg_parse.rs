@@ -2,14 +2,29 @@
 
 use crate::{ArgParseError, InteractiveError};
 
-// TODO make more of these using a macro
+pub trait ArgParse: Sized {
+    fn arg_parse(s: &str) -> Result<Self, ArgParseError>;
+}
 
 #[doc(hidden)]
-pub fn parse_0_args<'a>(_func_name: &'a str, args: &'a str) -> crate::Result<'a, ()> {
+pub fn parse_arg<'a, T: ArgParse>(
+    method_name: &'a str,
+    args_iterator: &mut impl Iterator<Item = &'a str>,
+) -> crate::Result<'a, T> {
+    let arg_str = args_iterator.next().unwrap(); // length was already checked
+    ArgParse::arg_parse(arg_str).map_err(|e| InteractiveError::ArgParseError {
+        method_name,
+        error: e,
+    })
+}
+
+#[doc(hidden)]
+pub fn parse_0_args<'a>(method_name: &'a str, args: &'a str) -> crate::Result<'a, ()> {
     let args_count = args.split_terminator(',').count();
 
     if args_count != 0 {
         return Err(InteractiveError::WrongNumberOfArguments {
+            method_name,
             expected: 0,
             found: args_count,
         });
@@ -19,75 +34,107 @@ pub fn parse_0_args<'a>(_func_name: &'a str, args: &'a str) -> crate::Result<'a,
 
 #[doc(hidden)]
 pub fn parse_1_arg<'a, T0: ArgParse>(
-    func_name: &'a str,
+    method_name: &'a str,
     args: &'a str,
 ) -> crate::Result<'a, (T0,)> {
     let args_count = args.split_terminator(',').count();
 
     if args_count != 1 {
         return Err(InteractiveError::WrongNumberOfArguments {
+            method_name,
             expected: 1,
             found: args_count,
         });
     }
     let mut args_iterator = args.split_terminator(',');
-    let arg0 = parse_arg(func_name, &mut args_iterator)?;
+    let arg0 = parse_arg(method_name, &mut args_iterator)?;
     Ok((arg0,))
 }
 
 #[doc(hidden)]
 pub fn parse_2_args<'a, T0: ArgParse, T1: ArgParse>(
-    func_name: &'a str,
+    method_name: &'a str,
     args: &'a str,
 ) -> crate::Result<'a, (T0, T1)> {
     let args_count = args.split_terminator(',').count();
 
     if args_count != 2 {
         return Err(InteractiveError::WrongNumberOfArguments {
+            method_name,
             expected: 2,
             found: args_count,
         });
     }
     let mut args_iterator = args.split_terminator(',');
-    let arg0 = parse_arg(func_name, &mut args_iterator)?;
-    let arg1 = parse_arg(func_name, &mut args_iterator)?;
+    let arg0 = parse_arg(method_name, &mut args_iterator)?;
+    let arg1 = parse_arg(method_name, &mut args_iterator)?;
     Ok((arg0, arg1))
 }
 
 #[doc(hidden)]
 pub fn parse_3_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse>(
-    func_name: &'a str,
+    method_name: &'a str,
     args: &'a str,
 ) -> crate::Result<'a, (T0, T1, T2)> {
     let args_count = args.split_terminator(',').count();
 
     if args_count != 3 {
         return Err(InteractiveError::WrongNumberOfArguments {
+            method_name,
             expected: 3,
             found: args_count,
         });
     }
     let mut args_iterator = args.split_terminator(',');
-    let arg0 = parse_arg(func_name, &mut args_iterator)?;
-    let arg1 = parse_arg(func_name, &mut args_iterator)?;
-    let arg2 = parse_arg(func_name, &mut args_iterator)?;
+    let arg0 = parse_arg(method_name, &mut args_iterator)?;
+    let arg1 = parse_arg(method_name, &mut args_iterator)?;
+    let arg2 = parse_arg(method_name, &mut args_iterator)?;
     Ok((arg0, arg1, arg2))
 }
 
 #[doc(hidden)]
-pub fn parse_arg<'a, T: ArgParse>(
-    func_name: &'a str,
-    args_iterator: &mut impl Iterator<Item = &'a str>,
-) -> crate::Result<'a, T> {
-    let arg_str = args_iterator.next().unwrap(); // length was already checked
-    ArgParse::arg_parse(arg_str).map_err(|e| InteractiveError::ArgParseError {
-        method_name: func_name,
-        error: e,
-    })
+pub fn parse_4_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse, T3: ArgParse>(
+    method_name: &'a str,
+    args: &'a str,
+) -> crate::Result<'a, (T0, T1, T2, T3)> {
+    let args_count = args.split_terminator(',').count();
+
+    if args_count != 4 {
+        return Err(InteractiveError::WrongNumberOfArguments {
+            method_name,
+            expected: 4,
+            found: args_count,
+        });
+    }
+    let mut args_iterator = args.split_terminator(',');
+    let arg0 = parse_arg(method_name, &mut args_iterator)?;
+    let arg1 = parse_arg(method_name, &mut args_iterator)?;
+    let arg2 = parse_arg(method_name, &mut args_iterator)?;
+    let arg3 = parse_arg(method_name, &mut args_iterator)?;
+    Ok((arg0, arg1, arg2, arg3))
 }
 
-pub trait ArgParse: Sized {
-    fn arg_parse(s: &str) -> Result<Self, ArgParseError>;
+#[doc(hidden)]
+pub fn parse_5_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse, T3: ArgParse, T4: ArgParse>(
+    method_name: &'a str,
+    args: &'a str,
+) -> crate::Result<'a, (T0, T1, T2, T3, T4)> {
+    let args_count = args.split_terminator(',').count();
+
+    if args_count != 5 {
+        return Err(InteractiveError::WrongNumberOfArguments {
+            method_name,
+            expected: 5,
+            found: args_count,
+        });
+    }
+    let mut args_iterator = args.split_terminator(',');
+    let arg0 = parse_arg(method_name, &mut args_iterator)?;
+    let arg1 = parse_arg(method_name, &mut args_iterator)?;
+    let arg2 = parse_arg(method_name, &mut args_iterator)?;
+    let arg3 = parse_arg(method_name, &mut args_iterator)?;
+    let arg4 = parse_arg(method_name, &mut args_iterator)?;
+    Ok((arg0, arg1, arg2, arg3, arg4))
 }
 
 macro_rules! parse_int {
@@ -140,6 +187,7 @@ impl ArgParse for String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::arg_parse::parse_5_args;
 
     fn test_parse_one_arg<T: ArgParse + PartialEq + core::fmt::Debug>(arg: &str, expected: T) {
         let result: T = parse_1_arg("", arg).unwrap().0;
@@ -179,5 +227,11 @@ mod tests {
     #[test]
     fn test_easy_string() {
         test_parse_one_arg("\"test\"", String::from("test"));
+    }
+
+    #[test]
+    fn test_parse_five_args() {
+        let result: (u8, u16, u32, u64, u128) = parse_5_args("", "1, 2, 3, 4, 5").unwrap();
+        assert_eq!(result, (1, 2, 3, 4, 5));
     }
 }

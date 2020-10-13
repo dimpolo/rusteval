@@ -18,7 +18,11 @@ pub enum InteractiveError<'a> {
         field_name: &'a str,
     },
     #[allow(missing_docs)]
-    WrongNumberOfArguments { expected: usize, found: usize },
+    WrongNumberOfArguments {
+        method_name: &'a str,
+        expected: usize,
+        found: usize,
+    },
     #[allow(missing_docs)]
     ArgParseError {
         method_name: &'a str,
@@ -46,7 +50,11 @@ impl Display for InteractiveError<'_> {
                 type_name,
                 field_name,
             } => write!(f, "No field `{field_name}` found for type `{type_name}`",),
-            InteractiveError::WrongNumberOfArguments { expected, found } => {
+            InteractiveError::WrongNumberOfArguments {
+                method_name,
+                expected,
+                found,
+            } => {
                 let arguments_1 = if *expected == 1 {
                     "argument"
                 } else {
@@ -56,7 +64,7 @@ impl Display for InteractiveError<'_> {
                 let was_were = if *found == 1 { "was" } else { "were" };
                 write!(
                     f,
-                    "This function takes {expected} {arguments_1} but {found} {arguments_2} {was_were} supplied",
+                    "´{method_name}´ takes {expected} {arguments_1} but {found} {arguments_2} {was_were} supplied",
                 )
             }
             InteractiveError::ArgParseError { error, .. } => write!(
