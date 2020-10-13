@@ -1,3 +1,5 @@
+#![doc(hidden)]
+
 use core::fmt::Debug;
 
 use crate::{InteractiveError, Result};
@@ -24,3 +26,9 @@ where
         Ok(self)
     }
 }
+
+#[doc(hidden)]
+#[allow(missing_copy_implementations)]
+#[derive(Debug)]
+/// Used as a dummy value for types that don't implement Debug inside #[derive(PartialDebug)].
+pub struct Unknown;

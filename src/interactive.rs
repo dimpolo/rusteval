@@ -1,7 +1,7 @@
 use core::any::type_name;
 use core::fmt::Debug;
 
-use crate::AsDebug;
+use crate::as_debug::AsDebug;
 use crate::{InteractiveError, Result};
 
 /// The main trait of this crate TODO

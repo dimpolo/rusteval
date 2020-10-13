@@ -61,11 +61,13 @@ impl Display for InteractiveError<'_> {
             }
             InteractiveError::ArgParseError { error, .. } => write!(
                 f,
-                "Could not parse `{:?}` as method/function argument(s).",
+                "Could not parse `{:?}` as method/function argument(s)",
                 error // TODO improve message
             ),
             InteractiveError::SyntaxError => write!(f, "Syntax Error"),
-            InteractiveError::DebugNotImplemented { .. } => write!(f, "unimplemented!()"),
+            InteractiveError::DebugNotImplemented { type_name } => {
+                write!(f, "´{type_name}´ doesn't implement ´Debug´")
+            }
             InteractiveError::FunctionNotFound { function_name } => {
                 write!(f, "No function named `{function_name}` found")
             }

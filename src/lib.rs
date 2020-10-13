@@ -65,7 +65,6 @@
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub use as_debug::AsDebug;
 pub use error::{ArgParseError, InteractiveError, Result};
 pub use interactive::{
     Interactive, InteractiveFieldNames, InteractiveFields, InteractiveMethodNames,
@@ -84,7 +83,7 @@ pub use root::InteractiveFunction;
 pub use minus_i_derive::InteractiveFunction;
 
 pub mod arg_parse;
-mod as_debug;
+pub mod as_debug;
 mod error;
 mod interactive;
 mod root;
