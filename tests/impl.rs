@@ -9,21 +9,19 @@ struct TestStruct {
 
 #[InteractiveMethods]
 impl TestStruct {
-    fn _private_method(&self) {}
-
-    pub fn _new() -> Self {
+    fn _new() -> Self {
         Self::default()
     }
 
-    pub fn clone(&self) -> Self {
+    fn clone(&self) -> Self {
         Self { field: self.field }
     }
 
-    pub fn get_field(&self) -> u32 {
+    fn get_field(&self) -> u32 {
         self.field
     }
 
-    pub fn answer(&self) {
+    fn answer(&self) {
         println!("42");
     }
 }
@@ -69,21 +67,6 @@ fn test_clone_method() {
 
     test_struct.interactive_eval_method_mut("clone", "", &mut |result| {
         assert_eq!(format!("{:?}", result.unwrap()), "TestStruct { field: 0 }")
-    });
-}
-
-#[test]
-fn test_private_method() {
-    let mut test_struct = TestStruct::default();
-
-    test_struct.interactive_eval_method_mut("_private_method", "", &mut |result| {
-        assert_eq!(
-            result.unwrap_err(),
-            InteractiveError::MethodNotFound {
-                type_name: "TestStruct",
-                method_name: "_private_method"
-            }
-        )
     });
 }
 

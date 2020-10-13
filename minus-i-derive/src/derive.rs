@@ -76,7 +76,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
     let tick_a = quote! {'unused}; // TODO check that unused
 
-    let interactive_fields: Vec<_> = ast.fields.iter().filter(is_interactive_field).collect();
+    let interactive_fields: Vec<_> = ast.fields.iter().collect();
 
     let eval_field_matches = interactive_fields.iter().map(|field| {
         let name = &field.ident;
@@ -170,7 +170,7 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
     let struct_name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
-    let interactive_fields = ast.fields.iter().filter(is_interactive_field);
+    let interactive_fields = ast.fields.iter();
 
     // TODO add tests
     let as_debug_all_fields = interactive_fields.map(|field| {
@@ -191,10 +191,6 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
     };
 
     expanded.into()
-}
-
-fn is_interactive_field(field: &&Field) -> bool {
-    matches!(field.vis, Visibility::Public(_))
 }
 
 fn needs_dereference(field: &Field) -> bool {

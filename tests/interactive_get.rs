@@ -4,19 +4,19 @@ use minus_i::{Interactive, InteractiveFields, InteractiveMethods};
 
 #[derive(Interactive, Debug, Default)]
 struct TestStruct {
-    pub a: bool,
+    a: bool,
 }
 
 #[InteractiveMethods]
 impl TestStruct {
-    pub fn try_ping(&self) -> Result<String, ()> {
+    fn try_ping(&self) -> Result<String, ()> {
         Ok("pong".into())
     }
 }
 
 #[derive(Interactive, Debug, Default)]
 struct ParentStruct {
-    pub child: TestStruct,
+    child: TestStruct,
 }
 
 #[test]

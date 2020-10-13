@@ -8,29 +8,28 @@ struct Inner(bool, Option<String>);
 
 #[derive(Interactive, Default, Debug)]
 struct TestStruct {
-    pub field1: u32,
-    pub field2: Inner,
-    private_field: u32,
+    field1: u32,
+    field2: Inner,
 }
 
 #[derive(Interactive)]
 struct RefStruct<'a> {
-    pub test_struct_ref: &'a TestStruct,
+    test_struct_ref: &'a TestStruct,
 }
 
 #[derive(Interactive)]
 struct RefMutStruct<'a> {
-    pub test_struct_ref: &'a mut TestStruct,
+    test_struct_ref: &'a mut TestStruct,
 }
 
 #[derive(Interactive)]
 struct DynRefStruct<'a> {
-    pub test_struct_ref: &'a dyn Interactive,
+    test_struct_ref: &'a dyn Interactive,
 }
 
 #[derive(Interactive)]
 struct DynRefMutStruct<'a> {
-    pub test_struct_ref: &'a mut dyn Interactive,
+    test_struct_ref: &'a mut dyn Interactive,
 }
 
 #[test]
@@ -68,25 +67,6 @@ fn test_complex_field() {
 }
 
 #[test]
-fn test_private_field() {
-    // TODO custom private field error
-    use minus_i::InteractiveError;
-
-    let test_struct = TestStruct::default();
-
-    assert_eq!(
-        test_struct
-            .interactive_get_field("private_field")
-            .map(|_| ()) // unwrap_err requires that Ok value implements Debug
-            .unwrap_err(),
-        InteractiveError::FieldNotFound {
-            type_name: "TestStruct",
-            field_name: "private_field"
-        }
-    );
-}
-
-#[test]
 fn test_references() {
     let test_struct = TestStruct::default();
 
@@ -103,13 +83,13 @@ fn test_references() {
                 .try_as_debug()
                 .unwrap()
         ),
-        "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+        "TestStruct { field1: 0, field2: Inner(false, None) }"
     );
 
     ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
-            "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+            "TestStruct { field1: 0, field2: Inner(false, None) }"
         )
     });
 }
@@ -125,7 +105,7 @@ fn test_mut_references() {
     ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
-            "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+            "TestStruct { field1: 0, field2: Inner(false, None) }"
         )
     });
 
@@ -138,7 +118,7 @@ fn test_mut_references() {
                 .try_as_debug()
                 .unwrap()
         ),
-        "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+        "TestStruct { field1: 0, field2: Inner(false, None) }"
     );
 }
 
@@ -159,13 +139,13 @@ fn test_mut_references_as_shared_references() {
                 .try_as_debug()
                 .unwrap()
         ),
-        "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+        "TestStruct { field1: 0, field2: Inner(false, None) }"
     );
 
     ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
-            "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+            "TestStruct { field1: 0, field2: Inner(false, None) }"
         )
     });
 }
@@ -211,13 +191,13 @@ fn test_dyn_references() {
                 .try_as_debug()
                 .unwrap()
         ),
-        "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+        "TestStruct { field1: 0, field2: Inner(false, None) }"
     );
 
     ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
-            "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+            "TestStruct { field1: 0, field2: Inner(false, None) }"
         )
     });
 }
@@ -233,7 +213,7 @@ fn test_dyn_mut_references() {
     ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
-            "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+            "TestStruct { field1: 0, field2: Inner(false, None) }"
         )
     });
 
@@ -246,7 +226,7 @@ fn test_dyn_mut_references() {
                 .try_as_debug()
                 .unwrap()
         ),
-        "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+        "TestStruct { field1: 0, field2: Inner(false, None) }"
     );
 }
 
@@ -267,13 +247,13 @@ fn test_dyn_mut_references_as_shared_references() {
                 .try_as_debug()
                 .unwrap()
         ),
-        "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+        "TestStruct { field1: 0, field2: Inner(false, None) }"
     );
 
     ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
-            "TestStruct { field1: 0, field2: Inner(false, None), private_field: 0 }"
+            "TestStruct { field1: 0, field2: Inner(false, None) }"
         )
     });
 }

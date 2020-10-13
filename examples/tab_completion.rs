@@ -9,12 +9,12 @@ use minus_i::{Interactive, InteractiveFunction, InteractiveMethods, InteractiveR
 
 #[derive(Interactive, Debug, Default)]
 struct ChildStruct {
-    pub last_sum: f32,
+    last_sum: f32,
 }
 
 #[InteractiveMethods]
 impl ChildStruct {
-    pub fn add(&mut self, a: f32, b: f32) -> f32 {
+    fn add(&mut self, a: f32, b: f32) -> f32 {
         self.last_sum = a + b;
         self.last_sum
     }
@@ -22,13 +22,13 @@ impl ChildStruct {
 
 #[derive(Interactive, Debug, Default)]
 struct ParentStruct {
-    pub child1: ChildStruct,
-    pub child2: ChildStruct,
+    child1: ChildStruct,
+    child2: ChildStruct,
 }
 
 #[derive(InteractiveRoot, Debug, Default)]
 struct Root {
-    pub parent: ParentStruct,
+    parent: ParentStruct,
 }
 
 #[InteractiveFunction]
@@ -52,7 +52,7 @@ fn main() -> rustyline::Result<()> {
 
 #[derive(Helper, Highlighter, Hinter, Validator)]
 struct RustyLine {
-    pub root: Root,
+    root: Root,
 }
 
 /// Uses get_queried_object to get a reference to the object before the last entered '.'

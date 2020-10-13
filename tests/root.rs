@@ -6,40 +6,40 @@ use minus_i::{Interactive, InteractiveError, InteractiveMethods, InteractiveRoot
 
 #[derive(Interactive, Debug, Default)]
 struct TestStruct {
-    pub a: bool,
+    a: bool,
 }
 
 #[InteractiveMethods]
 impl TestStruct {
-    pub fn try_ping(&self) -> core::result::Result<String, ()> {
+    fn try_ping(&self) -> core::result::Result<String, ()> {
         Ok("pong".into())
     }
 
-    pub fn answer(&self) {
+    fn answer(&self) {
         println!("42");
     }
 
-    pub fn add(&self, a: f32, b: f32) -> f32 {
+    fn add(&self, a: f32, b: f32) -> f32 {
         a + b
     }
 
-    pub fn frob(&self, a: usize, b: f32, c: i32) -> (usize, f32, i32) {
+    fn frob(&self, a: usize, b: f32, c: i32) -> (usize, f32, i32) {
         (a, b, c)
     }
 
-    pub fn toggle(&mut self) {
+    fn toggle(&mut self) {
         self.a = !self.a;
     }
 }
 
 #[derive(Interactive, Debug, Default)]
 struct ParentStruct {
-    pub child: TestStruct,
+    child: TestStruct,
 }
 
 #[derive(InteractiveRoot, Default, Debug)]
 struct Root {
-    pub parent: ParentStruct,
+    parent: ParentStruct,
 }
 
 #[test]
@@ -111,7 +111,7 @@ fn test_call_with_bad_args() {
 fn test_shared_reference_field() {
     #[derive(InteractiveRoot)]
     struct RefStruct<'a> {
-        pub child: &'a TestStruct,
+        child: &'a TestStruct,
     }
 
     let child = TestStruct::default();
@@ -123,7 +123,7 @@ fn test_shared_reference_field() {
 fn test_shared_reference_method() {
     #[derive(InteractiveRoot)]
     struct RefStruct<'a> {
-        pub child: &'a TestStruct,
+        child: &'a TestStruct,
     }
 
     let child = TestStruct::default();
@@ -135,7 +135,7 @@ fn test_shared_reference_method() {
 fn test_shared_reference_mut_method() {
     #[derive(InteractiveRoot)]
     struct RefStruct<'a> {
-        pub child: &'a TestStruct,
+        child: &'a TestStruct,
     }
 
     let child = TestStruct::default();
@@ -157,7 +157,7 @@ fn test_shared_reference_mut_method() {
 fn test_shared_dyn_reference_field() {
     #[derive(InteractiveRoot)]
     struct RefStruct<'a> {
-        pub child: &'a dyn Interactive,
+        child: &'a dyn Interactive,
     }
 
     let child = TestStruct::default();
@@ -169,7 +169,7 @@ fn test_shared_dyn_reference_field() {
 fn test_mut_dyn_reference_field() {
     #[derive(InteractiveRoot)]
     struct RefStruct<'a> {
-        pub child: &'a mut dyn Interactive,
+        child: &'a mut dyn Interactive,
     }
 
     let mut child = TestStruct::default();

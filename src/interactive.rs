@@ -35,12 +35,12 @@ pub trait Interactive:
     /// #
     /// #[derive(Interactive, Default)]
     /// struct Struct {
-    ///     pub field: OtherStruct,
+    ///     field: OtherStruct,
     /// }
     ///
     /// #[derive(Interactive, Default)]
     /// struct OtherStruct {
-    ///     pub other_field: u8,
+    ///     other_field: u8,
     /// }
     ///
     /// let mut obj = Struct::default();

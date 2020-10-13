@@ -135,11 +135,10 @@ pub fn interactive_function(input: TokenStream) -> TokenStream {
 }
 
 fn is_interactive_method(method: &&ImplItemMethod) -> bool {
-    // skip methods that are not pub and associated functions
+    // skip associated functions
     // skip methods with argument types that are not supported
 
-    matches!(method.vis, Visibility::Public(_))
-        && matches!(method.sig.inputs.first(), Some(FnArg::Receiver(_)))
+    matches!(method.sig.inputs.first(), Some(FnArg::Receiver(_)))
         && method.sig.inputs.iter().skip(1).all(is_supported_fn_arg)
 }
 

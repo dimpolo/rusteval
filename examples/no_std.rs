@@ -8,19 +8,19 @@ struct ChildStruct {}
 
 #[InteractiveMethods]
 impl ChildStruct {
-    pub fn add(&mut self, a: f32, b: f32) -> f32 {
+    fn add(&mut self, a: f32, b: f32) -> f32 {
         a + b
     }
 }
 
 #[derive(Interactive, Default)]
 struct ParentStruct {
-    pub child: ChildStruct,
+    child: ChildStruct,
 }
 
 #[derive(InteractiveRoot, Default)]
 struct Root {
-    pub parent: ParentStruct,
+    parent: ParentStruct,
 }
 
 fn main() -> core::fmt::Result {

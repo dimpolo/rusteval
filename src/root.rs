@@ -19,18 +19,18 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// #
     /// #[derive(Interactive, Debug, Default)]
     /// struct Child {
-    ///     pub field1: bool
+    ///     field1: bool
     /// }
     /// #[InteractiveMethods]
     /// impl Child {
-    ///     pub fn add(&self, a: u8, b: u8) -> u8 {
+    ///     fn add(&self, a: u8, b: u8) -> u8 {
     ///         a + b
     ///     }
     /// }
     ///
     /// #[derive(InteractiveRoot, Debug, Default)]
     /// struct Root {
-    ///     pub child: Child,
+    ///     child: Child,
     /// }
     ///
     /// let mut root = Root::default();
@@ -95,12 +95,12 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// #
     /// #[derive(Interactive, Debug, Default)]
     /// struct Child {
-    ///     pub field1: bool
+    ///     field1: bool
     /// }
     ///
     /// #[derive(InteractiveRoot, Debug, Default)]
     /// struct Root {
-    ///     pub child: Child,
+    ///     child: Child,
     /// }
     ///
     /// let root = Root::default();
