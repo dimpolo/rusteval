@@ -35,25 +35,25 @@ pub trait Interactive:
     /// #
     /// #[derive(Interactive, Default)]
     /// struct Struct {
-    ///     pub field: u8
+    ///     pub field: OtherStruct,
+    /// }
+    ///
+    /// #[derive(Interactive, Default)]
+    /// struct OtherStruct {
+    ///     pub other_field: u8,
     /// }
     ///
     /// let mut obj = Struct::default();
     ///
-    /// assert_eq!(
-    ///     format!(
-    ///         "{:?}",
-    ///         obj.interactive_get_field_mut("field").unwrap().try_as_debug()
-    ///     ),
-    ///     "Err(DebugNotImplemented { type_name: \"&mut dyn minus_i::interactive::Interactive\" })"
-    /// );
-    /// assert_eq!(
-    ///     format!(
-    ///         "{:?}",
-    ///         (&*obj.interactive_get_field_mut("field").unwrap()).try_as_debug()
-    ///     ),
-    ///     "Ok(0)"
-    /// );
+    /// assert!(obj
+    ///     .interactive_get_field_mut("field")
+    ///     .unwrap()
+    ///     .interactive_get_field("other_field")
+    ///     .is_err());
+    ///
+    /// assert!((&*obj.interactive_get_field_mut("field").unwrap())
+    ///     .interactive_get_field("other_field")
+    ///     .is_ok());
     /// ```
     fn interactive_get_field_mut<'a>(
         &'a mut self,
