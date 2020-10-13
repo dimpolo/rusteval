@@ -149,3 +149,27 @@ fn test_shared_reference_mut_method() {
     );
     // TODO custom mutability error
 }
+
+#[test]
+fn test_shared_dyn_reference_field() {
+    #[derive(InteractiveRoot)]
+    struct RefStruct<'a> {
+        pub child: &'a dyn Interactive,
+    }
+
+    let child = TestStruct::default();
+    let mut root = RefStruct { child: &child };
+    assert_eq!(root.eval_to_string("child.a"), "false");
+}
+
+#[test]
+fn test_mut_dyn_reference_field() {
+    #[derive(InteractiveRoot)]
+    struct RefStruct<'a> {
+        pub child: &'a mut dyn Interactive,
+    }
+
+    let mut child = TestStruct::default();
+    let mut root = RefStruct { child: &mut child };
+    assert_eq!(root.eval_to_string("child.a"), "false");
+}

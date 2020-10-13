@@ -34,7 +34,7 @@ fn test_get_child_field() {
 
     let child = parent_struct.interactive_get_field("child").unwrap();
 
-    (&*child).interactive_eval_field("a", &mut |result| {
+    child.interactive_eval_field("a", &mut |result| {
         assert_eq!(format!("{:?}", result.unwrap()), "false")
     });
 }

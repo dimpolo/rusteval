@@ -46,7 +46,7 @@ pub trait InteractiveRoot: Interactive + Sized {
                 let access_type = parse_access_type(rest_expression);
                 match access_type {
                     Ok(AccessType::FieldAccess(field_name)) => {
-                        (&*object).interactive_eval_field(field_name, &mut f)
+                        object.interactive_eval_field(field_name, &mut f)
                     }
                     Ok(AccessType::MethodAccess(method_name, args)) => {
                         object.interactive_eval_method(method_name, args, &mut f)
@@ -68,7 +68,7 @@ pub trait InteractiveRoot: Interactive + Sized {
                 let access_type = parse_access_type(rest_expression);
                 match access_type {
                     Ok(AccessType::FieldAccess(field_name)) => {
-                        (&*object).interactive_eval_field(field_name, &mut f)
+                        object.interactive_eval_field(field_name, &mut f)
                     }
                     Ok(AccessType::MethodAccess(method_name, args)) => {
                         object.interactive_eval_method_mut(method_name, args, &mut f)
