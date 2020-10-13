@@ -69,5 +69,4 @@ impl Display for InteractiveError<'_> {
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for InteractiveError<'_> {}
+impl core_error::Error for InteractiveError<'_> {}

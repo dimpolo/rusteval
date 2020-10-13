@@ -6,12 +6,13 @@ edition = "2018"
 
 [dependencies]
 minus-i-derive = { path = "minus-i-derive" }
+core-error = "0.0.1-rc4"
 inventory = { version = "0.1.9", optional = true }
 lazy_static = { version = "1", optional = true }
 
 [features]
 default = ["std", "inventory", "lazy_static"]
-std = []
+std = ["core-error/std"]
 
 [[example]]
 name = "minimal"
