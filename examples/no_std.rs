@@ -1,12 +1,12 @@
 #![feature(min_specialization)]
 
 use arrayvec::ArrayString;
-use minus_i::{Interactive, InteractiveMethods, InteractiveRoot};
+use minus_i::{Interactive, InteractiveRoot, Methods};
 
 #[derive(Default)]
 struct ChildStruct {}
 
-#[InteractiveMethods]
+#[Methods]
 impl ChildStruct {
     fn add(&mut self, a: f32, b: f32) -> f32 {
         a + b

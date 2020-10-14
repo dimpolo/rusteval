@@ -11,12 +11,9 @@ use crate::{InteractiveError, Result};
 /// This means that all members of an [`Interactive`] struct need to also implement [`Interactive`], which is why
 /// a default blanket implementation for all `T` is provided.
 ///
-pub trait Interactive: AsDebug + InteractiveMethods + InteractiveFields {
+pub trait Interactive: AsDebug + Methods + Fields {
     /// Looks for a field with the given name and on success return a shared reference to it.
-    fn interactive_get_field<'a>(
-        &'a self,
-        field_name: &'a str,
-    ) -> crate::Result<'a, &dyn crate::Interactive>;
+    fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive>;
 
     /// Looks for a field with the given name and on success return a mutable reference to it.
     ///
@@ -44,33 +41,30 @@ pub trait Interactive: AsDebug + InteractiveMethods + InteractiveFields {
     /// let mut obj = Struct::default();
     ///
     /// assert!(obj
-    ///     .interactive_get_field_mut("field")
+    ///     .get_field_mut("field")
     ///     .unwrap()
-    ///     .interactive_get_field("other_field")
+    ///     .get_field("other_field")
     ///     .is_err());
     ///
-    /// assert!((&*obj.interactive_get_field_mut("field").unwrap())
-    ///     .interactive_get_field("other_field")
+    /// assert!((&*obj.get_field_mut("field").unwrap())
+    ///     .get_field("other_field")
     ///     .is_ok());
     /// ```
-    fn interactive_get_field_mut<'a>(
+    fn get_field_mut<'a>(
         &'a mut self,
         field_name: &'a str,
     ) -> crate::Result<'a, &mut dyn crate::Interactive>;
 }
 
 impl<T> Interactive for T {
-    default fn interactive_get_field<'a>(
-        &'a self,
-        field_name: &'a str,
-    ) -> Result<'a, &dyn Interactive> {
+    default fn get_field<'a>(&'a self, field_name: &'a str) -> Result<'a, &dyn Interactive> {
         Err(InteractiveError::FieldNotFound {
             type_name: type_name::<T>(),
             field_name,
         })
     }
 
-    default fn interactive_get_field_mut<'a>(
+    default fn get_field_mut<'a>(
         &'a mut self,
         field_name: &'a str,
     ) -> Result<'a, &mut dyn Interactive> {
@@ -91,39 +85,35 @@ impl<T> Interactive for T {
 /// a default blanket implementation for all `T` is provided.
 ///
 /// [`Interactive`]: ./derive.Interactive.html
-pub trait InteractiveFields {
+pub trait Fields {
     /// Looks for a field with the given name,
     /// and passes it as a `Ok(&dyn Debug)` to the given closure.
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
-    fn interactive_eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>));
+    fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>));
 
     /// Returns all interactive field names of this type.
     ///
     /// Can be used to drive auto-completion in a CLI.
-    fn get_all_interactive_field_names(&self) -> &'static [&'static str];
+    fn get_all_field_names(&self) -> &'static [&'static str];
 }
 
-impl<T> InteractiveFields for T {
-    default fn interactive_eval_field(
-        &self,
-        field_name: &str,
-        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
-    ) {
+impl<T> Fields for T {
+    default fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
         f(Err(InteractiveError::FieldNotFound {
             type_name: type_name::<T>(),
             field_name,
         }));
     }
 
-    default fn get_all_interactive_field_names(&self) -> &'static [&'static str] {
+    default fn get_all_field_names(&self) -> &'static [&'static str] {
         &[]
     }
 }
 
 /// A trait that allows to interactively evaluate a method and pass its result to a given closure.
 ///
-/// This trait gets implemented automatically when you use the [`InteractiveMethods`] attribute.
+/// This trait gets implemented automatically when you use the [`Methods`] attribute.
 ///
 /// # Note:
 /// It is currently not possible to check if a trait is implemented at runtime.
@@ -131,8 +121,8 @@ impl<T> InteractiveFields for T {
 /// a default blanket implementation for all `T` is provided.
 ///
 /// [`Interactive`]: ./derive.Interactive.html
-/// [`InteractiveMethods`]: ./attr.InteractiveMethods.html
-pub trait InteractiveMethods {
+/// [`Methods`]: ./attr.Methods.html
+pub trait Methods {
     /// Looks for a method with the given name,
     /// parses the args string into the expected arguments of the method,
     /// executes the method and
@@ -141,12 +131,7 @@ pub trait InteractiveMethods {
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
     ///
     /// TODO explain difference
-    fn interactive_eval_method(
-        &self,
-        method_name: &str,
-        args: &str,
-        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
-    );
+    fn eval_method(&self, method_name: &str, args: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>));
 
     /// Looks for a method with the given name,
     /// parses the args string into the expected arguments of the method,
@@ -154,7 +139,7 @@ pub trait InteractiveMethods {
     /// passes the result as a `Ok(&dyn Debug)` to the given closure.
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
-    fn interactive_eval_method_mut(
+    fn eval_method_mut(
         &mut self,
         method_name: &str,
         args: &str,
@@ -164,11 +149,11 @@ pub trait InteractiveMethods {
     /// Returns all interactive field names of this type.
     ///
     /// Can be used to drive auto-completion in a CLI.
-    fn get_all_interactive_method_names(&self) -> &'static [&'static str];
+    fn get_all_method_names(&self) -> &'static [&'static str];
 }
 
-impl<T> InteractiveMethods for T {
-    default fn interactive_eval_method(
+impl<T> Methods for T {
+    default fn eval_method(
         &self,
         method_name: &str,
         _args: &str,
@@ -180,7 +165,7 @@ impl<T> InteractiveMethods for T {
         }));
     }
 
-    default fn interactive_eval_method_mut(
+    default fn eval_method_mut(
         &mut self,
         method_name: &str,
         _args: &str,
@@ -192,7 +177,7 @@ impl<T> InteractiveMethods for T {
         }));
     }
 
-    default fn get_all_interactive_method_names(&self) -> &'static [&'static str] {
+    default fn get_all_method_names(&self) -> &'static [&'static str] {
         &[]
     }
 }

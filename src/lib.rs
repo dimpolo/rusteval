@@ -8,14 +8,14 @@
 //! ```no_run
 //! #![feature(min_specialization)]
 //!
-//! use minus_i::{Interactive, InteractiveMethods, InteractiveRoot};
+//! use minus_i::{Interactive, Methods, InteractiveRoot};
 //!
 //! #[derive(Interactive, Debug, Default)]
 //! struct ChildStruct {
 //!     last_sum: f32,
 //! }
 //!
-//! #[InteractiveMethods]
+//! #[Methods]
 //! impl ChildStruct {
 //!     fn add(&mut self, a: f32, b: f32) -> f32 {
 //!         self.last_sum = a + b;
@@ -66,8 +66,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use error::{ArgParseError, InteractiveError, Result};
-pub use interactive::{Interactive, InteractiveFields, InteractiveMethods};
-pub use minus_i_derive::{Interactive, InteractiveMethods, InteractiveRoot, PartialDebug};
+pub use interactive::{Fields, Interactive, Methods};
+pub use minus_i_derive::{Interactive, InteractiveRoot, Methods, PartialDebug};
 pub use root::InteractiveRoot;
 
 #[cfg(feature = "std")]
@@ -75,10 +75,10 @@ pub use root::InteractiveRoot;
 pub use inventory;
 
 #[cfg(feature = "std")]
-pub use root::InteractiveFunction;
+pub use root::Function;
 
 #[cfg(feature = "std")]
-pub use minus_i_derive::InteractiveFunction;
+pub use minus_i_derive::Function;
 
 pub mod arg_parse;
 pub mod as_debug;

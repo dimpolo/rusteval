@@ -12,7 +12,7 @@ pub fn derive_interactive(input: TokenStream) -> TokenStream {
 
 #[proc_macro_derive(InteractiveRoot)]
 pub fn derive_interactive_root(input: TokenStream) -> TokenStream {
-    derive::derive_interactive_root(input)
+    derive::derive_root(input)
 }
 
 #[proc_macro_derive(PartialDebug)]
@@ -22,12 +22,12 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
 
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
-pub fn InteractiveMethods(_attr: TokenStream, input: TokenStream) -> TokenStream {
-    functions::interactive_methods(input)
+pub fn Methods(_attr: TokenStream, input: TokenStream) -> TokenStream {
+    functions::methods(input)
 }
 
 #[allow(non_snake_case)]
 #[proc_macro_attribute]
-pub fn InteractiveFunction(_attr: TokenStream, input: TokenStream) -> TokenStream {
-    functions::interactive_function(input)
+pub fn Function(_attr: TokenStream, input: TokenStream) -> TokenStream {
+    functions::function(input)
 }

@@ -1,8 +1,8 @@
 #![feature(min_specialization)]
 
-use minus_i::{InteractiveError, InteractiveFunction, InteractiveMethods, InteractiveRoot};
+use minus_i::{Function, InteractiveError, InteractiveRoot, Methods};
 
-#[InteractiveFunction]
+#[Function]
 fn add_one(a: u32) -> u32 {
     a + 1
 }
@@ -14,7 +14,7 @@ struct Root;
 fn test_free_function_names() {
     let root = Root;
 
-    assert_eq!(root.get_all_interactive_method_names(), ["add_one"]);
+    assert_eq!(root.get_all_method_names(), ["add_one"]);
 }
 
 #[test]

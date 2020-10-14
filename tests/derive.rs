@@ -1,7 +1,7 @@
 #![feature(min_specialization)]
 
 use core::fmt::Debug;
-use minus_i::{Interactive, InteractiveFields};
+use minus_i::{Fields, Interactive};
 
 #[derive(Default, Debug)]
 struct Inner(bool, Option<String>);
@@ -40,7 +40,7 @@ fn test_primitive_field() {
         format!(
             "{:?}",
             test_struct
-                .interactive_get_field("field1")
+                .get_field("field1")
                 .unwrap()
                 .try_as_debug()
                 .unwrap()
@@ -57,7 +57,7 @@ fn test_complex_field() {
         format!(
             "{:?}",
             test_struct
-                .interactive_get_field("field2")
+                .get_field("field2")
                 .unwrap()
                 .try_as_debug()
                 .unwrap()
@@ -78,7 +78,7 @@ fn test_references() {
         format!(
             "{:?}",
             ref_struct
-                .interactive_get_field("test_struct_ref")
+                .get_field("test_struct_ref")
                 .unwrap()
                 .try_as_debug()
                 .unwrap()
@@ -86,7 +86,7 @@ fn test_references() {
         "TestStruct { field1: 0, field2: Inner(false, None) }"
     );
 
-    ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
+    ref_struct.eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
             "TestStruct { field1: 0, field2: Inner(false, None) }"
@@ -102,7 +102,7 @@ fn test_mut_references() {
         test_struct_ref: &mut test_struct,
     };
 
-    ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
+    ref_struct.eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
             "TestStruct { field1: 0, field2: Inner(false, None) }"
@@ -113,7 +113,7 @@ fn test_mut_references() {
         format!(
             "{:?}",
             ref_struct
-                .interactive_get_field_mut("test_struct_ref")
+                .get_field_mut("test_struct_ref")
                 .unwrap()
                 .try_as_debug()
                 .unwrap()
@@ -134,7 +134,7 @@ fn test_mut_references_as_shared_references() {
         format!(
             "{:?}",
             ref_struct
-                .interactive_get_field("test_struct_ref")
+                .get_field("test_struct_ref")
                 .unwrap()
                 .try_as_debug()
                 .unwrap()
@@ -142,7 +142,7 @@ fn test_mut_references_as_shared_references() {
         "TestStruct { field1: 0, field2: Inner(false, None) }"
     );
 
-    ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
+    ref_struct.eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
             "TestStruct { field1: 0, field2: Inner(false, None) }"
@@ -164,7 +164,7 @@ fn test_shared_references_as_mut_references() {
 
     assert_eq!(
         ref_struct
-            .interactive_get_field_mut("test_struct_ref")
+            .get_field_mut("test_struct_ref")
             .map(|_| ()) // unwrap_err requires that Ok value implements Debug
             .unwrap_err(),
         InteractiveError::FieldNotFound {
@@ -186,7 +186,7 @@ fn test_dyn_references() {
         format!(
             "{:?}",
             ref_struct
-                .interactive_get_field("test_struct_ref")
+                .get_field("test_struct_ref")
                 .unwrap()
                 .try_as_debug()
                 .unwrap()
@@ -194,7 +194,7 @@ fn test_dyn_references() {
         "TestStruct { field1: 0, field2: Inner(false, None) }"
     );
 
-    ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
+    ref_struct.eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
             "TestStruct { field1: 0, field2: Inner(false, None) }"
@@ -210,7 +210,7 @@ fn test_dyn_mut_references() {
         test_struct_ref: &mut test_struct,
     };
 
-    ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
+    ref_struct.eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
             "TestStruct { field1: 0, field2: Inner(false, None) }"
@@ -221,7 +221,7 @@ fn test_dyn_mut_references() {
         format!(
             "{:?}",
             ref_struct
-                .interactive_get_field_mut("test_struct_ref")
+                .get_field_mut("test_struct_ref")
                 .unwrap()
                 .try_as_debug()
                 .unwrap()
@@ -242,7 +242,7 @@ fn test_dyn_mut_references_as_shared_references() {
         format!(
             "{:?}",
             ref_struct
-                .interactive_get_field("test_struct_ref")
+                .get_field("test_struct_ref")
                 .unwrap()
                 .try_as_debug()
                 .unwrap()
@@ -250,7 +250,7 @@ fn test_dyn_mut_references_as_shared_references() {
         "TestStruct { field1: 0, field2: Inner(false, None) }"
     );
 
-    ref_struct.interactive_eval_field("test_struct_ref", &mut |field| {
+    ref_struct.eval_field("test_struct_ref", &mut |field| {
         assert_eq!(
             format!("{:?}", field.unwrap()),
             "TestStruct { field1: 0, field2: Inner(false, None) }"
@@ -272,7 +272,7 @@ fn test_dyn_shared_references_as_mut_references() {
 
     assert_eq!(
         ref_struct
-            .interactive_get_field_mut("test_struct_ref")
+            .get_field_mut("test_struct_ref")
             .map(|_| ()) // unwrap_err requires that Ok value implements Debug
             .unwrap_err(),
         InteractiveError::FieldNotFound {
@@ -289,8 +289,8 @@ fn test_tuple_struct() {
 
     let tuple_struct = TupleStruct(42, 43);
 
-    assert_eq!(tuple_struct.get_all_interactive_field_names(), ["0", "1"]);
-    tuple_struct.interactive_eval_field("1", &mut |field| {
+    assert_eq!(tuple_struct.get_all_field_names(), ["0", "1"]);
+    tuple_struct.eval_field("1", &mut |field| {
         assert_eq!(format!("{:?}", field.unwrap()), "43")
     });
 }

@@ -5,14 +5,14 @@ use rustyline::Context;
 use rustyline::Editor;
 use rustyline_derive::{Helper, Highlighter, Hinter, Validator};
 
-use minus_i::{Interactive, InteractiveFunction, InteractiveMethods, InteractiveRoot};
+use minus_i::{Function, Interactive, InteractiveRoot, Methods};
 
 #[derive(Interactive, Debug, Default)]
 struct ChildStruct {
     last_sum: f32,
 }
 
-#[InteractiveMethods]
+#[Methods]
 impl ChildStruct {
     fn add(&mut self, a: f32, b: f32) -> f32 {
         self.last_sum = a + b;
@@ -31,7 +31,7 @@ struct Root {
     parent: ParentStruct,
 }
 
-#[InteractiveFunction]
+#[Function]
 fn add_one(a: u32) -> u32 {
     a + 1
 }
@@ -57,7 +57,7 @@ struct RustyLine {
 
 /// Uses get_queried_object to get a reference to the object before the last entered '.'
 /// This object then is used to feed the RustyLine Completer with
-/// get_all_interactive_field_names and get_all_interactive_method_names
+/// get_all_field_names and get_all_method_names
 impl Completer for RustyLine {
     type Candidate = String;
 
@@ -71,9 +71,9 @@ impl Completer for RustyLine {
             let start_len = line.len() - rest_line.len();
 
             let candidates = current_object
-                .get_all_interactive_field_names()
+                .get_all_field_names()
                 .iter()
-                .chain(current_object.get_all_interactive_method_names())
+                .chain(current_object.get_all_method_names())
                 .filter(|candidate| candidate.starts_with(&line[start_len..pos]))
                 .map(|s| s.to_string())
                 .collect();

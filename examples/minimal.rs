@@ -1,13 +1,13 @@
 #![feature(min_specialization)]
 
-use minus_i::{Interactive, InteractiveFunction, InteractiveMethods, InteractiveRoot};
+use minus_i::{Function, Interactive, InteractiveRoot, Methods};
 
 #[derive(Interactive, Debug, Default)]
 struct ChildStruct {
     last_sum: f32,
 }
 
-#[InteractiveMethods]
+#[Methods]
 impl ChildStruct {
     fn add(&mut self, a: f32, b: f32) -> f32 {
         self.last_sum = a + b;
@@ -26,7 +26,7 @@ struct Root {
     parent: ParentStruct,
 }
 
-#[InteractiveFunction]
+#[Function]
 fn add_one(a: u32) -> u32 {
     a + 1
 }

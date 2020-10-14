@@ -2,14 +2,14 @@
 #![feature(str_split_once)]
 
 use core::fmt::Debug;
-use minus_i::{Interactive, InteractiveError, InteractiveMethods, InteractiveRoot};
+use minus_i::{Interactive, InteractiveError, InteractiveRoot, Methods};
 
 #[derive(Interactive, Debug, Default)]
 struct TestStruct {
     a: bool,
 }
 
-#[InteractiveMethods]
+#[Methods]
 impl TestStruct {
     fn try_ping(&self) -> core::result::Result<String, ()> {
         Ok("pong".into())

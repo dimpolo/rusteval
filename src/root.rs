@@ -14,14 +14,14 @@ pub trait InteractiveRoot: Interactive + Sized {
     ///
     /// ```
     /// # #![feature(min_specialization)]
-    /// # use minus_i::{Interactive, InteractiveMethods, InteractiveRoot};
+    /// # use minus_i::{Interactive, Methods, InteractiveRoot};
     /// # use core::fmt::Debug;
     /// #
     /// #[derive(Interactive, Debug, Default)]
     /// struct Child {
     ///     field1: bool
     /// }
-    /// #[InteractiveMethods]
+    /// #[Methods]
     /// impl Child {
     ///     fn add(&self, a: u8, b: u8) -> u8 {
     ///         a + b
@@ -46,10 +46,10 @@ pub trait InteractiveRoot: Interactive + Sized {
                 let access_type = parse_access_type(rest_expression);
                 match access_type {
                     Ok(AccessType::FieldAccess(field_name)) => {
-                        object.interactive_eval_field(field_name, &mut f)
+                        object.eval_field(field_name, &mut f)
                     }
                     Ok(AccessType::MethodAccess(method_name, args)) => {
-                        object.interactive_eval_method(method_name, args, &mut f)
+                        object.eval_method(method_name, args, &mut f)
                     }
                     Err(e) => f(Err(e)),
                 }
@@ -68,10 +68,10 @@ pub trait InteractiveRoot: Interactive + Sized {
                 let access_type = parse_access_type(rest_expression);
                 match access_type {
                     Ok(AccessType::FieldAccess(field_name)) => {
-                        object.interactive_eval_field(field_name, &mut f)
+                        object.eval_field(field_name, &mut f)
                     }
                     Ok(AccessType::MethodAccess(method_name, args)) => {
-                        object.interactive_eval_method_mut(method_name, args, &mut f)
+                        object.eval_method_mut(method_name, args, &mut f)
                     }
                     Err(e) => f(Err(e)),
                 }
@@ -105,7 +105,7 @@ pub trait InteractiveRoot: Interactive + Sized {
     ///
     /// let root = Root::default();
     /// let (child, rest_expression) = root.get_queried_object("child.rest").unwrap();
-    /// assert_eq!(child.get_all_interactive_field_names(), &["field1"]);
+    /// assert_eq!(child.get_all_field_names(), &["field1"]);
     /// assert_eq!(rest_expression, "rest");
     /// ```
     fn get_queried_object<'a>(
@@ -122,14 +122,14 @@ pub trait InteractiveRoot: Interactive + Sized {
                 .unwrap_or((object_path.trim(), ""));
             object_path = object_path_remainder;
 
-            current = current.interactive_get_field(field_name.trim())?
+            current = current.get_field(field_name.trim())?
         }
         Ok((current, rest_expression))
     }
 
     /// Same as [`get_queried_object`] but returning a mutable reference.
     ///
-    /// [`get_queried_object`]: ./trait.InteractiveRoot.html#method.get_queried_object
+    /// [`get_queried_object`]: ./trait.Root.html#method.get_queried_object
     fn get_queried_object_mut<'a>(
         &'a mut self,
         expression: &'a str,
@@ -144,7 +144,7 @@ pub trait InteractiveRoot: Interactive + Sized {
                 .unwrap_or((object_path.trim(), ""));
             object_path = object_path_remainder;
 
-            current = current.interactive_get_field_mut(field_name.trim())?
+            current = current.get_field_mut(field_name.trim())?
         }
         Ok((current, rest_expression))
     }
@@ -182,10 +182,10 @@ pub trait InteractiveRoot: Interactive + Sized {
 
 /// A trait that allows to interactively evaluate a function and pass its result to a given closure.
 ///
-/// This trait gets implemented automatically when you use the [`InteractiveFunction`] attribute.
+/// This trait gets implemented automatically when you use the [`Function`] attribute.
 ///
-/// [`InteractiveFunction`]: ./attr.InteractiveFunction.html
-pub trait InteractiveFunction {
+/// [`Function`]: ./attr.Function.html
+pub trait Function {
     /// Returns the functions name.
     ///
     /// Can be used to drive auto-completion in a CLI.
@@ -200,7 +200,7 @@ pub trait InteractiveFunction {
 }
 
 #[cfg(feature = "std")]
-inventory::collect!(&'static dyn InteractiveFunction);
+inventory::collect!(&'static dyn Function);
 
 fn parse_access_type(expression: &str) -> Result<'_, AccessType<'_>> {
     let expression = expression.trim();

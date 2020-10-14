@@ -11,7 +11,7 @@ pub fn derive_interactive(input: TokenStream) -> TokenStream {
     interactive_impl(&ast).into()
 }
 
-pub fn derive_interactive_root(input: TokenStream) -> TokenStream {
+pub fn derive_root(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as ItemStruct);
 
     let struct_name = &ast.ident;
@@ -26,14 +26,14 @@ pub fn derive_interactive_root(input: TokenStream) -> TokenStream {
         impl #impl_generics InteractiveRoot for #struct_name #ty_generics #where_clause{}
 
         #[cfg(feature = "std")]
-        impl #impl_generics ::minus_i::InteractiveMethods for #struct_name #ty_generics #where_clause{
-            fn interactive_eval_method(
+        impl #impl_generics ::minus_i::Methods for #struct_name #ty_generics #where_clause{
+            fn eval_method(
                 &self,
                 function_name: &str,
                 args: &str,
                 f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>),
             ) {
-                if let Some(function) = ::minus_i::inventory::iter::<&dyn ::minus_i::InteractiveFunction>.into_iter()
+                if let Some(function) = ::minus_i::inventory::iter::<&dyn ::minus_i::Function>.into_iter()
                     .find(|function| function.function_name() == function_name)
                 {
                     function.eval(args, f)
@@ -44,18 +44,18 @@ pub fn derive_interactive_root(input: TokenStream) -> TokenStream {
                 }
             }
 
-            fn interactive_eval_method_mut(
+            fn eval_method_mut(
                 &mut self,
                 function_name: &str,
                 args: &str,
                 f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>),
             ) {
-                (&*self).interactive_eval_method(function_name, args, f)
+                (&*self).eval_method(function_name, args, f)
             }
 
-            fn get_all_interactive_method_names(&self) -> &'static [&'static str]{
+            fn get_all_method_names(&self) -> &'static [&'static str]{
                 ::lazy_static::lazy_static! {
-                    static ref NAMES: ::std::vec::Vec<&'static str> = ::minus_i::inventory::iter::<&dyn ::minus_i::InteractiveFunction>
+                    static ref NAMES: ::std::vec::Vec<&'static str> = ::minus_i::inventory::iter::<&dyn ::minus_i::Function>
                     .into_iter()
                     .map(|function| function.function_name())
                     .collect();
@@ -131,13 +131,13 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
     quote! {
         impl #impl_generics ::minus_i::Interactive for #struct_name #ty_generics #where_clause {
-            fn interactive_get_field<#tick_a>(&#tick_a self, field_name: &#tick_a str) -> ::minus_i::Result<#tick_a, &dyn ::minus_i::Interactive>{
+            fn get_field<#tick_a>(&#tick_a self, field_name: &#tick_a str) -> ::minus_i::Result<#tick_a, &dyn ::minus_i::Interactive>{
                 match field_name {
                     #(#get_field_matches)*
                     _ => Err(::minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
                 }
             }
-            fn interactive_get_field_mut<#tick_a>(&#tick_a mut self, field_name: &#tick_a str) -> ::minus_i::Result<#tick_a, &mut dyn ::minus_i::Interactive>{
+            fn get_field_mut<#tick_a>(&#tick_a mut self, field_name: &#tick_a str) -> ::minus_i::Result<#tick_a, &mut dyn ::minus_i::Interactive>{
                 match field_name {
                     #(#get_field_mut_matches)*
                     _ => Err(::minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
@@ -146,8 +146,8 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
         }
 
-        impl #impl_generics ::minus_i::InteractiveFields for #struct_name #ty_generics #where_clause{
-            fn interactive_eval_field(&self, field_name: &str, f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>))
+        impl #impl_generics ::minus_i::Fields for #struct_name #ty_generics #where_clause{
+            fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>))
             {
                 match field_name {
                     #(#eval_field_matches)*
@@ -155,7 +155,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
                 }
             }
 
-            fn get_all_interactive_field_names(&self) -> &'static [&'static str]{
+            fn get_all_field_names(&self) -> &'static [&'static str]{
                 &[#(#all_field_names)*]
             }
         }

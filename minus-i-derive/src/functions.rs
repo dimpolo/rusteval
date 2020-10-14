@@ -11,7 +11,7 @@ static SUPPORTED_FUNC_ARGS: &[&str] = &[
     "u64", "u128", "usize", "String",
 ];
 
-pub fn interactive_methods(input: TokenStream) -> TokenStream {
+pub fn methods(input: TokenStream) -> TokenStream {
     let original_impl = TokenStream2::from(input.clone());
     let ast = parse_macro_input!(input as ItemImpl);
 
@@ -51,8 +51,8 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #original_impl
 
-        impl #impl_generics ::minus_i::InteractiveMethods for #struct_name #ty_generics #where_clause{
-            fn interactive_eval_method(
+        impl #impl_generics ::minus_i::Methods for #struct_name #ty_generics #where_clause{
+            fn eval_method(
                 &self,
                 method_name: &str,
                 args: &str,
@@ -69,7 +69,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
                 }
             }
 
-            fn interactive_eval_method_mut(
+            fn eval_method_mut(
                 &mut self,
                 method_name: &str,
                 args: &str,
@@ -86,7 +86,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
                 }
             }
 
-            fn get_all_interactive_method_names(&self) -> &'static [&'static str]{
+            fn get_all_method_names(&self) -> &'static [&'static str]{
                 &[#(#all_method_names)*]
             }
         }
@@ -95,13 +95,10 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
     expanded.into()
 }
 
-pub fn interactive_function(input: TokenStream) -> TokenStream {
+pub fn function(input: TokenStream) -> TokenStream {
     let original_func = TokenStream2::from(input.clone());
 
-    let struct_name = &Ident::new(
-        &format!("InteractiveFunction{}", hash(&input)),
-        Span::call_site(),
-    );
+    let struct_name = &Ident::new(&format!("Function{}", hash(&input)), Span::call_site());
 
     let ast = parse_macro_input!(input as ImplItemMethod);
 
@@ -114,7 +111,7 @@ pub fn interactive_function(input: TokenStream) -> TokenStream {
 
         struct #struct_name;
 
-        impl ::minus_i::InteractiveFunction for #struct_name{
+        impl ::minus_i::Function for #struct_name{
             fn function_name(&self) -> &'static str{
                 stringify!(#function_name)
             }
@@ -126,7 +123,7 @@ pub fn interactive_function(input: TokenStream) -> TokenStream {
         }
 
         ::minus_i::inventory::submit! {
-            &#struct_name as &dyn ::minus_i::InteractiveFunction
+            &#struct_name as &dyn ::minus_i::Function
         }
     };
 
