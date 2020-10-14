@@ -224,9 +224,18 @@ fn get_name(field: &Field, field_index: usize) -> TokenStream2 {
     }
 }
 
+/// Blanket implementations like ´impl<T> Interactive for &T{..}´ don't seem to work.
 fn needs_dereference(field: &Field) -> bool {
-    // TODO check who needs this
-    matches!(field.ty, Type::Reference(_))
+    if matches!(field.ty, Type::Reference(_)) {
+        return true;
+    }
+    if let Type::Path(TypePath { path, .. }) = &field.ty {
+        if path.is_ident("Box") || path.is_ident("Rc") || path.is_ident("Arc") {
+            return true;
+        }
+    }
+
+    false
 }
 
 fn is_owned_or_mut_reference(field: &&&Field) -> bool {
