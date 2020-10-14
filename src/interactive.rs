@@ -75,7 +75,7 @@ impl<T> Interactive for T {
     }
 }
 
-/// A trait that allows to interactively evaluate a field and pass its value to a given closure.
+/// A trait that allows to interactively evaluate a field and pass its value to the given closure.
 ///
 /// This trait gets implemented automatically when you derive [`Interactive`].
 ///
@@ -111,7 +111,7 @@ impl<T> Fields for T {
     }
 }
 
-/// A trait that allows to interactively evaluate a method and pass its result to a given closure.
+/// A trait that allows to interactively evaluate a structs methods and pass their result to the given closure.
 ///
 /// This trait gets implemented automatically when you use the [`Methods`] attribute.
 ///

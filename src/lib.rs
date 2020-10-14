@@ -75,7 +75,7 @@ pub use root::InteractiveRoot;
 pub use inventory;
 
 #[cfg(feature = "std")]
-pub use root::Function;
+pub use function::Function;
 
 #[cfg(feature = "std")]
 pub use minus_i_derive::Function;
@@ -83,5 +83,6 @@ pub use minus_i_derive::Function;
 pub mod arg_parse;
 pub mod as_debug;
 mod error;
+mod function;
 mod interactive;
 mod root;
