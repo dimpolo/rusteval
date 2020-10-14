@@ -11,9 +11,7 @@ use crate::{InteractiveError, Result};
 /// This means that all members of an [`Interactive`] struct need to also implement [`Interactive`], which is why
 /// a default blanket implementation for all `T` is provided.
 ///
-pub trait Interactive:
-    AsDebug + InteractiveMethods + InteractiveFields + InteractiveFieldNames + InteractiveMethodNames
-{
+pub trait Interactive: AsDebug + InteractiveMethods + InteractiveFields {
     /// Looks for a field with the given name and on success return a shared reference to it.
     fn interactive_get_field<'a>(
         &'a self,
@@ -99,6 +97,11 @@ pub trait InteractiveFields {
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
     fn interactive_eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>));
+
+    /// Returns all interactive field names of this type.
+    ///
+    /// Can be used to drive auto-completion in a CLI.
+    fn get_all_interactive_field_names(&self) -> &'static [&'static str];
 }
 
 impl<T> InteractiveFields for T {
@@ -111,6 +114,10 @@ impl<T> InteractiveFields for T {
             type_name: type_name::<T>(),
             field_name,
         }));
+    }
+
+    default fn get_all_interactive_field_names(&self) -> &'static [&'static str] {
+        &[]
     }
 }
 
@@ -153,6 +160,11 @@ pub trait InteractiveMethods {
         args: &str,
         f: &mut dyn FnMut(Result<'_, &dyn Debug>),
     );
+
+    /// Returns all interactive field names of this type.
+    ///
+    /// Can be used to drive auto-completion in a CLI.
+    fn get_all_interactive_method_names(&self) -> &'static [&'static str];
 }
 
 impl<T> InteractiveMethods for T {
@@ -179,46 +191,7 @@ impl<T> InteractiveMethods for T {
             method_name,
         }));
     }
-}
 
-/// A trait that allows a CLI to query all interactive field names.
-///
-/// This trait gets implemented automatically when you derive [`Interactive`].
-///
-/// # Note:
-/// It is currently not possible to check if a trait is implemented at runtime.
-/// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
-/// a default blanket implementation for all `T` is provided.
-///
-/// [`Interactive`]: ./derive.Interactive.html
-pub trait InteractiveFieldNames {
-    /// Returns all interactive field names of this type.
-    fn get_all_interactive_field_names(&self) -> &'static [&'static str];
-}
-
-impl<T> InteractiveFieldNames for T {
-    default fn get_all_interactive_field_names(&self) -> &'static [&'static str] {
-        &[]
-    }
-}
-
-/// A trait that allows a CLI to query all interactive method names.
-///
-/// This trait gets implemented automatically when you use the [`InteractiveMethods`] attribute.
-///
-/// # Note:
-/// It is currently not possible to check if a trait is implemented at runtime.
-/// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
-/// a default blanket implementation for all `T` is provided.
-///
-/// [`Interactive`]: ./derive.Interactive.html
-/// [`InteractiveMethods`]: ./attr.InteractiveMethods.html
-pub trait InteractiveMethodNames {
-    /// Returns all interactive field names of this type.
-    fn get_all_interactive_method_names(&self) -> &'static [&'static str];
-}
-
-impl<T> InteractiveMethodNames for T {
     default fn get_all_interactive_method_names(&self) -> &'static [&'static str] {
         &[]
     }

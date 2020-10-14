@@ -1,6 +1,6 @@
 #![feature(min_specialization)]
 
-use minus_i::{InteractiveError, InteractiveFunction, InteractiveMethodNames, InteractiveRoot};
+use minus_i::{InteractiveError, InteractiveFunction, InteractiveMethods, InteractiveRoot};
 
 #[InteractiveFunction]
 fn add_one(a: u32) -> u32 {

@@ -187,6 +187,8 @@ pub trait InteractiveRoot: Interactive + Sized {
 /// [`InteractiveFunction`]: ./attr.InteractiveFunction.html
 pub trait InteractiveFunction {
     /// Returns the functions name.
+    ///
+    /// Can be used to drive auto-completion in a CLI.
     fn function_name(&self) -> &'static str;
 
     /// Parses the args string into the expected arguments of the method,

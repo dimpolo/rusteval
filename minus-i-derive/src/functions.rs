@@ -85,9 +85,7 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
                     })),
                 }
             }
-        }
 
-        impl #impl_generics ::minus_i::InteractiveMethodNames for #struct_name #ty_generics #where_clause{
             fn get_all_interactive_method_names(&self) -> &'static [&'static str]{
                 &[#(#all_method_names)*]
             }
