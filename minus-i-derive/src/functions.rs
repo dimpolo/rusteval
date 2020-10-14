@@ -47,7 +47,6 @@ pub fn interactive_methods(input: TokenStream) -> TokenStream {
         }
     });
 
-    // TODO add generics
     let expanded = quote! {
         #original_impl
 

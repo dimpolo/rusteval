@@ -46,6 +46,7 @@
 //!         print!(">>> ");
 //!         io::stdout().flush()?;
 //!
+//!         input.clear();
 //!         io::stdin().read_line(&mut input)?;
 //!         println!("{}", root.eval_to_string(&input));
 //!     }
@@ -74,6 +75,7 @@ pub use minus_i_derive::{Interactive, InteractiveMethods, InteractiveRoot, Parti
 pub use root::InteractiveRoot;
 
 #[cfg(feature = "std")]
+#[doc(hidden)]
 pub use inventory;
 
 #[cfg(feature = "std")]

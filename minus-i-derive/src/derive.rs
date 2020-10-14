@@ -1,7 +1,8 @@
 use proc_macro::TokenStream;
 
-use quote::quote;
+use quote::{quote, quote_spanned};
 use syn::export::TokenStream2;
+use syn::spanned::Spanned;
 use syn::*;
 
 pub fn derive_interactive(input: TokenStream) -> TokenStream {
@@ -78,8 +79,8 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
     let interactive_fields: Vec<_> = ast.fields.iter().collect();
 
-    let eval_field_matches = interactive_fields.iter().map(|field| {
-        let name = &field.ident;
+    let eval_field_matches = interactive_fields.iter().enumerate().map(|(i, field)| {
+        let name = get_name(field, i);
 
         if needs_dereference(&field) {
             quote! {
@@ -92,8 +93,8 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
         }
     });
 
-    let get_field_matches = interactive_fields.iter().map(|field| {
-        let name = &field.ident;
+    let get_field_matches = interactive_fields.iter().enumerate().map(|(i, field)| {
+        let name = get_name(field, i);
         if needs_dereference(&field) {
             quote! {
                 stringify!(#name) => Ok(&*self.#name),
@@ -108,8 +109,9 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
     let get_field_mut_matches = interactive_fields
         .iter()
         .filter(is_owned_or_mut_reference)
-        .map(|field| {
-            let name = &field.ident;
+        .enumerate()
+        .map(|(i, field)| {
+            let name = get_name(field, i);
 
             if needs_dereference(&field) {
                 quote! {
@@ -122,8 +124,8 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
             }
         });
 
-    let all_field_names = interactive_fields.iter().map(|field| {
-        let name = &field.ident;
+    let all_field_names = interactive_fields.iter().enumerate().map(|(i, field)| {
+        let name = get_name(field, i);
         quote! {
             stringify!(#name),
         }
@@ -172,8 +174,8 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
 
     let interactive_fields = ast.fields.iter();
 
-    let as_debug_all_fields = interactive_fields.map(|field| {
-        let name = &field.ident;
+    let as_debug_all_fields = interactive_fields.enumerate().map(|(i, field)| {
+        let name = get_name(field, i);
         quote! {
             .field(
                 stringify!(#name),
@@ -196,6 +198,15 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
     };
 
     expanded.into()
+}
+
+fn get_name(field: &Field, field_index: usize) -> TokenStream2 {
+    if let Some(ident) = field.ident.as_ref() {
+        quote! {#ident}
+    } else {
+        let i = Index::from(field_index);
+        quote_spanned! {field.span()=> #i}
+    }
 }
 
 fn needs_dereference(field: &Field) -> bool {

@@ -1,7 +1,7 @@
 #![feature(min_specialization)]
 
 use core::fmt::Debug;
-use minus_i::{Interactive, InteractiveFields};
+use minus_i::{Interactive, InteractiveFieldNames, InteractiveFields};
 
 #[derive(Default, Debug)]
 struct Inner(bool, Option<String>);
@@ -280,4 +280,17 @@ fn test_dyn_shared_references_as_mut_references() {
             field_name: "test_struct_ref"
         }
     );
+}
+
+#[test]
+fn test_tuple_struct() {
+    #[derive(Interactive)]
+    struct TupleStruct(u32, u32);
+
+    let tuple_struct = TupleStruct(42, 43);
+
+    assert_eq!(tuple_struct.get_all_interactive_field_names(), ["0", "1"]);
+    tuple_struct.interactive_eval_field("1", &mut |field| {
+        assert_eq!(format!("{:?}", field.unwrap()), "43")
+    });
 }
