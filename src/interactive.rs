@@ -114,7 +114,7 @@ impl<T> InteractiveFields for T {
     }
 }
 
-/// A trait that allows to interactively evaluate a function and pass its result to a given closure.
+/// A trait that allows to interactively evaluate a method and pass its result to a given closure.
 ///
 /// This trait gets implemented automatically when you use the [`InteractiveMethods`] attribute.
 ///

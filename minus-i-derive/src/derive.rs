@@ -36,7 +36,7 @@ pub fn derive_interactive_root(input: TokenStream) -> TokenStream {
                 if let Some(function) = ::minus_i::inventory::iter::<&dyn ::minus_i::InteractiveFunction>.into_iter()
                     .find(|function| function.function_name() == function_name)
                 {
-                    function.eval(function_name, args, f)
+                    function.eval(args, f)
                 } else {
                     f(Err(::minus_i::InteractiveError::FunctionNotFound {
                         function_name,

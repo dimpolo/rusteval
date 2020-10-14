@@ -121,7 +121,8 @@ pub fn interactive_function(input: TokenStream) -> TokenStream {
                 stringify!(#function_name)
             }
 
-            fn eval(&self, method_name: &str, args: &str, f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>)) {
+            fn eval(&self, args: &str, f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>)) {
+                let method_name = self.function_name();
                 #method_call
             }
         }
