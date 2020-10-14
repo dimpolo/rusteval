@@ -3,7 +3,6 @@
 //! # Known Limitations:
 //! * derive not implemented for Enums
 //! * interactive method args must implement parse
-//! * don't use 'unused
 //!
 //! # Example
 //! ```no_run

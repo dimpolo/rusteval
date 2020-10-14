@@ -1,7 +1,8 @@
 use proc_macro::TokenStream;
 
+use proc_macro2::Span;
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
-use syn::export::TokenStream2;
 use syn::spanned::Spanned;
 use syn::*;
 
@@ -73,9 +74,9 @@ pub fn derive_interactive_root(input: TokenStream) -> TokenStream {
 fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
     let struct_name = &ast.ident;
 
-    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
+    let tick_a = get_unused_lifetime(ast);
 
-    let tick_a = quote! {'unused}; // TODO check that unused
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
     let interactive_fields: Vec<_> = ast.fields.iter().collect();
 
@@ -198,6 +199,25 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
     };
 
     expanded.into()
+}
+
+fn get_unused_lifetime(ast: &ItemStruct) -> Lifetime {
+    let mut lifetime_name = "'minus_i".to_owned();
+
+    for possible_lifetime in ('a'..='z').map(|char| char.to_string()) {
+        if ast
+            .generics
+            .lifetimes()
+            .any(|lt| lt.lifetime.ident == possible_lifetime)
+        {
+            continue;
+        } else {
+            lifetime_name = "'".to_owned() + &possible_lifetime;
+            break;
+        }
+    }
+
+    Lifetime::new(&lifetime_name, Span::call_site())
 }
 
 fn get_name(field: &Field, field_index: usize) -> TokenStream2 {
