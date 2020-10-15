@@ -1,6 +1,8 @@
 use core::any::type_name;
 use core::fmt::Debug;
 
+use auto_impl::auto_impl;
+
 use crate::as_debug::AsDebug;
 use crate::{InteractiveError, Result};
 
@@ -11,49 +13,22 @@ use crate::{InteractiveError, Result};
 /// This means that all members of an [`Interactive`] struct need to also implement [`Interactive`], which is why
 /// a default blanket implementation for all `T` is provided.
 ///
+#[auto_impl(&, &mut, Box, Rc, Arc)]
 pub trait Interactive: AsDebug + Methods + Fields {
     /// Looks for a field with the given name and on success return a shared reference to it.
     fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive>;
 
     /// Looks for a field with the given name and on success return a mutable reference to it.
-    ///
-    /// # Note:
-    /// Be careful when calling methods on the returned trait object that require only a shared reference.
-    /// Since there is a default implementation for all T for those methods
-    /// Rust will use the trait object as a `& &mut dyn Interactive`
-    /// and you'll get the default implementation instead of the concrete one.
-    ///
-    /// See the below example on how to circumvent this.
-    /// ```
-    /// # #![feature(min_specialization)]
-    /// # use minus_i::Interactive;
-    /// #
-    /// #[derive(Interactive, Default)]
-    /// struct Struct {
-    ///     field: OtherStruct,
-    /// }
-    ///
-    /// #[derive(Interactive, Default)]
-    /// struct OtherStruct {
-    ///     other_field: u8,
-    /// }
-    ///
-    /// let mut obj = Struct::default();
-    ///
-    /// assert!(obj
-    ///     .get_field_mut("field")
-    ///     .unwrap()
-    ///     .get_field("other_field")
-    ///     .is_err());
-    ///
-    /// assert!((&*obj.get_field_mut("field").unwrap())
-    ///     .get_field("other_field")
-    ///     .is_ok());
-    /// ```
+    #[auto_impl(keep_default_for(&, Rc, Arc))]
     fn get_field_mut<'a>(
         &'a mut self,
         field_name: &'a str,
-    ) -> crate::Result<'a, &mut dyn crate::Interactive>;
+    ) -> crate::Result<'a, &mut dyn crate::Interactive> {
+        Err(InteractiveError::FieldNotFound {
+            type_name: type_name::<Self>(),
+            field_name,
+        })
+    }
 }
 
 impl<T> Interactive for T {
@@ -85,6 +60,7 @@ impl<T> Interactive for T {
 /// a default blanket implementation for all `T` is provided.
 ///
 /// [`Interactive`]: ./derive.Interactive.html
+#[auto_impl(&, &mut, Box, Rc, Arc)]
 pub trait Fields {
     /// Looks for a field with the given name,
     /// and passes it as a `Ok(&dyn Debug)` to the given closure.
@@ -122,6 +98,7 @@ impl<T> Fields for T {
 ///
 /// [`Interactive`]: ./derive.Interactive.html
 /// [`Methods`]: ./attr.Methods.html
+#[auto_impl(&, &mut, Box, Rc, Arc)]
 pub trait Methods {
     /// Looks for a method with the given name,
     /// parses the args string into the expected arguments of the method,
@@ -139,12 +116,19 @@ pub trait Methods {
     /// passes the result as a `Ok(&dyn Debug)` to the given closure.
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
+    #[auto_impl(keep_default_for(&, Rc, Arc))]
     fn eval_method_mut(
         &mut self,
         method_name: &str,
         args: &str,
         f: &mut dyn FnMut(Result<'_, &dyn Debug>),
-    );
+    ) {
+        let _ = args;
+        f(Err(InteractiveError::MethodNotFound {
+            type_name: type_name::<Self>(),
+            method_name,
+        }));
+    }
 
     /// Returns all interactive field names of this type.
     ///

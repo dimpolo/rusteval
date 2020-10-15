@@ -80,27 +80,16 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
     let eval_field_matches = interactive_fields.iter().enumerate().map(|(i, field)| {
         let name = get_name(field, i);
 
-        if needs_dereference(&field) {
-            quote! {
-                stringify!(#name) => f(::minus_i::as_debug::AsDebug::try_as_debug(&*self.#name)),
-            }
-        } else {
-            quote! {
-                stringify!(#name) => f(::minus_i::as_debug::AsDebug::try_as_debug(&self.#name)),
-            }
+        quote! {
+            stringify!(#name) => f(::minus_i::as_debug::AsDebug::try_as_debug(&self.#name)),
         }
     });
 
     let get_field_matches = interactive_fields.iter().enumerate().map(|(i, field)| {
         let name = get_name(field, i);
-        if needs_dereference(&field) {
-            quote! {
-                stringify!(#name) => Ok(&*self.#name),
-            }
-        } else {
-            quote! {
-                stringify!(#name) => Ok(&self.#name),
-            }
+
+        quote! {
+            stringify!(#name) => Ok(&self.#name),
         }
     });
 
@@ -111,14 +100,8 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
         .map(|(i, field)| {
             let name = get_name(field, i);
 
-            if needs_dereference(&field) {
-                quote! {
-                    stringify!(#name) => Ok(&mut *self.#name),
-                }
-            } else {
-                quote! {
-                    stringify!(#name) => Ok(&mut self.#name),
-                }
+            quote! {
+                stringify!(#name) => Ok(&mut self.#name),
             }
         });
 

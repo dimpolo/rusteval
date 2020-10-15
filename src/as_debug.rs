@@ -2,7 +2,7 @@
 
 use core::fmt::Debug;
 
-use crate::{InteractiveError, Result};
+use crate::{Interactive, InteractiveError, Result};
 use core::any::type_name;
 
 #[doc(hidden)]
@@ -24,6 +24,24 @@ where
 {
     fn try_as_debug(&self) -> Result<'_, &dyn Debug> {
         Ok(self)
+    }
+}
+
+impl AsDebug for &dyn Interactive {
+    fn try_as_debug(&self) -> Result<'_, &dyn Debug> {
+        (&**self).try_as_debug()
+    }
+}
+
+impl AsDebug for &mut dyn Interactive {
+    fn try_as_debug(&self) -> Result<'_, &dyn Debug> {
+        (&**self).try_as_debug()
+    }
+}
+
+impl AsDebug for Box<dyn Interactive> {
+    fn try_as_debug(&self) -> Result<'_, &dyn Debug> {
+        (&**self).try_as_debug()
     }
 }
 
