@@ -6,7 +6,6 @@
 //!
 //! # Example
 //! ```no_run
-//! #![feature(min_specialization)]
 //!
 //! use minus_i::{Interactive, Methods, InteractiveRoot};
 //!
@@ -81,8 +80,8 @@ pub use function::Function;
 pub use minus_i_derive::Function;
 
 pub mod arg_parse;
-pub mod as_debug;
 mod error;
 mod function;
 mod interactive;
 mod root;
+pub mod specialization;

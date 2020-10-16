@@ -1,5 +1,6 @@
 use core::fmt::Debug;
 
+use crate::specialization::AsMethods;
 use crate::{Interactive, InteractiveError, Result};
 
 enum AccessType<'a> {
@@ -13,7 +14,6 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// # Example
     ///
     /// ```
-    /// # #![feature(min_specialization)]
     /// # use minus_i::{Interactive, Methods, InteractiveRoot};
     /// # use core::fmt::Debug;
     /// #
@@ -49,7 +49,10 @@ pub trait InteractiveRoot: Interactive + Sized {
                         object.eval_field(field_name, &mut f)
                     }
                     Ok(AccessType::MethodAccess(method_name, args)) => {
-                        object.eval_method(method_name, args, &mut f)
+                        match AsMethods::try_as_methods(object) {
+                            Ok(obj) => obj.eval_method(method_name, args, &mut f),
+                            Err(e) => f(Err(e)),
+                        }
                     }
                     Err(e) => f(Err(e)),
                 }
@@ -71,7 +74,10 @@ pub trait InteractiveRoot: Interactive + Sized {
                         object.eval_field(field_name, &mut f)
                     }
                     Ok(AccessType::MethodAccess(method_name, args)) => {
-                        object.eval_method_mut(method_name, args, &mut f)
+                        match AsMethods::try_as_methods_mut(object) {
+                            Ok(obj) => obj.eval_method_mut(method_name, args, &mut f),
+                            Err(e) => f(Err(e)),
+                        }
                     }
                     Err(e) => f(Err(e)),
                 }
@@ -89,7 +95,6 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// # Example
     ///
     /// ```
-    /// # #![feature(min_specialization)]
     /// # use minus_i::{Interactive, InteractiveRoot};
     /// # use core::fmt::Debug;
     /// #
@@ -184,7 +189,7 @@ fn parse_access_type(expression: &str) -> Result<'_, AccessType<'_>> {
     let expression = expression.trim();
     match expression.strip_suffix(')').map(|s| s.split_once('(')) {
         Some(Some((method_name, args))) => Ok(AccessType::MethodAccess(method_name.trim(), args)),
-        Some(None) => Err(InteractiveError::SyntaxError),
+        Some(None) => Err(InteractiveError::SyntaxError), // closing parenthesis but no opening parenthesis
         None => Ok(AccessType::FieldAccess(expression)),
     }
 }

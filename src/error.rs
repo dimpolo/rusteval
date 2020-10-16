@@ -8,6 +8,12 @@ pub type Result<'a, T> = core::result::Result<T, InteractiveError<'a>>;
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum InteractiveError<'a> {
     #[allow(missing_docs)]
+    InteractiveNotImplemented { type_name: &'a str },
+    #[allow(missing_docs)]
+    MethodsNotImplemented { type_name: &'a str },
+    #[allow(missing_docs)]
+    DebugNotImplemented { type_name: &'static str },
+    #[allow(missing_docs)]
     MethodNotFound {
         type_name: &'a str,
         method_name: &'a str,
@@ -31,14 +37,21 @@ pub enum InteractiveError<'a> {
     #[allow(missing_docs)]
     SyntaxError,
     #[allow(missing_docs)]
-    DebugNotImplemented { type_name: &'static str },
-    #[allow(missing_docs)]
     FunctionNotFound { function_name: &'a str },
 }
 
 impl Display for InteractiveError<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         match self {
+            InteractiveError::InteractiveNotImplemented { type_name } => {
+                write!(f, "`{type_name}` doesn't implement `Interactive`",)
+            }
+            InteractiveError::MethodsNotImplemented { type_name } => {
+                write!(f, "`{type_name}` doesn't implement `Methods`",)
+            }
+            InteractiveError::DebugNotImplemented { type_name } => {
+                write!(f, "´{type_name}´ doesn't implement ´Debug´")
+            }
             InteractiveError::MethodNotFound {
                 method_name,
                 type_name,
@@ -69,13 +82,10 @@ impl Display for InteractiveError<'_> {
             }
             InteractiveError::ArgParseError { error, .. } => write!(
                 f,
-                "Could not parse `{:?}` as method/function argument(s)",
+                "Couldn't parse `{:?}` as method/function argument(s)",
                 error // TODO improve message
             ),
             InteractiveError::SyntaxError => write!(f, "Syntax Error"),
-            InteractiveError::DebugNotImplemented { type_name } => {
-                write!(f, "´{type_name}´ doesn't implement ´Debug´")
-            }
             InteractiveError::FunctionNotFound { function_name } => {
                 write!(f, "No function named `{function_name}` found")
             }

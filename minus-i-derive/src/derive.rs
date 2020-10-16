@@ -81,7 +81,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
         let name = get_name(field, i);
 
         quote! {
-            stringify!(#name) => f(::minus_i::as_debug::AsDebug::try_as_debug(&self.#name)),
+            stringify!(#name) => f(::minus_i::specialization::AsDebug::try_as_debug(&self.#name)),
         }
     });
 
@@ -89,7 +89,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
         let name = get_name(field, i);
 
         quote! {
-            stringify!(#name) => Ok(&self.#name),
+            stringify!(#name) => ::minus_i::specialization::AsInteractive::try_as_interactive(&self.#name),
         }
     });
 
@@ -101,7 +101,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
             let name = get_name(field, i);
 
             quote! {
-                stringify!(#name) => Ok(&mut self.#name),
+                stringify!(#name) => ::minus_i::specialization::AsInteractive::try_as_interactive_mut(&mut self.#name),
             }
         });
 
@@ -158,9 +158,9 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
         quote! {
             .field(
                 stringify!(#name),
-                match ::minus_i::as_debug::AsDebug::try_as_debug(&self.#name){
+                match ::minus_i::specialization::AsDebug::try_as_debug(&self.#name){
                     Ok(field) => field,
-                    Err(_) => &::minus_i::as_debug::Unknown,
+                    Err(_) => &::minus_i::specialization::Unknown,
                 },
             )
         }
@@ -205,20 +205,6 @@ fn get_name(field: &Field, field_index: usize) -> TokenStream2 {
         let i = Index::from(field_index);
         quote_spanned! {field.span()=> #i}
     }
-}
-
-/// Blanket implementations like ´impl<T> Interactive for &T{..}´ don't seem to work.
-fn needs_dereference(field: &Field) -> bool {
-    if matches!(field.ty, Type::Reference(_)) {
-        return true;
-    }
-    if let Type::Path(TypePath { path, .. }) = &field.ty {
-        if path.is_ident("Box") || path.is_ident("Rc") || path.is_ident("Arc") {
-            return true;
-        }
-    }
-
-    false
 }
 
 fn is_owned_or_mut_reference(field: &&&Field) -> bool {

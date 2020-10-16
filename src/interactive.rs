@@ -3,7 +3,7 @@ use core::fmt::Debug;
 
 use auto_impl::auto_impl;
 
-use crate::as_debug::AsDebug;
+use crate::specialization::{AsDebug, AsMethods};
 use crate::{InteractiveError, Result};
 
 /// The main trait of this crate TODO
@@ -14,7 +14,7 @@ use crate::{InteractiveError, Result};
 /// a default blanket implementation for all `T` is provided.
 ///
 #[auto_impl(&, &mut, Box, Rc, Arc)]
-pub trait Interactive: AsDebug + Methods + Fields {
+pub trait Interactive: AsDebug + AsMethods + Fields {
     /// Looks for a field with the given name and on success return a shared reference to it.
     fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive>;
 
@@ -26,25 +26,6 @@ pub trait Interactive: AsDebug + Methods + Fields {
     ) -> crate::Result<'a, &mut dyn crate::Interactive> {
         Err(InteractiveError::FieldNotFound {
             type_name: type_name::<Self>(),
-            field_name,
-        })
-    }
-}
-
-impl<T> Interactive for T {
-    default fn get_field<'a>(&'a self, field_name: &'a str) -> Result<'a, &dyn Interactive> {
-        Err(InteractiveError::FieldNotFound {
-            type_name: type_name::<T>(),
-            field_name,
-        })
-    }
-
-    default fn get_field_mut<'a>(
-        &'a mut self,
-        field_name: &'a str,
-    ) -> Result<'a, &mut dyn Interactive> {
-        Err(InteractiveError::FieldNotFound {
-            type_name: type_name::<T>(),
             field_name,
         })
     }
@@ -72,19 +53,6 @@ pub trait Fields {
     ///
     /// Can be used to drive auto-completion in a CLI.
     fn get_all_field_names(&self) -> &'static [&'static str];
-}
-
-impl<T> Fields for T {
-    default fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
-        f(Err(InteractiveError::FieldNotFound {
-            type_name: type_name::<T>(),
-            field_name,
-        }));
-    }
-
-    default fn get_all_field_names(&self) -> &'static [&'static str] {
-        &[]
-    }
 }
 
 /// A trait that allows to interactively evaluate a structs methods and pass their result to the given closure.
@@ -134,34 +102,4 @@ pub trait Methods {
     ///
     /// Can be used to drive auto-completion in a CLI.
     fn get_all_method_names(&self) -> &'static [&'static str];
-}
-
-impl<T> Methods for T {
-    default fn eval_method(
-        &self,
-        method_name: &str,
-        _args: &str,
-        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
-    ) {
-        f(Err(InteractiveError::MethodNotFound {
-            type_name: type_name::<T>(),
-            method_name,
-        }));
-    }
-
-    default fn eval_method_mut(
-        &mut self,
-        method_name: &str,
-        _args: &str,
-        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
-    ) {
-        f(Err(InteractiveError::MethodNotFound {
-            type_name: type_name::<T>(),
-            method_name,
-        }));
-    }
-
-    default fn get_all_method_names(&self) -> &'static [&'static str] {
-        &[]
-    }
 }
