@@ -14,14 +14,14 @@ pub enum InteractiveError<'a> {
     #[allow(missing_docs)]
     DebugNotImplemented { type_name: &'static str },
     #[allow(missing_docs)]
-    MethodNotFound {
-        type_name: &'a str,
-        method_name: &'a str,
-    },
-    #[allow(missing_docs)]
     FieldNotFound {
         type_name: &'a str,
         field_name: &'a str,
+    },
+    #[allow(missing_docs)]
+    MethodNotFound {
+        type_name: &'a str,
+        method_name: &'a str,
     },
     #[allow(missing_docs)]
     WrongNumberOfArguments {
@@ -52,6 +52,10 @@ impl Display for InteractiveError<'_> {
             InteractiveError::DebugNotImplemented { type_name } => {
                 write!(f, "´{type_name}´ doesn't implement ´Debug´")
             }
+            InteractiveError::FieldNotFound {
+                type_name,
+                field_name,
+            } => write!(f, "No field `{field_name}` found for type `{type_name}`",),
             InteractiveError::MethodNotFound {
                 method_name,
                 type_name,
@@ -59,10 +63,6 @@ impl Display for InteractiveError<'_> {
                 f,
                 "No method named `{method_name}` found for type `{type_name}`",
             ),
-            InteractiveError::FieldNotFound {
-                type_name,
-                field_name,
-            } => write!(f, "No field `{field_name}` found for type `{type_name}`",),
             InteractiveError::WrongNumberOfArguments {
                 method_name,
                 expected,

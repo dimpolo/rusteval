@@ -123,9 +123,10 @@ pub trait InteractiveRoot: Interactive + Sized {
 
         while !object_path.is_empty() {
             let (field_name, object_path_remainder) = object_path
-                .rsplit_once('.')
+                .split_once('.')
                 .unwrap_or((object_path.trim(), ""));
             object_path = object_path_remainder;
+            dbg!(&field_name);
 
             current = current.get_field(field_name.trim())?
         }
@@ -144,10 +145,12 @@ pub trait InteractiveRoot: Interactive + Sized {
         let mut current: &mut dyn Interactive = self;
 
         while !object_path.is_empty() {
+            dbg!(object_path.rsplit_once('.'));
             let (field_name, object_path_remainder) = object_path
-                .rsplit_once('.')
+                .split_once('.')
                 .unwrap_or((object_path.trim(), ""));
             object_path = object_path_remainder;
+            dbg!(&field_name);
 
             current = current.get_field_mut(field_name.trim())?
         }

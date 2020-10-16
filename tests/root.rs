@@ -177,8 +177,13 @@ fn test_mut_dyn_reference_field() {
 }
 
 #[test]
-fn test_weird_access() {
-    // TODO name
+fn test_primitive_access() {
     let mut root = Root::default();
-    assert_eq!(root.eval_to_string("parent.child.a.b"), "something better");
+    assert_eq!(
+        root.eval_to_string("parent.child.a.b"),
+        format!(
+            "{}",
+            InteractiveError::InteractiveNotImplemented { type_name: "bool" }
+        )
+    );
 }
