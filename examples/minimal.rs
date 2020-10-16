@@ -1,5 +1,3 @@
-#![feature(min_specialization)]
-
 use minus_i::{Function, Interactive, InteractiveRoot, Methods};
 
 #[derive(Interactive, Debug, Default)]

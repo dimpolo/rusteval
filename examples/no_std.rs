@@ -1,5 +1,3 @@
-#![feature(min_specialization)]
-
 use arrayvec::ArrayString;
 use minus_i::{Interactive, InteractiveRoot, Methods};
 

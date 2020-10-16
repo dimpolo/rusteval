@@ -1,5 +1,3 @@
-#![feature(min_specialization)]
-
 use core::fmt::Debug;
 use minus_i::{Interactive, InteractiveRoot};
 use std::rc::Rc;

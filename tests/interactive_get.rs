@@ -1,5 +1,3 @@
-#![feature(min_specialization)]
-
 use minus_i::{Fields, Interactive, Methods};
 
 #[derive(Interactive, Debug, Default)]
@@ -45,7 +43,10 @@ fn test_call_child_method() {
 
     let child = parent_struct.get_field_mut("child").unwrap();
 
-    child.eval_method_mut("try_ping", "", &mut |result| {
-        assert_eq!(format!("{:?}", result.unwrap()), "Ok(\"pong\")")
-    });
+    child
+        .try_as_methods_mut()
+        .unwrap()
+        .eval_method_mut("try_ping", "", &mut |result| {
+            assert_eq!(format!("{:?}", result.unwrap()), "Ok(\"pong\")")
+        });
 }

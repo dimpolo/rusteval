@@ -1,5 +1,3 @@
-#![feature(min_specialization)]
-
 use core::fmt::Debug;
 use minus_i::{Fields, Interactive};
 
@@ -36,34 +34,18 @@ struct DynRefMutStruct<'a> {
 fn test_primitive_field() {
     let test_struct = TestStruct::default();
 
-    assert_eq!(
-        format!(
-            "{:?}",
-            test_struct
-                .get_field("field1")
-                .unwrap()
-                .try_as_debug()
-                .unwrap()
-        ),
-        "0"
-    );
+    test_struct.eval_field("field1", &mut |field| {
+        assert_eq!(format!("{:?}", field.unwrap()), "0")
+    });
 }
 
 #[test]
 fn test_complex_field() {
     let test_struct = TestStruct::default();
 
-    assert_eq!(
-        format!(
-            "{:?}",
-            test_struct
-                .get_field("field2")
-                .unwrap()
-                .try_as_debug()
-                .unwrap()
-        ),
-        "Inner(false, None)"
-    );
+    test_struct.eval_field("field2", &mut |field| {
+        assert_eq!(format!("{:?}", field.unwrap()), "Inner(false, None)")
+    });
 }
 
 #[test]

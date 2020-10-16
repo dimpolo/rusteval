@@ -1,4 +1,3 @@
-#![feature(min_specialization)]
 #![feature(str_split_once)]
 
 use core::fmt::Debug;
@@ -175,4 +174,11 @@ fn test_mut_dyn_reference_field() {
     let mut child = TestStruct::default();
     let mut root = RefStruct { child: &mut child };
     assert_eq!(root.eval_to_string("child.a"), "false");
+}
+
+#[test]
+fn test_weird_access() {
+    // TODO name
+    let mut root = Root::default();
+    assert_eq!(root.eval_to_string("parent.child.a.b"), "something better");
 }

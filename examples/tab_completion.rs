@@ -1,5 +1,3 @@
-#![feature(min_specialization)]
-
 use rustyline::completion::Completer;
 use rustyline::Context;
 use rustyline::Editor;
@@ -73,7 +71,12 @@ impl Completer for RustyLine {
             let candidates = current_object
                 .get_all_field_names()
                 .iter()
-                .chain(current_object.get_all_method_names())
+                .chain(
+                    current_object
+                        .try_as_methods()
+                        .map(|methods| methods.get_all_method_names())
+                        .unwrap_or(&[]),
+                )
                 .filter(|candidate| candidate.starts_with(&line[start_len..pos]))
                 .map(|s| s.to_string())
                 .collect();
