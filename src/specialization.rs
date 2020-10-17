@@ -119,3 +119,5 @@ where
         Ok(self)
     }
 }
+
+// TODO add AsIndex and maybe AsDeref for custom smart pointers

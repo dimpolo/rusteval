@@ -111,6 +111,8 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
         }
     });
 
+    // TODO shorten impl when default impl would work as_well
+
     quote! {
         impl #impl_generics ::minus_i::Interactive for #struct_name #ty_generics #where_clause {
             fn get_field<#tick_a>(&#tick_a self, field_name: &#tick_a str) -> ::minus_i::Result<#tick_a, &dyn ::minus_i::Interactive>{

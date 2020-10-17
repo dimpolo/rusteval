@@ -8,10 +8,14 @@ use crate::{InteractiveError, Result};
 
 /// The main trait of this crate TODO
 #[auto_impl(&, &mut, Box, Rc, Arc)]
-// TODO add default impls for all methods. Shorten proc macro when possible
 pub trait Interactive: AsDebug + AsMethods {
     /// Looks for a field with the given name and on success return a shared reference to it.
-    fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive>;
+    fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive> {
+        Err(InteractiveError::FieldNotFound {
+            type_name: type_name::<Self>(),
+            field_name,
+        })
+    }
 
     /// Looks for a field with the given name and on success return a mutable reference to it.
     #[auto_impl(keep_default_for(&, Rc, Arc))]
@@ -29,12 +33,19 @@ pub trait Interactive: AsDebug + AsMethods {
     /// and passes it as a `Ok(&dyn Debug)` to the given closure.
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
-    fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>));
+    fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
+        f(Err(InteractiveError::FieldNotFound {
+            type_name: type_name::<Self>(),
+            field_name,
+        }))
+    }
 
     /// Returns all interactive field names of this type.
     ///
     /// Can be used to drive auto-completion in a CLI.
-    fn get_all_field_names(&self) -> &'static [&'static str];
+    fn get_all_field_names(&self) -> &'static [&'static str] {
+        &[]
+    }
 }
 
 /// A trait that allows to interactively evaluate a structs methods and pass their result to the given closure.
@@ -58,7 +69,20 @@ pub trait Methods {
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
     ///
     /// TODO explain difference
-    fn eval_method(&self, method_name: &str, args: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>));
+    fn eval_method(
+        &self,
+        method_name: &str,
+        args: &str,
+        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
+    ) {
+        {
+            let _ = args;
+            f(Err(InteractiveError::MethodNotFound {
+                type_name: type_name::<Self>(),
+                method_name,
+            }));
+        }
+    }
 
     /// Looks for a method with the given name,
     /// parses the args string into the expected arguments of the method,
@@ -83,5 +107,7 @@ pub trait Methods {
     /// Returns all interactive field names of this type.
     ///
     /// Can be used to drive auto-completion in a CLI.
-    fn get_all_method_names(&self) -> &'static [&'static str];
+    fn get_all_method_names(&self) -> &'static [&'static str] {
+        &[]
+    }
 }

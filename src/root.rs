@@ -8,6 +8,7 @@ enum AccessType<'a> {
     MethodAccess(&'a str, &'a str),
 }
 
+// TODO maybe make a struct out of this
 /// Docs and stuff TODO
 pub trait InteractiveRoot: Interactive + Sized {
     /// Evaluates the given expression and calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>`.
