@@ -21,8 +21,8 @@ name = "minimal"
 path = "examples/minimal.rs"
 
 [[example]]
-name = "tab_completion"
-path = "examples/tab_completion.rs"
+name = "autocomplete"
+path = "examples/autocomplete.rs"
 
 [[example]]
 name = "no_std"

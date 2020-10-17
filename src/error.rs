@@ -82,7 +82,7 @@ impl Display for InteractiveError<'_> {
             }
             InteractiveError::ArgParseError { error, .. } => write!(
                 f,
-                "Couldn't parse `{:?}` as method/function argument(s)",
+                "Couldn't parse method/function argument(s)\n{:?}",
                 error // TODO improve message
             ),
             InteractiveError::SyntaxError => write!(f, "Syntax Error"),
