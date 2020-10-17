@@ -126,9 +126,6 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
                 }
             }
 
-        }
-
-        impl #impl_generics ::minus_i::Fields for #struct_name #ty_generics #where_clause{
             fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>))
             {
                 match field_name {

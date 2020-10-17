@@ -7,14 +7,9 @@ use crate::specialization::{AsDebug, AsMethods};
 use crate::{InteractiveError, Result};
 
 /// The main trait of this crate TODO
-///
-/// # Note:
-/// It is currently not possible to check if a trait is implemented at runtime.
-/// This means that all members of an [`Interactive`] struct need to also implement [`Interactive`], which is why
-/// a default blanket implementation for all `T` is provided.
-///
 #[auto_impl(&, &mut, Box, Rc, Arc)]
-pub trait Interactive: AsDebug + AsMethods + Fields {
+// TODO add default impls for all methods. Shorten proc macro when possible
+pub trait Interactive: AsDebug + AsMethods {
     /// Looks for a field with the given name and on success return a shared reference to it.
     fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive>;
 
@@ -29,20 +24,7 @@ pub trait Interactive: AsDebug + AsMethods + Fields {
             field_name,
         })
     }
-}
 
-/// A trait that allows to interactively evaluate a field and pass its value to the given closure.
-///
-/// This trait gets implemented automatically when you derive [`Interactive`].
-///
-/// # Note:
-/// It is currently not possible to check if a trait is implemented at runtime.
-/// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
-/// a default blanket implementation for all `T` is provided.
-///
-/// [`Interactive`]: ./derive.Interactive.html
-#[auto_impl(&, &mut, Box, Rc, Arc)]
-pub trait Fields {
     /// Looks for a field with the given name,
     /// and passes it as a `Ok(&dyn Debug)` to the given closure.
     ///

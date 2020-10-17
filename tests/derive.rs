@@ -1,5 +1,5 @@
 use core::fmt::Debug;
-use minus_i::{Fields, Interactive};
+use minus_i::Interactive;
 
 #[derive(Default, Debug)]
 struct Inner(bool, Option<String>);

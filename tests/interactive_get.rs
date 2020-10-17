@@ -1,4 +1,4 @@
-use minus_i::{Fields, Interactive, Methods};
+use minus_i::{Interactive, Methods};
 
 #[derive(Interactive, Debug, Default)]
 struct TestStruct {

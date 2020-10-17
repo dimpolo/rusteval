@@ -65,7 +65,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use error::{ArgParseError, InteractiveError, Result};
-pub use interactive::{Fields, Interactive, Methods};
+pub use interactive::{Interactive, Methods};
 pub use minus_i_derive::{Interactive, InteractiveRoot, Methods, PartialDebug};
 pub use root::InteractiveRoot;
 
