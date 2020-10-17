@@ -1,6 +1,5 @@
 use proc_macro::TokenStream;
 
-use proc_macro2::Span;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::spanned::Spanned;
@@ -98,7 +97,7 @@ pub fn methods(input: TokenStream) -> TokenStream {
 pub fn function(input: TokenStream) -> TokenStream {
     let original_func = TokenStream2::from(input.clone());
 
-    let struct_name = &Ident::new(&format!("Function{}", hash(&input)), Span::call_site());
+    let struct_name = &Ident::new(&format!("Function{}", hash(&input)), original_func.span());
 
     let ast = parse_macro_input!(input as ImplItemMethod);
 

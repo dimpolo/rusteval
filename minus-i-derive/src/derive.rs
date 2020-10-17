@@ -1,6 +1,5 @@
 use proc_macro::TokenStream;
 
-use proc_macro2::Span;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
 use syn::spanned::Spanned;
@@ -195,7 +194,7 @@ fn get_unused_lifetime(ast: &ItemStruct) -> Lifetime {
         }
     }
 
-    Lifetime::new(&lifetime_name, Span::call_site())
+    Lifetime::new(&lifetime_name, ast.span())
 }
 
 fn get_name(field: &Field, field_index: usize) -> TokenStream2 {
