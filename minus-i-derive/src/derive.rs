@@ -34,7 +34,7 @@ pub fn derive_root(input: TokenStream) -> TokenStream {
             ) {
                 if let Some(function) = ::core::iter::Iterator::find(
                     &mut ::core::iter::IntoIterator::into_iter(
-                        minus_i::inventory::iter::<&dyn ::minus_i::Function>,
+                        ::minus_i::inventory::iter::<&dyn ::minus_i::Function>,
                     ),
                     |function| function.function_name() == function_name,
                 ) {
@@ -57,10 +57,12 @@ pub fn derive_root(input: TokenStream) -> TokenStream {
 
             fn get_all_method_names(&self) -> &'static [&'static str]{
                 ::lazy_static::lazy_static! {
-                    static ref NAMES: ::std::vec::Vec<&'static str> = ::minus_i::inventory::iter::<&dyn ::minus_i::Function>
-                    .into_iter()
-                    .map(|function| function.function_name())
-                    .collect();
+                    static ref NAMES: ::std::vec::Vec<&'static str> = ::core::iter::Iterator::collect(::core::iter::Iterator::map(
+                        ::core::iter::IntoIterator::into_iter(
+                            ::minus_i::inventory::iter::<&dyn ::minus_i::Function>,
+                        ),
+                        |function| function.function_name(),
+                    ));
                 }
                 &*NAMES
             }
