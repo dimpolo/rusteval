@@ -32,9 +32,12 @@ pub fn derive_root(input: TokenStream) -> TokenStream {
                 args: &str,
                 f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>),
             ) {
-                if let Some(function) = ::minus_i::inventory::iter::<&dyn ::minus_i::Function>.into_iter()
-                    .find(|function| function.function_name() == function_name)
-                {
+                if let Some(function) = ::core::iter::Iterator::find(
+                    &mut ::core::iter::IntoIterator::into_iter(
+                        minus_i::inventory::iter::<&dyn ::minus_i::Function>,
+                    ),
+                    |function| function.function_name() == function_name,
+                ) {
                     function.eval(args, f)
                 } else {
                     f(Err(::minus_i::InteractiveError::FunctionNotFound {
