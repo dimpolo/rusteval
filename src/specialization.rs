@@ -55,6 +55,14 @@ macro_rules! duck_type_mut {
     };
 }
 
+duck_type!(pub AsInteractive(try_as_interactive): Interactive | InteractiveNotImplemented);
+
+duck_type_mut!(pub AsInteractiveMut(try_as_interactive_mut): Interactive | InteractiveNotImplemented);
+duck_type!(pub AsMethods(try_as_methods): Methods | MethodsNotImplemented);
+
+duck_type_mut!(pub AsMethodsMut(try_as_methods_mut): Methods | MethodsNotImplemented);
+duck_type!(pub AsDebug(try_as_debug): Debug | DebugNotImplemented);
+
 macro_rules! deref_for_interactive {
     ($AsTrait:ident ($method:ident) : $Trait:path) => {
         impl $AsTrait for &dyn Interactive {
@@ -80,14 +88,6 @@ macro_rules! deref_for_interactive_mut {
         }
     };
 }
-
-duck_type!(pub AsInteractive(try_as_interactive): Interactive | InteractiveNotImplemented);
-duck_type_mut!(pub AsInteractiveMut(try_as_interactive_mut): Interactive | InteractiveNotImplemented);
-
-duck_type!(pub AsMethods(try_as_methods): Methods | MethodsNotImplemented);
-duck_type_mut!(pub AsMethodsMut(try_as_methods_mut): Methods | MethodsNotImplemented);
-
-duck_type!(pub AsDebug(try_as_debug): Debug | DebugNotImplemented);
 
 deref_for_interactive!(AsMethods(try_as_methods): Methods);
 deref_for_interactive_mut!(AsMethodsMut(try_as_methods_mut): Methods);
