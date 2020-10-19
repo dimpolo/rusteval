@@ -43,6 +43,7 @@ fn main() -> rustyline::Result<()> {
 
     loop {
         let input = rl.readline(">>> ")?;
+        rl.add_history_entry(&input);
         let root = &mut rl.helper_mut().unwrap().root;
         println!("{}", root.eval_to_string(&input));
     }

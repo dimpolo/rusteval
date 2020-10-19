@@ -101,7 +101,7 @@ deref_for_interactive!(AsDebug(try_as_debug): Debug);
 // deref_for_interactive!(AsIndex(try_as_index): Index<usize, Output = dyn AsInteractive>);
 // deref_for_interactive_mut!(AsIndexMut(try_as_index_mut): IndexMut<usize, Output = dyn AsInteractiveMut>);
 
+/// Used as a dummy value for types that don't implement Debug inside #[derive(PartialDebug)].
 #[allow(missing_copy_implementations)]
 #[derive(Debug)]
-/// Used as a dummy value for types that don't implement Debug inside #[derive(PartialDebug)].
 pub struct Unknown;
