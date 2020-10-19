@@ -1,6 +1,5 @@
 use core::fmt::Debug;
 
-use crate::specialization::AsMethods;
 use crate::{Interactive, InteractiveError, Result};
 
 enum AccessType<'a> {
@@ -50,7 +49,7 @@ pub trait InteractiveRoot: Interactive + Sized {
                         object.eval_field(field_name, &mut f)
                     }
                     Ok(AccessType::MethodAccess(method_name, args)) => {
-                        match AsMethods::try_as_methods(object) {
+                        match object.try_as_methods() {
                             Ok(obj) => obj.eval_method(method_name, args, &mut f),
                             Err(e) => f(Err(e)),
                         }
@@ -75,7 +74,7 @@ pub trait InteractiveRoot: Interactive + Sized {
                         object.eval_field(field_name, &mut f)
                     }
                     Ok(AccessType::MethodAccess(method_name, args)) => {
-                        match AsMethods::try_as_methods_mut(object) {
+                        match object.try_as_methods_mut() {
                             Ok(obj) => obj.eval_method_mut(method_name, args, &mut f),
                             Err(e) => f(Err(e)),
                         }

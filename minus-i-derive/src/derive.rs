@@ -105,7 +105,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
             let name = get_name(field, i);
 
             quote! {
-                stringify!(#name) => ::minus_i::specialization::AsInteractive::try_as_interactive_mut(&mut self.#name),
+                stringify!(#name) => ::minus_i::specialization::AsInteractiveMut::try_as_interactive_mut(&mut self.#name),
             }
         });
 

@@ -1,14 +1,17 @@
+#[cfg(not(feature = "std"))]
+use core as std;
+
 use core::any::type_name;
 use core::fmt::Debug;
 
 use auto_impl::auto_impl;
 
-use crate::specialization::{AsDebug, AsMethods};
+use crate::specialization::{AsDebug, AsMethods, AsMethodsMut};
 use crate::{InteractiveError, Result};
 
 /// The main trait of this crate TODO
 #[auto_impl(&, &mut, Box, Rc, Arc)]
-pub trait Interactive: AsDebug + AsMethods {
+pub trait Interactive: AsDebug + AsMethods + AsMethodsMut {
     /// Looks for a field with the given name and on success return a shared reference to it.
     fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive> {
         Err(InteractiveError::FieldNotFound {
