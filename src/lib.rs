@@ -227,9 +227,93 @@ pub use minus_i_derive::Methods;
 /// Implements [`Debug`] for a struct replacing all fields that do not implement `Debug` with a placeholder.
 ///
 /// [`Debug`]: core::fmt::Debug
+///
+/// ```
+/// # use minus_i::PartialDebug;
+///
+/// struct NoDebug;
+///
+/// #[derive(PartialDebug)]
+/// struct Struct {
+///     field: NoDebug,
+/// }
+/// ```
+///
+/// Expands to something like:
+/// ```
+/// # use std::fmt::Debug;
+/// # use core::fmt;
+/// # use minus_i::specialization::AsDebug;
+/// #
+/// # struct NoDebug;
+/// # struct Struct {
+/// #     field: NoDebug,
+/// # }
+/// #
+/// impl Debug for Struct {
+///     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+///         f.debug_struct("Struct")
+///             .field(
+///                 "field",
+///                 match &self.field.try_as_debug() {
+///                     Ok(field) => field,
+///                     Err(_) => &minus_i::specialization::Unknown,
+///                 },
+///             )
+///             .finish()
+///     }
+/// }
+///
+/// ```
 pub use minus_i_derive::PartialDebug;
 
 /// Gives interactive access to a function.
+///
+/// This makes use of the [inventory](https://docs.rs/inventory/*/inventory/) crate
+/// to submit a wrapper struct to a global registry.
+///
+/// You can gain access to the wrapped function by using `#[derive(InteractiveRoot)]`. ([link])
+///
+/// Since the inventory crate requires std this macro is only available with default features on.
+///
+/// [link]: macro@crate::InteractiveRoot
+///
+/// ```
+/// # use minus_i::Function;
+/// #
+/// #[Function]
+/// fn add_one(a: u32) -> u32 {
+///     a + 1
+/// }
+/// ```
+/// Expands to something like:
+/// ```
+/// # use core::fmt::Debug;
+/// # use minus_i::*;
+/// # use minus_i::arg_parse::*;
+/// # use minus_i::inventory;
+///
+/// # fn add_one(a: u32) -> u32 {
+/// #     a + 1
+/// # }
+/// #
+/// struct FunctionXYZ;
+/// impl Function for FunctionXYZ {
+///     fn eval(&self, args: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
+///         match parse_1_arg(self.function_name(), args) {
+///             Ok((arg0,)) => f(Ok(&add_one(arg0))),
+///             Err(e) => f(Err(e)),
+///         }
+///     }
+///     fn function_name(&self) -> &'static str {
+///         "add_one"
+///     }
+/// }
+/// inventory::submit! {
+///     &FunctionXYZ as &dyn ::minus_i::Function
+/// }
+///
+/// ```
 #[cfg(feature = "std")]
 pub use minus_i_derive::Function;
 

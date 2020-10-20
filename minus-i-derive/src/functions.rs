@@ -111,13 +111,12 @@ pub fn function(input: TokenStream) -> TokenStream {
         struct #struct_name;
 
         impl ::minus_i::Function for #struct_name{
-            fn function_name(&self) -> &'static str{
-                stringify!(#function_name)
-            }
-
             fn eval(&self, args: &str, f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>)) {
                 let method_name = self.function_name();
                 #method_call
+            }
+            fn function_name(&self) -> &'static str{
+                stringify!(#function_name)
             }
         }
 

@@ -8,17 +8,17 @@ use crate::Result;
 ///
 /// [`Function`]: macro@crate::Function
 pub trait Function {
-    /// Returns the functions name.
-    ///
-    /// Can be used to drive auto-completion in a CLI.
-    fn function_name(&self) -> &'static str;
-
     /// Parses the args string into the expected arguments of the method,
     /// executes the method and
     /// passes the result as a `Ok(&dyn Debug)` to the given closure.
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
     fn eval(&self, args: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>));
+
+    /// Returns the functions name.
+    ///
+    /// Can be used to drive auto-completion in a CLI.
+    fn function_name(&self) -> &'static str;
 }
 
 // Implement inventory::Collect for ´&dyn Function´
