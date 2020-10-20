@@ -41,61 +41,7 @@ pub trait InteractiveRoot: Interactive + Sized {
 
     /// Evaluates the given expression and calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>`.
     ///
-    /// # Example
-    ///
-    /// ```
-    /// # use minus_i::{Interactive, Methods, InteractiveRoot};
-    /// # use core::fmt::Debug;
-    /// #
-    /// #[derive(Interactive, Debug, Default)]
-    /// struct Child {
-    ///     field1: bool
-    /// }
-    /// #[Methods]
-    /// impl Child {
-    ///     fn toggle(&mut self){
-    ///         self.field1 = !self.field1;
-    ///     }
-    /// }
-    ///
-    /// #[derive(InteractiveRoot, Debug, Default)]
-    /// struct Root {
-    ///     child: Child,
-    /// }
-    ///
-    /// let mut root = Root::default();
-    /// root.try_eval_mut("child.toggle()", |result| assert!(result.is_ok()));
-    /// root.try_eval_mut("child.field1", |result| assert_eq!(format!("{:?}", result.unwrap()), "true"));
-    /// root.try_eval("child.field2", |result| assert_eq!(format!("{}", result.unwrap_err()), "No field `field2` found for type `Child`"));
-    /// ```
-    fn try_eval_mut<F>(&mut self, expression: &str, mut f: F)
-    where
-        F: FnMut(Result<'_, &dyn Debug>),
-    {
-        match self.get_queried_object_mut(expression) {
-            Ok((object, rest_expression)) => {
-                let access_type = parse_access_type(rest_expression);
-                match access_type {
-                    Ok(AccessType::FieldAccess(field_name)) => {
-                        object.eval_field(field_name, &mut f)
-                    }
-                    Ok(AccessType::MethodAccess(method_name, args)) => {
-                        match object.try_as_methods_mut() {
-                            Ok(obj) => obj.eval_method_mut(method_name, args, &mut f),
-                            Err(e) => f(Err(e)),
-                        }
-                    }
-                    Err(e) => f(Err(e)),
-                }
-            }
-            Err(InteractiveError::FieldNotFound { .. }) => self.try_eval(expression, f), // field might be behind shared reference
-            Err(e) => f(Err(e)),
-        }
-    }
-
-    /// Evaluates the given expression and calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>`.
-    ///
-    /// This method does not have access to methods that take `&mut` as their receiver,
+    /// This method does not have access to methods that take `&mut self` as their receiver,
     /// use [`try_eval_mut`] instead.
     ///
     /// [`try_eval_mut`]: #method.try_eval_mut
@@ -150,6 +96,60 @@ pub trait InteractiveRoot: Interactive + Sized {
                     Err(e) => f(Err(e)),
                 }
             }
+            Err(e) => f(Err(e)),
+        }
+    }
+
+    /// Evaluates the given expression and calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use minus_i::{Interactive, Methods, InteractiveRoot};
+    /// # use core::fmt::Debug;
+    /// #
+    /// #[derive(Interactive, Debug, Default)]
+    /// struct Child {
+    ///     field1: bool
+    /// }
+    /// #[Methods]
+    /// impl Child {
+    ///     fn toggle(&mut self){
+    ///         self.field1 = !self.field1;
+    ///     }
+    /// }
+    ///
+    /// #[derive(InteractiveRoot, Debug, Default)]
+    /// struct Root {
+    ///     child: Child,
+    /// }
+    ///
+    /// let mut root = Root::default();
+    /// root.try_eval_mut("child.toggle()", |result| assert!(result.is_ok()));
+    /// root.try_eval_mut("child.field1", |result| assert_eq!(format!("{:?}", result.unwrap()), "true"));
+    /// root.try_eval("child.field2", |result| assert_eq!(format!("{}", result.unwrap_err()), "No field `field2` found for type `Child`"));
+    /// ```
+    fn try_eval_mut<F>(&mut self, expression: &str, mut f: F)
+    where
+        F: FnMut(Result<'_, &dyn Debug>),
+    {
+        match self.get_queried_object_mut(expression) {
+            Ok((object, rest_expression)) => {
+                let access_type = parse_access_type(rest_expression);
+                match access_type {
+                    Ok(AccessType::FieldAccess(field_name)) => {
+                        object.eval_field(field_name, &mut f)
+                    }
+                    Ok(AccessType::MethodAccess(method_name, args)) => {
+                        match object.try_as_methods_mut() {
+                            Ok(obj) => obj.eval_method_mut(method_name, args, &mut f),
+                            Err(e) => f(Err(e)),
+                        }
+                    }
+                    Err(e) => f(Err(e)),
+                }
+            }
+            Err(InteractiveError::FieldNotFound { .. }) => self.try_eval(expression, f), // field might be behind shared reference
             Err(e) => f(Err(e)),
         }
     }

@@ -1,6 +1,3 @@
-#[cfg(not(feature = "std"))]
-use core as std;
-
 use core::any::type_name;
 use core::fmt::Debug;
 
@@ -55,11 +52,6 @@ pub trait Interactive: AsDebug + AsMethods + AsMethodsMut {
 ///
 /// This trait gets implemented automatically when you use the [`Methods`] attribute.
 ///
-/// # Note:
-/// It is currently not possible to check if a trait is implemented at runtime.
-/// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
-/// a default blanket implementation for all `T` is provided.
-///
 /// [`Interactive`]: macro@crate::Interactive
 /// [`Methods`]: macro@crate::Methods
 #[auto_impl(&, &mut, Box, Rc, Arc)]
@@ -71,7 +63,10 @@ pub trait Methods {
     ///
     /// On error the an `Err(InteractiveError)` is passed to the closure instead.
     ///
-    /// TODO explain difference
+    /// This method does not have access to methods that take `&mut self` as their receiver,
+    /// use [`eval_method_mut`] instead.
+    ///
+    /// [`eval_method_mut`]: #method.eval_method_mut
     fn eval_method(
         &self,
         method_name: &str,
@@ -107,7 +102,7 @@ pub trait Methods {
         }));
     }
 
-    /// Returns all interactive field names of this type.
+    /// Returns all interactive method names of this type.
     ///
     /// Can be used to drive auto-completion in a CLI.
     fn get_all_method_names(&self) -> &'static [&'static str] {
