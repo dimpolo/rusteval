@@ -64,7 +64,7 @@
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
 
-/// Derive this on a struct to make it an interactive access point to your application.
+/// Derive this on a struct to make it an interactive access point for your application.
 ///
 /// Same as `#[derive(Interactive)]` but with two additional impls:
 /// * [`trait@InteractiveRoot`] with its default methods
