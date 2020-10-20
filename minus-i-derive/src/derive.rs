@@ -120,13 +120,13 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
 
     quote! {
         impl #impl_generics ::minus_i::Interactive for #struct_name #ty_generics #where_clause {
-            fn get_field<#tick_a>(&#tick_a self, field_name: &#tick_a str) -> ::minus_i::Result<#tick_a, &dyn ::minus_i::Interactive>{
+            fn get_field<#tick_a>(&#tick_a self, field_name: &#tick_a str) -> ::minus_i::Result<'_, &dyn ::minus_i::Interactive>{
                 match field_name {
                     #(#get_field_matches)*
                     _ => Err(::minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
                 }
             }
-            fn get_field_mut<#tick_a>(&#tick_a mut self, field_name: &#tick_a str) -> ::minus_i::Result<#tick_a, &mut dyn ::minus_i::Interactive>{
+            fn get_field_mut<#tick_a>(&#tick_a mut self, field_name: &#tick_a str) -> ::minus_i::Result<'_, &mut dyn ::minus_i::Interactive>{
                 match field_name {
                     #(#get_field_mut_matches)*
                     _ => Err(::minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),

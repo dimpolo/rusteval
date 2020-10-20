@@ -102,20 +102,77 @@
 /// ```
 pub use minus_i_derive::InteractiveRoot;
 
+/// Gives interactive access to a structs fields.
+/// ```
+/// # use minus_i::Interactive;
+/// #
+/// #[derive(Interactive)]
+/// struct Struct {
+///     field1: u32,
+///     field2: u32,
+/// }
+/// ```
+/// Expands to something like:
+/// ```
+/// # use minus_i::*;
+/// # use minus_i::InteractiveError::*;
+/// # use minus_i::specialization::*;
+/// # use core::fmt::Debug;
+/// #
+/// # struct Struct {
+/// #     field1: u32,
+/// #     field2: u32,
+/// # }
+/// impl Interactive for Struct {
+///     fn get_field<'a>(&'a self, field_name: &'a str) -> Result<'_, &dyn Interactive> {
+///         match field_name {
+///             "field1" => self.field1.try_as_interactive(),
+///             "field2" => self.field2.try_as_interactive(),
+///             _ => Err(FieldNotFound {
+///                 type_name: "Struct",
+///                 field_name,
+///             }),
+///         }
+///     }
+///     fn get_field_mut<'a>(&'a mut self, field_name: &'a str) -> Result<'_, &mut dyn Interactive> {
+///         /* ... */
+///         # unimplemented!()
+///     }
+///     fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
+///         match field_name {
+///             "field1" => f(self.field1.try_as_debug()),
+///             /* ... */
+///             # _ => unimplemented!(),
+///         }
+///     }
+///     fn get_all_field_names(&self) -> &'static [&'static str] {
+///         &["field1", "field2"]
+///     }
+/// }
+/// ```
+pub use minus_i_derive::Interactive;
+
+/// Gives interactive access to a structs methods.
+pub use minus_i_derive::Methods;
+
+/// Implements [`Debug`] for a struct replacing all fields that do not implement `Debug` with a placeholder.
+///
+/// [`Debug`]: core::fmt::Debug
+pub use minus_i_derive::PartialDebug;
+
+/// Gives interactive access to a function.
+#[cfg(feature = "std")]
+pub use minus_i_derive::Function;
+
 pub use error::{ArgParseError, InteractiveError, Result};
+#[cfg(feature = "std")]
+pub use function::Function;
 pub use interactive::{Interactive, Methods};
-pub use minus_i_derive::{Interactive, Methods, PartialDebug};
 pub use root::InteractiveRoot;
 
 #[cfg(feature = "std")]
 #[doc(hidden)]
 pub use inventory;
-
-#[cfg(feature = "std")]
-pub use function::Function;
-
-#[cfg(feature = "std")]
-pub use minus_i_derive::Function;
 
 pub mod arg_parse;
 mod error;
