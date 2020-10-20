@@ -115,8 +115,8 @@ pub use minus_i_derive::InteractiveRoot;
 /// Expands to something like:
 /// ```
 /// # use minus_i::*;
-/// # use minus_i::InteractiveError::*;
 /// # use minus_i::specialization::*;
+/// # use minus_i::InteractiveError::*;
 /// # use core::fmt::Debug;
 /// #
 /// # struct Struct {
@@ -153,6 +153,75 @@ pub use minus_i_derive::InteractiveRoot;
 pub use minus_i_derive::Interactive;
 
 /// Gives interactive access to a structs methods.
+///
+/// ```
+/// # use minus_i::Methods;
+/// #
+/// # struct Struct;
+/// #
+/// #[Methods]
+/// impl Struct {
+///     fn ping(&self) -> &str {
+///         "pong"
+///     }
+///     fn frob(&mut self, arg: u32){
+///         unimplemented!()
+///     }
+/// }
+/// ```
+/// Expands to something like:
+/// (notice how `frob` is only available inside `eval_method_mut`)
+/// ```
+/// # use core::fmt::Debug;
+/// # use minus_i::*;
+/// # use minus_i::arg_parse::*;
+/// # use minus_i::InteractiveError::*;
+/// #
+/// # struct Struct;
+/// #
+/// # impl Struct {
+/// #     fn ping(&self) -> &str {
+/// #         "pong"
+/// #     }
+/// #     fn frob(&mut self, arg: u32){
+/// #         unimplemented!()
+/// #     }
+/// # }
+/// #
+/// impl Methods for Struct {
+///     fn eval_method(&self, method_name: &str, args: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
+///         match method_name {
+///             "ping" => match parse_0_args(method_name, args) {
+///                 Ok(()) => f(Ok(&self.ping())),
+///                 Err(e) => f(Err(e)),
+///             },
+///             _ => f(Err(MethodNotFound {
+///                 type_name: "Struct",
+///                 method_name,
+///             })),
+///         }
+///     }
+///     fn eval_method_mut(&mut self, method_name: &str, args: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
+///         match method_name {
+///             "ping" => match parse_0_args(method_name, args) {
+///                 Ok(()) => f(Ok(&self.ping())),
+///                 Err(e) => f(Err(e)),
+///             },
+///             "frob" => match parse_1_arg(method_name, args) {
+///                 Ok((arg0,)) => f(Ok(&self.frob(arg0))),
+///                 Err(e) => f(Err(e)),
+///             },
+///             _ => f(Err(MethodNotFound {
+///                 type_name: "Struct",
+///                 method_name,
+///             })),
+///         }
+///     }
+///     fn get_all_method_names(&self) -> &'static [&'static str] {
+///         &["ping", "frob"]
+///     }
+/// }
+/// ```
 pub use minus_i_derive::Methods;
 
 /// Implements [`Debug`] for a struct replacing all fields that do not implement `Debug` with a placeholder.
