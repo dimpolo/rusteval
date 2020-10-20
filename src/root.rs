@@ -7,10 +7,40 @@ enum AccessType<'a> {
     MethodAccess(&'a str, &'a str),
 }
 
-// TODO maybe make a struct out of this
 /// Docs and stuff TODO
 pub trait InteractiveRoot: Interactive + Sized {
+    #[cfg(feature = "std")]
+    /// Evaluates the expression and returns the result as a String.
+    /// Not available in no_std contexts.
+    fn eval_to_string(&mut self, expression: &str) -> String {
+        let mut s = String::new();
+        self.try_eval_mut(expression, |result| {
+            s = match result {
+                Ok(r) => format!("{:?}", r),
+                Err(e) => format!("{}", e),
+            }
+        });
+        s
+    }
+
+    /// Evaluates the expression and writes the result into the provided buffer.
+    /// Useful in no_std contexts.
+    fn eval_and_write<T>(&mut self, expression: &str, buf: &mut T) -> core::fmt::Result
+    where
+        T: core::fmt::Write,
+    {
+        let mut r = Ok(());
+        self.try_eval_mut(expression, |result| {
+            r = match result {
+                Ok(r) => write!(buf, "{:?}", r),
+                Err(e) => write!(buf, "{}", e),
+            }
+        });
+        r
+    }
+
     /// Evaluates the given expression and calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>`.
+    ///
     /// # Example
     ///
     /// ```
@@ -23,8 +53,8 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// }
     /// #[Methods]
     /// impl Child {
-    ///     fn add(&self, a: u8, b: u8) -> u8 {
-    ///         a + b
+    ///     fn toggle(&mut self){
+    ///         self.field1 = !self.field1;
     ///     }
     /// }
     ///
@@ -34,34 +64,10 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// }
     ///
     /// let mut root = Root::default();
-    /// root.try_eval("child.add(1, 2)", |result| assert_eq!(format!("{:?}", result), "Ok(3)"));
-    /// root.try_eval("child.field1", |result| assert_eq!(format!("{:?}", result), "Ok(false)"));
+    /// root.try_eval_mut("child.toggle()", |result| assert!(result.is_ok()));
+    /// root.try_eval_mut("child.field1", |result| assert_eq!(format!("{:?}", result.unwrap()), "true"));
+    /// root.try_eval("child.field2", |result| assert_eq!(format!("{}", result.unwrap_err()), "No field `field2` found for type `Child`"));
     /// ```
-    fn try_eval<F>(&self, expression: &str, mut f: F)
-    where
-        F: FnMut(Result<'_, &dyn Debug>),
-    {
-        match self.get_queried_object(expression) {
-            Ok((object, rest_expression)) => {
-                let access_type = parse_access_type(rest_expression);
-                match access_type {
-                    Ok(AccessType::FieldAccess(field_name)) => {
-                        object.eval_field(field_name, &mut f)
-                    }
-                    Ok(AccessType::MethodAccess(method_name, args)) => {
-                        match object.try_as_methods() {
-                            Ok(obj) => obj.eval_method(method_name, args, &mut f),
-                            Err(e) => f(Err(e)),
-                        }
-                    }
-                    Err(e) => f(Err(e)),
-                }
-            }
-            Err(e) => f(Err(e)),
-        }
-    }
-
-    /// Docs and Stuff TODO
     fn try_eval_mut<F>(&mut self, expression: &str, mut f: F)
     where
         F: FnMut(Result<'_, &dyn Debug>),
@@ -87,8 +93,71 @@ pub trait InteractiveRoot: Interactive + Sized {
         }
     }
 
+    /// Evaluates the given expression and calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>`.
+    ///
+    /// This method does not have access to methods that take `&mut` as their receiver,
+    /// use [`try_eval_mut`] instead.
+    ///
+    /// [`try_eval_mut`]: #method.try_eval_mut
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use minus_i::{Interactive, Methods, InteractiveRoot};
+    /// # use core::fmt::Debug;
+    /// #
+    /// #[derive(Interactive, Debug, Default)]
+    /// struct Child {
+    ///     field1: bool
+    /// }
+    /// #[Methods]
+    /// impl Child {
+    ///     fn add(&self, a: u8, b: u8) -> u8 {
+    ///         a + b
+    ///     }
+    ///     fn toggle(&mut self){
+    ///         self.field1 = !self.field1;
+    ///     }
+    /// }
+    ///
+    /// #[derive(InteractiveRoot, Debug, Default)]
+    /// struct Root {
+    ///     child: Child,
+    /// }
+    ///
+    /// let mut root = Root::default();
+    /// root.try_eval("child.add(1, 2)", |result| assert_eq!(format!("{:?}", result.unwrap()), "3"));
+    /// root.try_eval("child.field1", |result| assert_eq!(format!("{:?}", result.unwrap()), "false"));
+    /// root.try_eval("child.toggle()", |result| assert_eq!(format!("{}", result.unwrap_err()), "No method named `toggle` found for type `Child`"));
+    /// ```
+    fn try_eval<F>(&self, expression: &str, mut f: F)
+    where
+        F: FnMut(Result<'_, &dyn Debug>),
+    {
+        match self.get_queried_object(expression) {
+            Ok((object, rest_expression)) => {
+                let access_type = parse_access_type(rest_expression);
+                match access_type {
+                    Ok(AccessType::FieldAccess(field_name)) => {
+                        object.eval_field(field_name, &mut f)
+                    }
+                    Ok(AccessType::MethodAccess(method_name, args)) => {
+                        match object.try_as_methods() {
+                            Ok(obj) => obj.eval_method(method_name, args, &mut f),
+                            Err(e) => f(Err(e)),
+                        }
+                    }
+                    Err(e) => f(Err(e)),
+                }
+            }
+            Err(e) => f(Err(e)),
+        }
+    }
+
     /// Splits the given expression into an object path and a rest expression.
+    ///
     /// The object path is the part of the given expression before the last `.`
+    ///
     /// Then recursively looks for an object matching the given object path
     /// and if successful returns a shared reference to it together with the rest expression.
 
@@ -134,7 +203,7 @@ pub trait InteractiveRoot: Interactive + Sized {
 
     /// Same as [`get_queried_object`] but returning a mutable reference.
     ///
-    /// [`get_queried_object`]: ./trait.Root.html#method.get_queried_object
+    /// [`get_queried_object`]: #method.get_queried_object
     fn get_queried_object_mut<'a>(
         &'a mut self,
         expression: &'a str,
@@ -152,36 +221,6 @@ pub trait InteractiveRoot: Interactive + Sized {
             current = current.get_field_mut(field_name.trim())?
         }
         Ok((current, rest_expression))
-    }
-
-    /// Evaluates the expression and writes the result into the provided buffer.
-    /// Useful in no_std contexts.
-    fn eval_and_write<T>(&mut self, expression: &str, buf: &mut T) -> core::fmt::Result
-    where
-        T: core::fmt::Write,
-    {
-        let mut r = Ok(());
-        self.try_eval_mut(expression, |result| {
-            r = match result {
-                Ok(r) => write!(buf, "{:?}", r),
-                Err(e) => write!(buf, "{}", e),
-            }
-        });
-        r
-    }
-
-    #[cfg(feature = "std")]
-    /// Evaluates the expression and returns the result as a String.
-    /// Not available in no_std contexts.
-    fn eval_to_string(&mut self, expression: &str) -> String {
-        let mut s = String::new();
-        self.try_eval_mut(expression, |result| {
-            s = match result {
-                Ok(r) => format!("{:?}", r),
-                Err(e) => format!("{}", e),
-            }
-        });
-        s
     }
 }
 

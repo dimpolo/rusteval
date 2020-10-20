@@ -170,7 +170,8 @@ impl ArgParse for f64 {
 #[cfg(feature = "std")]
 impl ArgParse for char {
     fn arg_parse(s: &str) -> Result<Self, ArgParseError> {
-        let char_candidate = snailquote::unescape(s).map_err(|_| ArgParseError::Stuff)?;
+        let char_candidate =
+            snailquote::unescape(s).map_err(|e| ArgParseError::UnescapeError(format!("{}", e)))?;
         char_candidate
             .parse()
             .map_err(ArgParseError::ParseCharError)
@@ -180,7 +181,7 @@ impl ArgParse for char {
 #[cfg(feature = "std")]
 impl ArgParse for String {
     fn arg_parse(s: &str) -> Result<Self, ArgParseError> {
-        snailquote::unescape(s).map_err(|_| ArgParseError::Stuff)
+        snailquote::unescape(s).map_err(|e| ArgParseError::UnescapeError(format!("{}", e)))
     }
 }
 

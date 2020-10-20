@@ -64,9 +64,47 @@
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+/// Derive this on a struct to make it an interactive access point to your application.
+///
+/// Same as `#[derive(Interactive)]` but with two additional impls:
+/// * [`trait@InteractiveRoot`] with its default methods
+/// * [`trait@Methods`] as a way to access free functions marked with the attribute [`macro@Function`] (only available with default features on).
+///
+///
+/// ```
+/// use minus_i::{Interactive, InteractiveRoot, Methods, Function};
+///
+/// #[derive(Interactive)]
+/// struct SomethingInteractive;
+///
+/// #[Methods]
+/// impl SomethingInteractive{
+///     fn ping(&self) -> &str{
+///         "pong"
+///     }
+/// }
+///
+/// #[Function]
+/// fn add_one(a: u32) -> u32 {
+///     a + 1
+/// }
+///
+/// let something = SomethingInteractive;
+///
+/// #[derive(InteractiveRoot)]
+/// struct Root {
+///     field: SomethingInteractive,
+/// }
+///
+/// let mut root = Root { field: something };
+/// assert_eq!(root.eval_to_string("field.ping()"), "\"pong\"");
+/// assert_eq!(root.eval_to_string("add_one(42)"), "43");
+/// ```
+pub use minus_i_derive::InteractiveRoot;
+
 pub use error::{ArgParseError, InteractiveError, Result};
 pub use interactive::{Interactive, Methods};
-pub use minus_i_derive::{Interactive, InteractiveRoot, Methods, PartialDebug};
+pub use minus_i_derive::{Interactive, Methods, PartialDebug};
 pub use root::InteractiveRoot;
 
 #[cfg(feature = "std")]

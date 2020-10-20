@@ -97,8 +97,6 @@ impl Display for InteractiveError<'_> {
 /// It is used inside the [`InteractiveError::ArgParseError`] variant.
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub enum ArgParseError {
-    /// TODO Docs and Stuff
-    Stuff,
     #[allow(missing_docs)]
     ParseIntError(core::num::ParseIntError),
     #[allow(missing_docs)]
@@ -107,6 +105,11 @@ pub enum ArgParseError {
     ParseFloatError(core::num::ParseFloatError),
     #[allow(missing_docs)]
     ParseBoolError(core::str::ParseBoolError),
+
+    #[cfg(feature = "std")]
+    /// `snailquote` error as string.
+    /// Produced when parsing string-like types.
+    UnescapeError(std::string::String),
 }
 
 impl core_error::Error for InteractiveError<'_> {}

@@ -6,7 +6,7 @@ use crate::Result;
 ///
 /// This trait gets implemented automatically when you use the [`Function`] attribute.
 ///
-/// [`Function`]: ./attr.Function.html
+/// [`Function`]: macro@crate::Function
 pub trait Function {
     /// Returns the functions name.
     ///

@@ -5,6 +5,8 @@ use core::fmt::Debug;
 
 use crate::{Interactive, InteractiveError, Methods, Result};
 
+/// Use specialization to retrieve a trait object reference
+/// from types that implement the trait or an error if it doesn't.
 macro_rules! duck_type {
     ($vis:vis $AsTrait:ident ($method:ident) : $Trait:path | $Error:ident) => {
         $vis trait $AsTrait {
@@ -30,6 +32,8 @@ macro_rules! duck_type {
     };
 }
 
+/// Use specialization to retrieve a mutable trait object reference
+/// from types that implement the trait or an error if it doesn't.
 macro_rules! duck_type_mut {
     ($vis:vis $AsTrait:ident ($method:ident) : $Trait:path | $Error:ident) => {
         $vis trait $AsTrait {
@@ -63,6 +67,8 @@ duck_type!(pub AsMethods(try_as_methods): Methods | MethodsNotImplemented);
 duck_type_mut!(pub AsMethodsMut(try_as_methods_mut): Methods | MethodsNotImplemented);
 duck_type!(pub AsDebug(try_as_debug): Debug | DebugNotImplemented);
 
+/// Add the appropriate $AsTrait impl for &dyn Interactive
+/// Prevents $AsTrait from using &(&dyn Interactive) or &(&mut dyn Interactive) as self
 macro_rules! deref_for_interactive {
     ($AsTrait:ident ($method:ident) : $Trait:path) => {
         impl $AsTrait for &dyn Interactive {
@@ -79,6 +85,8 @@ macro_rules! deref_for_interactive {
     };
 }
 
+/// Add the appropriate trait impl for &mut dyn Interactive
+/// Prevents $AsTrait from using &mut (&mut dyn Interactive) as self
 macro_rules! deref_for_interactive_mut {
     ($AsTrait:ident ($method:ident) : $Trait:path) => {
         impl $AsTrait for &mut dyn Interactive {

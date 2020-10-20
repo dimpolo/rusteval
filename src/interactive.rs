@@ -60,8 +60,8 @@ pub trait Interactive: AsDebug + AsMethods + AsMethodsMut {
 /// This means that all members of an [`Interactive`] struct need to implement this trait, which is why
 /// a default blanket implementation for all `T` is provided.
 ///
-/// [`Interactive`]: ./derive.Interactive.html
-/// [`Methods`]: ./attr.Methods.html
+/// [`Interactive`]: macro@crate::Interactive
+/// [`Methods`]: macro@crate::Methods
 #[auto_impl(&, &mut, Box, Rc, Arc)]
 pub trait Methods {
     /// Looks for a method with the given name,
