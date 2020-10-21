@@ -1,4 +1,4 @@
-#![doc(hidden)]
+#![allow(missing_docs)]
 
 use core::any::type_name;
 use core::fmt::Debug;

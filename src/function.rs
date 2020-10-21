@@ -2,6 +2,7 @@ use core::fmt::Debug;
 
 use crate::Result;
 
+// TODO no_std 
 /// A trait that allows to interactively evaluate a function and pass its result to the given closure.
 ///
 /// This trait gets implemented automatically when you use the [`Function`] attribute.

@@ -105,6 +105,7 @@
 //! See the macro's documentation for more details.
 //!
 //! # Current limitations:
+//! * Method arguments that pass by reference will be added soon
 //! * Methods and functions can only be made interactive if their arguments implement [`FromStr`](core::str::FromStr)
 //! * Enums are not supported
 
@@ -325,6 +326,8 @@ pub use minus_i_derive::Methods;
 pub use minus_i_derive::PartialDebug;
 
 /// Gives interactive access to a function.
+///
+/// Can be used in different modules.
 ///
 /// This makes use of the [inventory](https://docs.rs/inventory/*/inventory/) crate
 /// to submit a wrapper struct to a global registry.

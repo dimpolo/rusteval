@@ -5,6 +5,7 @@ use quote::quote;
 use syn::spanned::Spanned;
 use syn::*;
 
+// TODO document this
 static SUPPORTED_FUNC_ARGS: &[&str] = &[
     "bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128", "isize", "u8", "u16", "u32",
     "u64", "u128", "usize", "String",

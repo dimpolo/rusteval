@@ -6,7 +6,6 @@ pub trait ArgParse: Sized {
     fn arg_parse(s: &str) -> Result<Self, ArgParseError>;
 }
 
-#[doc(hidden)]
 pub fn parse_arg<'a, T: ArgParse>(
     method_name: &'a str,
     args_iterator: &mut impl Iterator<Item = &'a str>,
@@ -18,7 +17,6 @@ pub fn parse_arg<'a, T: ArgParse>(
     })
 }
 
-#[doc(hidden)]
 pub fn parse_0_args<'a>(method_name: &'a str, args: &'a str) -> crate::Result<'a, ()> {
     let args_count = args.split_terminator(',').count();
 
@@ -32,7 +30,6 @@ pub fn parse_0_args<'a>(method_name: &'a str, args: &'a str) -> crate::Result<'a
     Ok(())
 }
 
-#[doc(hidden)]
 pub fn parse_1_arg<'a, T0: ArgParse>(
     method_name: &'a str,
     args: &'a str,
@@ -51,7 +48,6 @@ pub fn parse_1_arg<'a, T0: ArgParse>(
     Ok((arg0,))
 }
 
-#[doc(hidden)]
 pub fn parse_2_args<'a, T0: ArgParse, T1: ArgParse>(
     method_name: &'a str,
     args: &'a str,
@@ -71,7 +67,6 @@ pub fn parse_2_args<'a, T0: ArgParse, T1: ArgParse>(
     Ok((arg0, arg1))
 }
 
-#[doc(hidden)]
 pub fn parse_3_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse>(
     method_name: &'a str,
     args: &'a str,
@@ -92,7 +87,6 @@ pub fn parse_3_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse>(
     Ok((arg0, arg1, arg2))
 }
 
-#[doc(hidden)]
 pub fn parse_4_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse, T3: ArgParse>(
     method_name: &'a str,
     args: &'a str,
@@ -114,7 +108,6 @@ pub fn parse_4_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse, T3: ArgParse>(
     Ok((arg0, arg1, arg2, arg3))
 }
 
-#[doc(hidden)]
 pub fn parse_5_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse, T3: ArgParse, T4: ArgParse>(
     method_name: &'a str,
     args: &'a str,
