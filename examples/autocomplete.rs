@@ -69,15 +69,15 @@ impl Completer for RustyLine {
         if let Ok((current_object, rest_line)) = self.root.get_queried_object(line) {
             let start_len = line.len() - rest_line.len();
 
-            let candidates = current_object
-                .get_all_field_names()
+            let field_names = current_object.get_all_field_names();
+            let method_names = current_object
+                .try_as_methods()
+                .map(|methods| methods.get_all_method_names())
+                .unwrap_or(&[]);
+
+            let candidates = field_names
                 .iter()
-                .chain(
-                    current_object
-                        .try_as_methods()
-                        .map(|methods| methods.get_all_method_names())
-                        .unwrap_or(&[]),
-                )
+                .chain(method_names)
                 .filter(|candidate| candidate.starts_with(&line[start_len..pos]))
                 .map(|s| s.to_string())
                 .collect();

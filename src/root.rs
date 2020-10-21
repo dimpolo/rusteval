@@ -156,10 +156,13 @@ pub trait InteractiveRoot: Interactive + Sized {
 
     /// Splits the given expression into an object path and a rest expression.
     ///
-    /// The object path is the part of the given expression before the last `.`
-    ///
     /// Then recursively looks for an object matching the given object path
     /// and if successful returns a shared reference to it together with the rest expression.
+    ///
+    /// The object path is the part of the given expression before the last `.`
+    ///
+    /// E.g. `"path.to.obj.foo"` will split into the object path `"path.to.obj"` and the rest expression `"foo"`.
+    ///
 
     /// # Example
     ///

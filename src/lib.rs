@@ -4,8 +4,8 @@
 //! and a free function with `#[Function]` will implement a set of traits,
 //! that will allow you to access them as if Rust had a REPL.
 //!
-//! Use this crate as an alternative to "print debugging" or
-//! as an API replacement for a long running process.
+//! Use this crate as an alternative for "print debugging" or
+//! as an ergonomic testing API.
 //!
 //! This crate is `no_std` compatible so you can use it to interact with embedded devices
 //! and blink those LEDs from a USB or UART connection.
@@ -15,7 +15,7 @@
 //! * Define a new struct that owns or holds references to the objects you want to access
 //! * Derive [`macro@InteractiveRoot`] for it
 //! * Use the trait's methods to evaluate a string
-//! * The simplest one is [`eval_to_string`](InteractiveRoot::eval_to_string) but others allow for more custom behaviour
+//! (the simplest one is [`eval_to_string`](InteractiveRoot::eval_to_string) but others allow for more custom behaviour)
 //! * Accessing a field will give you its Debug representation
 //! * Calling a method will parse the arguments and give you the Debug representation of its return value
 //!
@@ -46,8 +46,9 @@
 //!
 //! #[Methods]
 //! impl ChildStruct {
-//!     fn add(&mut self, a: f32, b: f32) {
+//!     fn add(&mut self, a: f32, b: f32) -> f32 {
 //!         self.last_sum = a + b;
+//!         self.last_sum
 //!     }
 //! }
 //!
@@ -67,10 +68,9 @@
 //! }
 //!
 //! let mut root = Root::default();
-//! assert_eq!(root.eval_to_string("parent.child.add(4.2, 6.9)"), "()");
-//! assert_eq!(root.eval_to_string("parent.child.last_sum"), "11.1");
-//! assert_eq!(root.eval_to_string("add_one(42)"), "43");
+//! assert_eq!(root.eval_to_string("parent.child.add(4.2, 6.9)"), "11.1");
 //! assert_eq!(root.eval_to_string("parent.child"), "ChildStruct { last_sum: 11.1, no_debug: Unknown }");
+//! assert_eq!(root.eval_to_string("add_one(42)"), "43");
 //! ```
 //!
 //! # How it works
