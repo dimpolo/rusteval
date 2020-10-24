@@ -44,24 +44,29 @@ impl Display for InteractiveError<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         match self {
             InteractiveError::InteractiveNotImplemented { type_name } => {
-                write!(f, "`{type_name}` doesn't implement `Interactive`",)
+                write!(f, "`{}` doesn't implement `Interactive`", type_name)
             }
             InteractiveError::MethodsNotImplemented { type_name } => {
-                write!(f, "`{type_name}` doesn't implement `Methods`",)
+                write!(f, "`{}` doesn't implement `Methods`", type_name)
             }
             InteractiveError::DebugNotImplemented { type_name } => {
-                write!(f, "´{type_name}´ doesn't implement ´Debug´")
+                write!(f, "´{}´ doesn't implement ´Debug´", type_name)
             }
             InteractiveError::FieldNotFound {
                 type_name,
                 field_name,
-            } => write!(f, "No field `{field_name}` found for type `{type_name}`",),
+            } => write!(
+                f,
+                "No field `{}` found for type `{}`",
+                field_name, type_name
+            ),
             InteractiveError::MethodNotFound {
                 method_name,
                 type_name,
             } => write!(
                 f,
-                "No method named `{method_name}` found for type `{type_name}`",
+                "No method named `{}` found for type `{}`",
+                method_name, type_name
             ),
             InteractiveError::WrongNumberOfArguments {
                 method_name,
@@ -77,7 +82,8 @@ impl Display for InteractiveError<'_> {
                 let was_were = if *found == 1 { "was" } else { "were" };
                 write!(
                     f,
-                    "´{method_name}´ takes {expected} {arguments_1} but {found} {arguments_2} {was_were} supplied",
+                    "´{}´ takes {} {} but {} {} {} supplied",
+                    method_name, expected, arguments_1, found, arguments_2, was_were
                 )
             }
             InteractiveError::ArgParseError { error, .. } => write!(
@@ -87,7 +93,7 @@ impl Display for InteractiveError<'_> {
             ),
             InteractiveError::SyntaxError => write!(f, "Syntax Error"),
             InteractiveError::FunctionNotFound { function_name } => {
-                write!(f, "No function named `{function_name}` found")
+                write!(f, "No function named `{}` found", function_name)
             }
         }
     }

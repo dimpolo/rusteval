@@ -101,14 +101,6 @@ deref_for_interactive!(AsMethods(try_as_methods): Methods);
 deref_for_interactive_mut!(AsMethodsMut(try_as_methods_mut): Methods);
 deref_for_interactive!(AsDebug(try_as_debug): Debug);
 
-// TODO add AsIndex and maybe AsDeref for custom smart pointers
-// use std::ops::{Index, IndexMut};
-// duck_type!(pub AsIndex(try_as_index): Index<usize, Output = dyn AsInteractive> | InteractiveNotImplemented);
-// duck_type_mut!(pub AsIndexMut(try_as_index_mut): IndexMut<usize, Output = dyn AsInteractiveMut> | InteractiveNotImplemented);
-
-// deref_for_interactive!(AsIndex(try_as_index): Index<usize, Output = dyn AsInteractive>);
-// deref_for_interactive_mut!(AsIndexMut(try_as_index_mut): IndexMut<usize, Output = dyn AsInteractiveMut>);
-
 /// Used as a dummy value for types that don't implement Debug inside #[derive(PartialDebug)].
 #[allow(missing_copy_implementations)]
 #[derive(Debug)]
