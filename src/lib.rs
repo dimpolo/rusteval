@@ -105,7 +105,6 @@
 //! See the macro's documentation for more details.
 //!
 //! # Current limitations:
-//! * Method arguments that pass by reference will be added soon
 //! * Methods and functions can only be made interactive if their arguments implement [`FromStr`](core::str::FromStr)
 //! * Enums are not supported
 

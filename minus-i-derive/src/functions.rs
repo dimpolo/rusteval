@@ -159,6 +159,15 @@ fn get_expected_arg_len(method: &ImplItemMethod, receiver: &Option<TokenStream2>
     }
 }
 
+/// Generate something like this:
+/// ```ignore
+/// "func" => match ::minus_i::arg_parse::parse_2_args(method_name, args) {
+///     Ok((mut arg0, mut arg1)) => f(Ok(&self.add(arg0, &mut arg1))),
+///     Err(e) => f(Err(e)),
+/// },
+/// ```
+///
+/// `mut` is not necessary a lot of times but simplifies the logic
 fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> TokenStream2 {
     let method_ident = &method.sig.ident;
 
@@ -169,7 +178,7 @@ fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> 
         method.sig.inputs.span(),
     );
 
-    let arg_names: Vec<_> = (0..expected_arg_len)
+    let arg_names: Vec<(Ident, bool)> = (0..expected_arg_len)
         .map(|arg_num| {
             let index = if receiver.is_some() {
                 // skip self
@@ -179,36 +188,60 @@ fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> 
             };
 
             let span = method.sig.inputs[index].span();
-            Ident::new(&format!("arg{}", arg_num), span)
+            let is_ref = match &method.sig.inputs[index] {
+                FnArg::Typed(PatType { ty, .. }) => matches!(**ty, Type::Reference(_)),
+                _ => false,
+            };
+            (Ident::new(&format!("arg{}", arg_num), span), is_ref)
         })
         .collect();
 
-    let args_punctuated: Vec<_> = arg_names
-        .iter()
-        .map(|arg_name| {
+    // mut arg0, mut arg1
+    let tuple_args = arg_names.iter().map(|(arg_name, _)| {
+        quote! {
+            mut #arg_name,
+        }
+    });
+    // arg0, &mut arg1
+    let call_args = arg_names.iter().map(|(arg_name, is_ref)| {
+        if *is_ref {
+            quote! {
+                &mut #arg_name,
+            }
+        } else {
             quote! {
                 #arg_name,
             }
-        })
-        .collect();
+        }
+    });
 
     quote! {
         match ::minus_i::arg_parse::#parse_func(method_name, args){
-            Ok((#(#args_punctuated)*)) => f(Ok(& #receiver #method_ident(#(#args_punctuated)*))),
+            Ok((#(#tuple_args)*)) => f(Ok(& #receiver #method_ident(#(#call_args)*))),
             Err(e) => f(Err(e)),
         }
     }
 }
 
+/// true for bool, &bool, &mut bool, etc
+/// false for &&bool or more complicated types like arrays, slices or generic types
 fn is_supported_fn_arg(arg: &FnArg) -> bool {
     if let FnArg::Typed(arg_type) = arg {
-        if let Type::Path(type_path) = &*arg_type.ty {
-            SUPPORTED_FUNC_ARGS
-                .iter()
-                .any(|supported_arg| type_path.path.is_ident(supported_arg))
-        } else {
-            false
-        }
+        let type_path = match &*arg_type.ty {
+            Type::Path(type_path) => type_path,
+            Type::Reference(TypeReference { elem, .. }) => {
+                if let Type::Path(type_path) = &**elem {
+                    type_path
+                } else {
+                    return false;
+                }
+            }
+            _ => return false,
+        };
+
+        SUPPORTED_FUNC_ARGS
+            .iter()
+            .any(|supported_arg| type_path.path.is_ident(supported_arg))
     } else {
         false
     }
