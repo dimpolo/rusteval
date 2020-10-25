@@ -3,7 +3,7 @@
 use crate::{ArgParseError, InteractiveError};
 
 pub trait ArgParse: Sized {
-    fn arg_parse(s: &str) -> Result<Self, ArgParseError>;
+    fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>>;
 }
 
 pub fn parse_arg<'a, T: ArgParse>(
@@ -133,7 +133,7 @@ pub fn parse_5_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse, T3: ArgParse, 
 macro_rules! parse_int {
     ($($t:ty),*) => (
       $(impl ArgParse for $t {
-        fn arg_parse(s: &str) -> Result<Self, ArgParseError> {
+        fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>> {
             s.trim().parse().map_err(ArgParseError::ParseIntError)
         }
       })*
@@ -143,38 +143,88 @@ macro_rules! parse_int {
 parse_int!(i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize);
 
 impl ArgParse for bool {
-    fn arg_parse(s: &str) -> Result<Self, ArgParseError> {
+    fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>> {
         s.trim().parse().map_err(ArgParseError::ParseBoolError)
     }
 }
 
 impl ArgParse for f32 {
-    fn arg_parse(s: &str) -> Result<Self, ArgParseError> {
+    fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>> {
         s.trim().parse().map_err(ArgParseError::ParseFloatError)
     }
 }
 
 impl ArgParse for f64 {
-    fn arg_parse(s: &str) -> Result<Self, ArgParseError> {
+    fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>> {
         s.trim().parse().map_err(ArgParseError::ParseFloatError)
     }
 }
 
-#[cfg(feature = "std")]
 impl ArgParse for char {
-    fn arg_parse(s: &str) -> Result<Self, ArgParseError> {
-        let char_candidate =
-            snailquote::unescape(s).map_err(|e| ArgParseError::UnescapeError(format!("{}", e)))?;
-        char_candidate
-            .parse()
-            .map_err(ArgParseError::ParseCharError)
+    fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>> {
+        unescape_char(s)
     }
 }
 
 #[cfg(feature = "std")]
 impl ArgParse for String {
-    fn arg_parse(s: &str) -> Result<Self, ArgParseError> {
-        snailquote::unescape(s).map_err(|e| ArgParseError::UnescapeError(format!("{}", e)))
+    fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>> {
+        unescape_str(s)
+    }
+}
+
+fn unescape_char(s: &str) -> Result<char, ArgParseError<'_>> {
+    match s.as_bytes() {
+        [b'\'', c, b'\''] => Ok(*c as char),
+        [b'\'', b'\\', c, b'\''] => match c {
+            b'n' => Ok('\n'),
+            b'r' => Ok('\r'),
+            b't' => Ok('\t'),
+            b'\\' => Ok('\\'),
+            b'\'' => Ok('\''),
+            b'"' => Ok('"'),
+
+            _ => Err(ArgParseError::UnescapeError(s)),
+        },
+        _ => Err(ArgParseError::UnescapeError(s)),
+    }
+}
+
+fn unescape_str(s: &str) -> Result<String, ArgParseError<'_>> {
+    if s.len() >= 2 && s.starts_with('"') && s.ends_with('"') {
+        let mut chars = s[1..s.len() - 1].chars();
+
+        let mut res = String::with_capacity(s.len());
+
+        while let Some(c) = chars.next() {
+            if c == '\\' {
+                match chars.next() {
+                    None => {
+                        return Err(ArgParseError::UnescapeError(s));
+                    }
+                    Some(c2) => {
+                        res.push(match c2 {
+                            'n' => '\n',
+                            'r' => '\r',
+                            't' => '\t',
+                            '\\' => '\\',
+                            '\'' => '\'',
+                            '"' => '"',
+                            _ => {
+                                return Err(ArgParseError::UnescapeError(s));
+                            }
+                        });
+                        continue;
+                    }
+                };
+            }
+
+            res.push(c);
+        }
+
+        Ok(res)
+    } else {
+        Err(ArgParseError::UnescapeError(s))
     }
 }
 
@@ -210,17 +260,22 @@ mod tests {
 
     #[test]
     fn test_char() {
-        test_parse_one_arg("\"t\"", 't');
+        test_parse_one_arg("'t'", 't');
     }
 
     #[test]
     fn test_escape_char() {
-        test_parse_one_arg("\"\\n\"", '\n');
+        test_parse_one_arg("'\\n'", '\n');
     }
 
     #[test]
     fn test_easy_string() {
         test_parse_one_arg("\"test\"", String::from("test"));
+    }
+
+    #[test]
+    fn test_string() {
+        test_parse_one_arg("\"test\\ntest\"", String::from("test\ntest"));
     }
 
     #[test]

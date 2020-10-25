@@ -10,10 +10,9 @@ core-error = "0.0.1-rc4"
 auto_impl = "0.4.1"
 inventory = { version = "0.1.9", optional = true }
 lazy_static = { version = "1", optional = true }
-snailquote = {version = "0.3.0", optional = true}
 
 [features]
-default = ["std", "inventory", "lazy_static", "snailquote"]
+default = ["std", "inventory", "lazy_static"]
 std = ["core-error/std"]
 
 [[example]]
