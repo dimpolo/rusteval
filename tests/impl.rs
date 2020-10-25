@@ -22,6 +22,10 @@ impl TestStruct {
     fn answer(&self) {
         println!("42");
     }
+
+    fn total_len(&self, s1: &str, s2: &mut str) -> usize {
+        s1.len() + s2.len()
+    }
 }
 
 #[test]
@@ -96,5 +100,14 @@ fn test_too_many_args() {
                 found: 1
             }
         )
+    });
+}
+
+#[test]
+fn test_str_arg() {
+    let test_struct = TestStruct::default();
+
+    test_struct.eval_method("total_len", "\"abcde\", \"abc\"", &mut |result| {
+        assert_eq!(format!("{:?}", result.unwrap()), "8")
     });
 }

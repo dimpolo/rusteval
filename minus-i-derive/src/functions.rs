@@ -8,7 +8,7 @@ use syn::*;
 // TODO document this
 static SUPPORTED_FUNC_ARGS: &[&str] = &[
     "bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128", "isize", "u8", "u16", "u32",
-    "u64", "u128", "usize", "String",
+    "u64", "u128", "usize", "String", "str",
 ];
 
 pub fn methods(input: TokenStream) -> TokenStream {
@@ -162,12 +162,11 @@ fn get_expected_arg_len(method: &ImplItemMethod, receiver: &Option<TokenStream2>
 /// Generate something like this:
 /// ```ignore
 /// "func" => match ::minus_i::arg_parse::parse_2_args(method_name, args) {
-///     Ok((mut arg0, mut arg1)) => f(Ok(&self.add(arg0, &mut arg1))),
+///     Ok((arg0, arg1, mut arg2)) => f(Ok(&self.add(arg0, &arg1, &mut arg2))),
 ///     Err(e) => f(Err(e)),
 /// },
 /// ```
 ///
-/// `mut` is not necessary a lot of times but simplifies the logic
 fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> TokenStream2 {
     let method_ident = &method.sig.ident;
 
@@ -178,7 +177,7 @@ fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> 
         method.sig.inputs.span(),
     );
 
-    let arg_names: Vec<(Ident, bool)> = (0..expected_arg_len)
+    let arg_names: Vec<_> = (0..expected_arg_len)
         .map(|arg_num| {
             let index = if receiver.is_some() {
                 // skip self
@@ -187,33 +186,43 @@ fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> 
                 arg_num
             };
 
-            let span = method.sig.inputs[index].span();
-            let is_ref = match &method.sig.inputs[index] {
-                FnArg::Typed(PatType { ty, .. }) => matches!(**ty, Type::Reference(_)),
-                _ => false,
-            };
-            (Ident::new(&format!("arg{}", arg_num), span), is_ref)
+            let arg = &method.sig.inputs[index];
+            (
+                Ident::new(&format!("arg{}", arg_num), arg.span()),
+                reference_tokens(arg),
+            )
         })
         .collect();
 
-    // mut arg0, mut arg1
-    let tuple_args = arg_names.iter().map(|(arg_name, _)| {
+    // arg0, arg1, mut arg2
+    let tuple_args = arg_names.iter().map(|(arg_name, ref_tokens)| {
+        let mut_token = match ref_tokens {
+            ReferenceTokens::NotStr { mut_token, .. } => mut_token,
+            ReferenceTokens::Str { mut_token } => mut_token,
+        };
         quote! {
-            mut #arg_name,
+            #mut_token #arg_name,
         }
     });
-    // arg0, &mut arg1
-    let call_args = arg_names.iter().map(|(arg_name, is_ref)| {
-        if *is_ref {
-            quote! {
-                &mut #arg_name,
+    // arg0, &arg1, &mut arg2
+    let call_args = arg_names
+        .iter()
+        .map(|(arg_name, ref_tokens)| match ref_tokens {
+            ReferenceTokens::NotStr {
+                and_token,
+                mut_token,
+            } => {
+                quote! {
+                    #and_token #mut_token #arg_name,
+                }
             }
-        } else {
-            quote! {
-                #arg_name,
-            }
-        }
-    });
+            ReferenceTokens::Str { mut_token: None } => quote! {
+                <::std::string::String as ::core::ops::Deref>::deref(& #arg_name),
+            },
+            ReferenceTokens::Str { mut_token: Some(_) } => quote! {
+                <::std::string::String as ::core::ops::DerefMut>::deref_mut(&mut #arg_name),
+            },
+        });
 
     quote! {
         match ::minus_i::arg_parse::#parse_func(method_name, args){
@@ -244,6 +253,61 @@ fn is_supported_fn_arg(arg: &FnArg) -> bool {
             .any(|supported_arg| type_path.path.is_ident(supported_arg))
     } else {
         false
+    }
+}
+
+enum ReferenceTokens<'a> {
+    NotStr {
+        and_token: Option<&'a Token!(&)>,
+        mut_token: Option<&'a Token!(mut)>,
+    },
+    Str {
+        mut_token: Option<&'a Token!(mut)>,
+    },
+}
+
+/// u32 -> NotStr{ and_token: None, mut_token: None }
+/// &u32 -> NotStr{ and_token: Some(&), mut_token: None }
+/// &mut u32 -> NotStr{ and_token: Some(&), mut_token: Some(mut) }
+///
+/// special case:
+/// &str -> Str{ None }
+/// &mut str -> Str{ mut_token: Some(mut) }
+fn reference_tokens(arg: &FnArg) -> ReferenceTokens<'_> {
+    match arg {
+        FnArg::Typed(PatType { ty, .. }) => match &**ty {
+            Type::Reference(TypeReference {
+                elem,
+                and_token,
+                mutability,
+                ..
+            }) => match &**elem {
+                Type::Path(type_path) => {
+                    if type_path.path.is_ident("str") {
+                        ReferenceTokens::Str {
+                            mut_token: mutability.as_ref(),
+                        }
+                    } else {
+                        ReferenceTokens::NotStr {
+                            and_token: Some(and_token),
+                            mut_token: mutability.as_ref(),
+                        }
+                    }
+                }
+                _ => ReferenceTokens::NotStr {
+                    and_token: Some(and_token),
+                    mut_token: mutability.as_ref(),
+                },
+            },
+            _ => ReferenceTokens::NotStr {
+                and_token: None,
+                mut_token: None,
+            },
+        },
+        _ => ReferenceTokens::NotStr {
+            and_token: None,
+            mut_token: None,
+        },
     }
 }
 
