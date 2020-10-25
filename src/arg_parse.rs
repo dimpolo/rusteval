@@ -203,7 +203,7 @@ fn unescape_str(s: &str) -> Result<String, ArgParseError<'_>> {
         return Err(ArgParseError::UnescapeError(s));
     }
 
-    let mut res = String::with_capacity(chars.as_str().len() - 2);
+    let mut res = String::with_capacity(chars.as_str().len());
 
     while let Some(c) = chars.next() {
         match c {
@@ -219,6 +219,7 @@ fn unescape_str(s: &str) -> Result<String, ArgParseError<'_>> {
 }
 
 // "n" -> Some('\n')
+// https://doc.rust-lang.org/reference/tokens.html
 fn get_escaped_char(after_backslash: &mut core::str::Chars<'_>) -> Option<char> {
     match after_backslash.next() {
         None => None,
@@ -230,7 +231,7 @@ fn get_escaped_char(after_backslash: &mut core::str::Chars<'_>) -> Option<char> 
             '0' => Some('\0'),
             '\'' => Some('\''),
             '\"' => Some('\"'),
-            'x' => parse_hex(after_backslash),
+            'x' => parse_ascii(after_backslash),
             'u' => parse_unicode(after_backslash),
             _ => None,
         },
@@ -238,13 +239,13 @@ fn get_escaped_char(after_backslash: &mut core::str::Chars<'_>) -> Option<char> 
 }
 
 // "41" -> Some('A')
-fn parse_hex(after_x: &mut core::str::Chars<'_>) -> Option<char> {
+fn parse_ascii(after_x: &mut core::str::Chars<'_>) -> Option<char> {
     let hex = after_x.as_str().get(..2)?;
-    let u = u32::from_str_radix(hex, 16).ok()?;
-    if u > 0x7f {
+    let ascii = u32::from_str_radix(hex, 16).ok()?;
+    if ascii > 0x7f {
         return None;
     };
-    let res = core::char::from_u32(u);
+    let res = core::char::from_u32(ascii);
 
     // pop used chars
     after_x.next();
