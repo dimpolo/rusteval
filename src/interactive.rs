@@ -7,7 +7,8 @@ use crate::specialization::{AsDebug, AsMethods, AsMethodsMut};
 use crate::{InteractiveError, Result};
 
 /// The main trait of this crate TODO
-#[auto_impl(&, &mut, Box, Rc, Arc)]
+#[cfg_attr(feature = "std", auto_impl(&, &mut, Box, Rc, Arc))]
+#[cfg_attr(not(feature = "std"), auto_impl(&, &mut))]
 pub trait Interactive: AsDebug + AsMethods + AsMethodsMut {
     /// Looks for a field with the given name and on success return a shared reference to it.
     fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive> {
@@ -54,7 +55,8 @@ pub trait Interactive: AsDebug + AsMethods + AsMethodsMut {
 ///
 /// [`Interactive`]: macro@crate::Interactive
 /// [`Methods`]: macro@crate::Methods
-#[auto_impl(&, &mut, Box, Rc, Arc)]
+#[cfg_attr(feature = "std", auto_impl(&, &mut, Box, Rc, Arc))]
+#[cfg_attr(not(feature = "std"), auto_impl(&, &mut))]
 pub trait Methods {
     /// Looks for a method with the given name,
     /// parses the args string into the expected arguments of the method,
