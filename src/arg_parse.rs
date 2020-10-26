@@ -8,125 +8,153 @@ pub trait ArgParse: Sized {
 
 pub fn parse_arg<'a, T: ArgParse>(
     method_name: &'a str,
-    args_iterator: &mut impl Iterator<Item = &'a str>,
+    haystack: &mut &'a str,
+    expected: usize,
+    found: usize,
 ) -> crate::Result<'a, T> {
-    let arg_str = args_iterator.next().unwrap(); // length was already checked
+    let arg_str = get_next_arg(method_name, haystack, expected, found)?;
+
     ArgParse::arg_parse(arg_str).map_err(|e| InteractiveError::ArgParseError {
         method_name,
         error: e,
     })
 }
-
-pub fn parse_0_args<'a>(method_name: &'a str, args: &'a str) -> crate::Result<'a, ()> {
-    let args_count = args.split_terminator(',').count();
-
-    if args_count != 0 {
-        return Err(InteractiveError::WrongNumberOfArguments {
-            method_name,
-            expected: 0,
-            found: args_count,
-        });
+pub fn get_next_arg<'a>(
+    method_name: &'a str,
+    haystack: &mut &'a str,
+    expected: usize,
+    found: usize,
+) -> crate::Result<'a, &'a str> {
+    match find_next_separator_index(haystack) {
+        Some(arg_end_idx) => {
+            let (arg_str, rest_str) = haystack.split_at(arg_end_idx);
+            let arg_str = arg_str.trim();
+            if arg_str.is_empty() {
+                // no arg before separator
+                return Err(InteractiveError::SyntaxError {});
+            }
+            *haystack = &rest_str[1..]; // skip separator
+            Ok(arg_str)
+        }
+        None => {
+            let arg_str = haystack.trim();
+            if arg_str.is_empty() {
+                // not enough args
+                return Err(InteractiveError::WrongNumberOfArguments {
+                    method_name,
+                    expected,
+                    found,
+                });
+            }
+            *haystack = "";
+            Ok(arg_str)
+        }
     }
+}
+
+pub fn clear_args<'a>(
+    method_name: &'a str,
+    haystack: &mut &'a str,
+    expected: usize,
+    mut found: usize,
+) -> crate::Result<'a, ()> {
+    if !haystack.is_empty() {
+        loop {
+            get_next_arg(method_name, haystack, expected, found)?;
+            found += 1;
+        }
+    }
+
     Ok(())
+}
+
+fn find_next_separator_index(s: &str) -> Option<usize> {
+    let mut chars = s.char_indices();
+    let mut inside_single_quotes = false;
+    let mut inside_double_quotes = false;
+
+    while let Some((idx, c)) = chars.next() {
+        match c {
+            '\\' => {
+                chars.next();
+            }
+            ',' => {
+                if !inside_double_quotes && !inside_single_quotes {
+                    return Some(idx);
+                }
+            }
+            '\'' => {
+                if !inside_double_quotes {
+                    inside_single_quotes = !inside_single_quotes;
+                }
+            }
+            '"' => {
+                if !inside_single_quotes {
+                    inside_double_quotes = !inside_double_quotes;
+                }
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+pub fn parse_0_args<'a>(method_name: &'a str, mut args: &'a str) -> crate::Result<'a, ()> {
+    clear_args(method_name, &mut args, 0, 0)
 }
 
 pub fn parse_1_arg<'a, T0: ArgParse>(
     method_name: &'a str,
-    args: &'a str,
+    mut args: &'a str,
 ) -> crate::Result<'a, (T0,)> {
-    let args_count = args.split_terminator(',').count();
-
-    if args_count != 1 {
-        return Err(InteractiveError::WrongNumberOfArguments {
-            method_name,
-            expected: 1,
-            found: args_count,
-        });
-    }
-    let mut args_iterator = args.split_terminator(',');
-    let arg0 = parse_arg(method_name, &mut args_iterator)?;
+    let arg0 = parse_arg(method_name, &mut args, 1, 0)?;
+    clear_args(method_name, &mut args, 1, 1)?;
     Ok((arg0,))
 }
 
 pub fn parse_2_args<'a, T0: ArgParse, T1: ArgParse>(
     method_name: &'a str,
-    args: &'a str,
+    mut args: &'a str,
 ) -> crate::Result<'a, (T0, T1)> {
-    let args_count = args.split_terminator(',').count();
-
-    if args_count != 2 {
-        return Err(InteractiveError::WrongNumberOfArguments {
-            method_name,
-            expected: 2,
-            found: args_count,
-        });
-    }
-    let mut args_iterator = args.split_terminator(',');
-    let arg0 = parse_arg(method_name, &mut args_iterator)?;
-    let arg1 = parse_arg(method_name, &mut args_iterator)?;
+    let arg0 = parse_arg(method_name, &mut args, 2, 0)?;
+    let arg1 = parse_arg(method_name, &mut args, 2, 1)?;
+    clear_args(method_name, &mut args, 2, 2)?;
     Ok((arg0, arg1))
 }
 
 pub fn parse_3_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse>(
     method_name: &'a str,
-    args: &'a str,
+    mut args: &'a str,
 ) -> crate::Result<'a, (T0, T1, T2)> {
-    let args_count = args.split_terminator(',').count();
-
-    if args_count != 3 {
-        return Err(InteractiveError::WrongNumberOfArguments {
-            method_name,
-            expected: 3,
-            found: args_count,
-        });
-    }
-    let mut args_iterator = args.split_terminator(',');
-    let arg0 = parse_arg(method_name, &mut args_iterator)?;
-    let arg1 = parse_arg(method_name, &mut args_iterator)?;
-    let arg2 = parse_arg(method_name, &mut args_iterator)?;
+    let arg0 = parse_arg(method_name, &mut args, 3, 0)?;
+    let arg1 = parse_arg(method_name, &mut args, 3, 1)?;
+    let arg2 = parse_arg(method_name, &mut args, 3, 2)?;
+    clear_args(method_name, &mut args, 3, 3)?;
     Ok((arg0, arg1, arg2))
 }
 
 pub fn parse_4_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse, T3: ArgParse>(
     method_name: &'a str,
-    args: &'a str,
+    mut args: &'a str,
 ) -> crate::Result<'a, (T0, T1, T2, T3)> {
-    let args_count = args.split_terminator(',').count();
-
-    if args_count != 4 {
-        return Err(InteractiveError::WrongNumberOfArguments {
-            method_name,
-            expected: 4,
-            found: args_count,
-        });
-    }
-    let mut args_iterator = args.split_terminator(',');
-    let arg0 = parse_arg(method_name, &mut args_iterator)?;
-    let arg1 = parse_arg(method_name, &mut args_iterator)?;
-    let arg2 = parse_arg(method_name, &mut args_iterator)?;
-    let arg3 = parse_arg(method_name, &mut args_iterator)?;
+    let arg0 = parse_arg(method_name, &mut args, 4, 0)?;
+    let arg1 = parse_arg(method_name, &mut args, 4, 1)?;
+    let arg2 = parse_arg(method_name, &mut args, 4, 2)?;
+    let arg3 = parse_arg(method_name, &mut args, 4, 3)?;
+    clear_args(method_name, &mut args, 4, 4)?;
     Ok((arg0, arg1, arg2, arg3))
 }
 
 pub fn parse_5_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse, T3: ArgParse, T4: ArgParse>(
     method_name: &'a str,
-    args: &'a str,
+    mut args: &'a str,
 ) -> crate::Result<'a, (T0, T1, T2, T3, T4)> {
-    let args_count = args.split_terminator(',').count();
-
-    if args_count != 5 {
-        return Err(InteractiveError::WrongNumberOfArguments {
-            method_name,
-            expected: 5,
-            found: args_count,
-        });
-    }
-    let mut args_iterator = args.split_terminator(',');
-    let arg0 = parse_arg(method_name, &mut args_iterator)?;
-    let arg1 = parse_arg(method_name, &mut args_iterator)?;
-    let arg2 = parse_arg(method_name, &mut args_iterator)?;
-    let arg3 = parse_arg(method_name, &mut args_iterator)?;
-    let arg4 = parse_arg(method_name, &mut args_iterator)?;
+    let arg0 = parse_arg(method_name, &mut args, 5, 0)?;
+    let arg1 = parse_arg(method_name, &mut args, 5, 1)?;
+    let arg2 = parse_arg(method_name, &mut args, 5, 2)?;
+    let arg3 = parse_arg(method_name, &mut args, 5, 3)?;
+    let arg4 = parse_arg(method_name, &mut args, 5, 4)?;
+    clear_args(method_name, &mut args, 5, 5)?;
     Ok((arg0, arg1, arg2, arg3, arg4))
 }
 
@@ -134,7 +162,7 @@ macro_rules! parse_int {
     ($($t:ty),*) => (
       $(impl ArgParse for $t {
         fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>> {
-            s.trim().parse().map_err(ArgParseError::ParseIntError)
+            s.parse().map_err(ArgParseError::ParseIntError)
         }
       })*
     )
@@ -144,19 +172,19 @@ parse_int!(i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize);
 
 impl ArgParse for bool {
     fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>> {
-        s.trim().parse().map_err(ArgParseError::ParseBoolError)
+        s.parse().map_err(ArgParseError::ParseBoolError)
     }
 }
 
 impl ArgParse for f32 {
     fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>> {
-        s.trim().parse().map_err(ArgParseError::ParseFloatError)
+        s.parse().map_err(ArgParseError::ParseFloatError)
     }
 }
 
 impl ArgParse for f64 {
     fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>> {
-        s.trim().parse().map_err(ArgParseError::ParseFloatError)
+        s.parse().map_err(ArgParseError::ParseFloatError)
     }
 }
 
@@ -249,8 +277,7 @@ fn parse_ascii(after_x: &mut core::str::Chars<'_>) -> Option<char> {
     let res = core::char::from_u32(ascii);
 
     // pop used chars
-    after_x.next();
-    after_x.next();
+    after_x.nth(1);
     res
 }
 
@@ -266,9 +293,7 @@ fn parse_unicode(after_u: &mut core::str::Chars<'_>) -> Option<char> {
             .and_then(core::char::from_u32);
 
         // pop used chars
-        for _ in 0..=hex_end {
-            after_u.next();
-        }
+        after_u.nth(hex_end);
         res
     } else {
         None
@@ -278,7 +303,6 @@ fn parse_unicode(after_u: &mut core::str::Chars<'_>) -> Option<char> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::arg_parse::parse_5_args;
 
     fn test_parse_one_arg<T: ArgParse + PartialEq + core::fmt::Debug>(arg: &str, expected: T) {
         let result: T = parse_1_arg("", arg).unwrap().0;
@@ -347,5 +371,36 @@ mod tests {
     fn test_parse_five_args() {
         let result: (u8, u16, u32, u64, u128) = parse_5_args("", "1, 2, 3, 4, 5").unwrap();
         assert_eq!(result, (1, 2, 3, 4, 5));
+    }
+
+    #[test]
+    fn test_find_separator() {
+        assert_eq!(find_next_separator_index("\",\", \",\""), Some(3));
+        assert_eq!(find_next_separator_index("',', ','"), Some(3));
+        assert_eq!(find_next_separator_index("4, 5"), Some(1));
+    }
+
+    #[test]
+    fn test_too_many_args() {
+        assert_eq!(
+            parse_2_args::<u32, u32>("test", "1, 2, 3, 4").unwrap_err(),
+            InteractiveError::WrongNumberOfArguments {
+                method_name: "test",
+                expected: 2,
+                found: 4
+            }
+        )
+    }
+
+    #[test]
+    fn test_too_few_args() {
+        assert_eq!(
+            parse_2_args::<u32, u32>("test", "1").unwrap_err(),
+            InteractiveError::WrongNumberOfArguments {
+                method_name: "test",
+                expected: 2,
+                found: 1
+            }
+        )
     }
 }
