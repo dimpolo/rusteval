@@ -103,60 +103,30 @@ pub fn parse_0_args<'a>(method_name: &'a str, mut args: &'a str) -> crate::Resul
     clear_args(method_name, &mut args, 0, 0)
 }
 
-pub fn parse_1_arg<'a, T0: ArgParse>(
-    method_name: &'a str,
-    mut args: &'a str,
-) -> crate::Result<'a, (T0,)> {
-    let arg0 = parse_arg(method_name, &mut args, 1, 0)?;
-    clear_args(method_name, &mut args, 1, 1)?;
-    Ok((arg0,))
+macro_rules! parse_x_args {
+    ($funcname:ident::<$($TN:ident),*>, ($($i:literal),*), x=$x:literal) => {
+        #[allow(non_snake_case)]
+        pub fn $funcname<'a, $($TN: ArgParse,)*>(
+            method_name: &'a str,
+            mut args: &'a str,
+        ) -> crate::Result<'a, ($($TN,)*)> {
+            $(let $TN  = parse_arg(method_name, &mut args, $x, $i)?;)*
+            clear_args(method_name, &mut args, $x, $x)?;
+            Ok(($($TN,)*))
+        }
+    };
 }
 
-pub fn parse_2_args<'a, T0: ArgParse, T1: ArgParse>(
-    method_name: &'a str,
-    mut args: &'a str,
-) -> crate::Result<'a, (T0, T1)> {
-    let arg0 = parse_arg(method_name, &mut args, 2, 0)?;
-    let arg1 = parse_arg(method_name, &mut args, 2, 1)?;
-    clear_args(method_name, &mut args, 2, 2)?;
-    Ok((arg0, arg1))
-}
-
-pub fn parse_3_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse>(
-    method_name: &'a str,
-    mut args: &'a str,
-) -> crate::Result<'a, (T0, T1, T2)> {
-    let arg0 = parse_arg(method_name, &mut args, 3, 0)?;
-    let arg1 = parse_arg(method_name, &mut args, 3, 1)?;
-    let arg2 = parse_arg(method_name, &mut args, 3, 2)?;
-    clear_args(method_name, &mut args, 3, 3)?;
-    Ok((arg0, arg1, arg2))
-}
-
-pub fn parse_4_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse, T3: ArgParse>(
-    method_name: &'a str,
-    mut args: &'a str,
-) -> crate::Result<'a, (T0, T1, T2, T3)> {
-    let arg0 = parse_arg(method_name, &mut args, 4, 0)?;
-    let arg1 = parse_arg(method_name, &mut args, 4, 1)?;
-    let arg2 = parse_arg(method_name, &mut args, 4, 2)?;
-    let arg3 = parse_arg(method_name, &mut args, 4, 3)?;
-    clear_args(method_name, &mut args, 4, 4)?;
-    Ok((arg0, arg1, arg2, arg3))
-}
-
-pub fn parse_5_args<'a, T0: ArgParse, T1: ArgParse, T2: ArgParse, T3: ArgParse, T4: ArgParse>(
-    method_name: &'a str,
-    mut args: &'a str,
-) -> crate::Result<'a, (T0, T1, T2, T3, T4)> {
-    let arg0 = parse_arg(method_name, &mut args, 5, 0)?;
-    let arg1 = parse_arg(method_name, &mut args, 5, 1)?;
-    let arg2 = parse_arg(method_name, &mut args, 5, 2)?;
-    let arg3 = parse_arg(method_name, &mut args, 5, 3)?;
-    let arg4 = parse_arg(method_name, &mut args, 5, 4)?;
-    clear_args(method_name, &mut args, 5, 5)?;
-    Ok((arg0, arg1, arg2, arg3, arg4))
-}
+parse_x_args!(parse_1_arg::<T0>, (0), x = 1);
+parse_x_args!(parse_2_args::<T0, T1>, (0, 1), x = 2);
+parse_x_args!(parse_3_args::<T0, T1, T2>, (0, 1, 2), x = 3);
+parse_x_args!(parse_4_args::<T0, T1, T2, T3>, (0, 1, 2, 3), x = 4);
+parse_x_args!(parse_5_args::<T0, T1, T2, T3, T4>, (0, 1, 2, 3, 4), x = 5);
+parse_x_args!(
+    parse_6_args::<T0, T1, T2, T3, T4, T5>,
+    (0, 1, 2, 3, 4, 5),
+    x = 6
+);
 
 macro_rules! parse_int {
     ($($t:ty),*) => (
