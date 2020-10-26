@@ -2,6 +2,7 @@
 //! Don't use this crate directly.
 // TODO correct link
 
+#![feature(box_patterns)]
 #![warn(trivial_casts, rust_2018_idioms)]
 
 use proc_macro::TokenStream;

@@ -194,6 +194,7 @@ fn unescape_char(s: &str) -> Result<char, ArgParseError<'_>> {
 }
 
 // "\"asfd\"" -> Ok("asdf")
+#[cfg(feature = "std")]
 fn unescape_str(s: &str) -> Result<String, ArgParseError<'_>> {
     let mut chars = s.chars();
     if chars.next() != Some('\"') {
@@ -335,6 +336,11 @@ mod tests {
             "\" test \\n '\\u{2764}' \\r \\\"täst\\\" \\x41\"",
             String::from(" test \n '❤' \r \"täst\" A"),
         );
+    }
+
+    #[test]
+    fn test_string_with_comma() {
+        test_parse_one_arg("\"1, 2\"", String::from("1, 2"));
     }
 
     #[test]

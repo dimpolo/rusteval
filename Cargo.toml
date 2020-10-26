@@ -5,7 +5,7 @@ authors = ["Dimitri Polonski <d.polonski@wmt.team>"]
 edition = "2018"
 
 [dependencies]
-minus-i-derive = { path = "minus-i-derive" }
+minus-i-derive = { path = "minus-i-derive" , default-features = false}
 core-error = "0.0.1-rc4"
 auto_impl = "0.4.1"
 inventory = { version = "0.1.9", optional = true }
@@ -13,7 +13,7 @@ lazy_static = { version = "1", optional = true }
 
 [features]
 default = ["std", "inventory", "lazy_static"]
-std = ["core-error/std"]
+std = ["core-error/std", "minus-i-derive/std"]
 
 [[example]]
 name = "minimal"

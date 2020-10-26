@@ -6,9 +6,16 @@ use syn::spanned::Spanned;
 use syn::*;
 
 // TODO document this
+#[cfg(feature = "std")]
 static SUPPORTED_FUNC_ARGS: &[&str] = &[
     "bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128", "isize", "u8", "u16", "u32",
     "u64", "u128", "usize", "String", "str",
+];
+
+#[cfg(not(feature = "std"))]
+static SUPPORTED_FUNC_ARGS: &[&str] = &[
+    "bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128", "isize", "u8", "u16", "u32",
+    "u64", "u128", "usize",
 ];
 
 pub fn methods(input: TokenStream) -> TokenStream {
@@ -235,16 +242,13 @@ fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> 
 /// true for bool, &bool, &mut bool, etc
 /// false for &&bool or more complicated types like arrays, slices or generic types
 fn is_supported_fn_arg(arg: &FnArg) -> bool {
-    if let FnArg::Typed(arg_type) = arg {
-        let type_path = match &*arg_type.ty {
+    if let FnArg::Typed(PatType { ty: box ty, .. }) = arg {
+        let type_path = match ty {
             Type::Path(type_path) => type_path,
-            Type::Reference(TypeReference { elem, .. }) => {
-                if let Type::Path(type_path) = &**elem {
-                    type_path
-                } else {
-                    return false;
-                }
-            }
+            Type::Reference(TypeReference {
+                elem: box Type::Path(type_path),
+                ..
+            }) => type_path,
             _ => return false,
         };
 
@@ -275,35 +279,28 @@ enum ReferenceTokens<'a> {
 /// &mut str -> Str{ mut_token: Some(mut) }
 fn reference_tokens(arg: &FnArg) -> ReferenceTokens<'_> {
     match arg {
-        FnArg::Typed(PatType { ty, .. }) => match &**ty {
-            Type::Reference(TypeReference {
-                elem,
-                and_token,
-                mutability,
-                ..
-            }) => match &**elem {
-                Type::Path(type_path) => {
-                    if type_path.path.is_ident("str") {
-                        ReferenceTokens::Str {
-                            mut_token: mutability.as_ref(),
-                        }
-                    } else {
-                        ReferenceTokens::NotStr {
-                            and_token: Some(and_token),
-                            mut_token: mutability.as_ref(),
-                        }
-                    }
+        FnArg::Typed(PatType {
+            ty:
+                box Type::Reference(TypeReference {
+                    elem: box Type::Path(type_path),
+                    and_token,
+                    mutability,
+                    ..
+                }),
+            ..
+        }) => {
+            if type_path.path.is_ident("str") {
+                ReferenceTokens::Str {
+                    mut_token: mutability.as_ref(),
                 }
-                _ => ReferenceTokens::NotStr {
+            } else {
+                ReferenceTokens::NotStr {
                     and_token: Some(and_token),
                     mut_token: mutability.as_ref(),
-                },
-            },
-            _ => ReferenceTokens::NotStr {
-                and_token: None,
-                mut_token: None,
-            },
-        },
+                }
+            }
+        }
+
         _ => ReferenceTokens::NotStr {
             and_token: None,
             mut_token: None,

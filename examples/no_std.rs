@@ -6,9 +6,11 @@ struct ChildStruct {}
 
 #[Methods]
 impl ChildStruct {
-    fn add(&mut self, a: f32, b: f32) -> f32 {
+    fn add(&self, a: f32, b: f32) -> f32 {
         a + b
     }
+
+    fn _not_interactive(&self, _: &str) {}
 }
 
 #[derive(Interactive, Default)]
