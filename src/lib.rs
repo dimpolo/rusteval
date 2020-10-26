@@ -63,14 +63,14 @@
 //! }
 //!
 //! #[Function]
-//! fn add_one(a: u32) -> u32 {
-//!     a + 1
+//! fn split_str_at(s: &str, mid: usize) -> (&str, &str) {
+//!     s.split_at(mid)
 //! }
 //!
 //! let mut root = Root::default();
 //! assert_eq!(root.eval_to_string("parent.child.add(4.2, 6.9)"), "11.1");
 //! assert_eq!(root.eval_to_string("parent.child"), "ChildStruct { last_sum: 11.1, no_debug: Unknown }");
-//! assert_eq!(root.eval_to_string("add_one(42)"), "43");
+//! assert_eq!(root.eval_to_string("split_str_at(\"foobar\", 3)"), "(\"foo\", \"bar\")");
 //! ```
 //!
 //! # How it works

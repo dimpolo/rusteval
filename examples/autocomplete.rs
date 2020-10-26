@@ -30,8 +30,8 @@ struct Root {
 }
 
 #[Function]
-fn add_one(a: u32) -> u32 {
-    a + 1
+fn split_str_at(s: &str, mid: usize) -> (&str, &str) {
+    s.split_at(mid)
 }
 
 fn main() -> rustyline::Result<()> {

@@ -17,7 +17,7 @@ struct ChildStruct {
 
 #[Methods]
 impl ChildStruct {
-    fn add(&mut self, _a: f32, _b: &str, _c: &mut str) -> bool {
+    fn yes(&mut self, _a: f32, _b: &str, _c: &mut str) -> bool {
         true
     }
 }
@@ -28,6 +28,6 @@ struct Root {
 }
 
 #[Function]
-fn add_one(a: u32) -> u32 {
-    a + 1
+fn split_str_at(s: &str, mid: usize) -> (&str, &str) {
+    s.split_at(mid)
 }

@@ -6,7 +6,7 @@ pub trait ArgParse: Sized {
     fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>>;
 }
 
-pub fn parse_arg<'a, T: ArgParse>(
+fn parse_arg<'a, T: ArgParse>(
     method_name: &'a str,
     haystack: &mut &'a str,
     expected: usize,
@@ -19,7 +19,8 @@ pub fn parse_arg<'a, T: ArgParse>(
         error: e,
     })
 }
-pub fn get_next_arg<'a>(
+
+fn get_next_arg<'a>(
     method_name: &'a str,
     haystack: &mut &'a str,
     expected: usize,
@@ -52,7 +53,7 @@ pub fn get_next_arg<'a>(
     }
 }
 
-pub fn clear_args<'a>(
+fn clear_args<'a>(
     method_name: &'a str,
     haystack: &mut &'a str,
     expected: usize,
