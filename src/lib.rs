@@ -106,7 +106,7 @@
 //! See the macro's documentation for more details.
 //!
 //! # Current limitations:
-//! * Methods and functions can only be made interactive if their arguments implement [`FromStr`](core::str::FromStr)
+//! * Methods and functions can only be made interactive if their argument types are supported
 //! * Enums are not supported
 
 #![allow(incomplete_features)] // TODO re-enable warning
@@ -160,6 +160,8 @@
 pub use minus_i_derive::InteractiveRoot;
 
 /// Gives interactive access to a structs fields.
+///
+/// # What it does:
 /// ```
 /// # use minus_i::Interactive;
 /// #
@@ -211,6 +213,18 @@ pub use minus_i_derive::Interactive;
 
 /// Gives interactive access to a structs methods.
 ///
+/// Only methods with supported argument types will be made interactive.
+///
+/// Currently supported argument types are:
+///
+/// `bool`, `char`, `f32`, `f64`, `i8`, `i16`, `i32`, `i64`, `i128`, `isize`, `u8`, `u16`, `u32`,
+/// `u64`, `u128`, `usize`, `String`, `str`
+///
+/// References to these types are also supported.
+///
+/// Both `String` and `str` are only available with default features on.
+///
+/// # What it does:
 /// ```
 /// # use minus_i::Methods;
 /// #
@@ -285,6 +299,7 @@ pub use minus_i_derive::Methods;
 ///
 /// [`Debug`]: core::fmt::Debug
 ///
+/// # What it does:
 /// ```
 /// # use minus_i::PartialDebug;
 ///
@@ -336,7 +351,7 @@ pub use minus_i_derive::PartialDebug;
 /// Since the inventory crate requires std this macro is only available with default features on.
 ///
 /// [link]: macro@crate::InteractiveRoot
-///
+/// # What it does:
 /// ```
 /// # use minus_i::Function;
 /// #

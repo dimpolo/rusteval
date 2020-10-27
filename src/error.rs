@@ -1,9 +1,9 @@
 use core::fmt::{Display, Formatter};
 
-/// The result type of most interactive methods
+/// The result type of most interactive methods.
 pub type Result<'a, T> = core::result::Result<T, InteractiveError<'a>>;
 
-/// The main error type of this crate
+/// The main error type of this crate.
 #[allow(missing_docs)]
 #[non_exhaustive]
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -101,15 +101,12 @@ impl Display for InteractiveError<'_> {
 /// Contains information about function or method argument parsing errors.
 ///
 /// It is used inside the [`InteractiveError::ArgParseError`] variant.
+#[allow(missing_docs)]
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub enum ArgParseError<'a> {
-    #[allow(missing_docs)]
     ParseIntError(core::num::ParseIntError),
-    #[allow(missing_docs)]
     ParseCharError(core::char::ParseCharError),
-    #[allow(missing_docs)]
     ParseFloatError(core::num::ParseFloatError),
-    #[allow(missing_docs)]
     ParseBoolError(core::str::ParseBoolError),
 
     /// Produced when parsing string-like types.

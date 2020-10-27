@@ -10,9 +10,13 @@ enum AccessType<'a> {
 /// The main entry point to everything interactive.
 ///
 /// The provided methods are not meant to be overridden.
-/// They provide access to interactive fields, methods, and free functions by means of a string query.
+/// This trait gets implemented automatically when you derive it with [`InteractiveRoot`].
 ///
-/// A query looks just like Rust syntax. Possible queries are:
+/// It provides access to interactive fields, methods, and free functions by means of a string query.
+///
+/// [`InteractiveRoot`]: macro@crate::InteractiveRoot
+///
+/// A query looks just like normal Rust syntax. Possible queries are:
 /// * `free_function()`
 /// * `field_of_root`
 /// * `field_of_root.child_field`
@@ -28,7 +32,11 @@ enum AccessType<'a> {
 /// Chars and string like types support escaping:
 /// * `show_escaping('\x41', "\u{1f980} is \u{2764}")`
 ///
-/// Currently supported argument types are `bool`, `char`, `String`, `str` and all numerical types.
+/// Currently supported argument types are:
+///
+/// `bool`, `char`, `f32`, `f64`, `i8`, `i16`, `i32`, `i64`, `i128`, `isize`, `u8`, `u16`, `u32`,
+/// `u64`, `u128`, `usize`, `String`, `str`
+///
 /// References to these types are also supported.
 ///
 /// Both `String` and `str` are only available with default features on.

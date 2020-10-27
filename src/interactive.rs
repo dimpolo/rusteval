@@ -6,9 +6,9 @@ use auto_impl::auto_impl;
 use crate::specialization::{AsDebug, AsMethods, AsMethodsMut};
 use crate::{InteractiveError, Result};
 
-/// A trait that gives interactive access to its fields either as `dyn Interactive` or `dyn Debug`.
+/// A trait that gives interactive access to its fields as `dyn Interactive` or `dyn Debug`.
 ///
-/// This trait gets implemented automatically when you use derive it with [`Interactive`].
+/// This trait gets implemented automatically when you derive it with [`Interactive`].
 /// See the macros documentation for more information.
 ///
 /// [`Interactive`]: macro@crate::Interactive
