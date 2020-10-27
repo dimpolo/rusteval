@@ -20,7 +20,7 @@ keywords = [
 ]
 
 [dependencies]
-rusteval-derive = { version = "0.1.0", default-features = false}
+rusteval-derive = { version = "0.1", default-features = false}
 core-error = "0.0.1-rc4"
 inventory = { version = "0.1.9", optional = true }
 lazy_static = { version = "1", optional = true }
