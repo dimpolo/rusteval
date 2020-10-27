@@ -6,7 +6,6 @@ authors = ["Dimitri Polonski"]
 edition = "2018"
 repository = "https://github.com/dimpolo/rusteval/"
 license = "MIT OR Apache-2.0"
-readme = "README.md"
 categories = [
     "command-line-interface",
     "development-tools::debugging",
