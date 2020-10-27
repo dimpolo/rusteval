@@ -20,7 +20,7 @@ keywords = [
 ]
 
 [dependencies]
-rusteval-derive = { path = "rusteval-derive", default-features = false}
+rusteval-derive = { version = "0.1.0", default-features = false}
 core-error = "0.0.1-rc4"
 auto_impl = { git = "https://github.com/dimpolo/auto_impl.git" , branch = "no_std_compat"}
 inventory = { version = "0.1.9", optional = true }

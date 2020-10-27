@@ -1,8 +1,11 @@
 [package]
 name = "rusteval-derive"
+description = "macros for rusteval"
 version = "0.1.0"
-authors = ["Dimitri Polonski <d.polonski@wmt.team>"]
+authors = ["Dimitri Polonski"]
 edition = "2018"
+repository = "https://github.com/dimpolo/rusteval/"
+license = "MIT OR Apache-2.0"
 
 [lib]
 proc-macro = true
