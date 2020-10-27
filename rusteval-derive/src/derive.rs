@@ -25,22 +25,22 @@ pub fn derive_root(input: TokenStream) -> TokenStream {
         impl #impl_generics InteractiveRoot for #struct_name #ty_generics #where_clause{}
 
         #[cfg(feature = "std")]
-        impl #impl_generics ::minus_i::Methods for #struct_name #ty_generics #where_clause{
+        impl #impl_generics ::rusteval::Methods for #struct_name #ty_generics #where_clause{
             fn eval_method(
                 &self,
                 function_name: &str,
                 args: &str,
-                f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>),
+                f: &mut dyn FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>),
             ) {
                 if let Some(function) = ::core::iter::Iterator::find(
                     &mut ::core::iter::IntoIterator::into_iter(
-                        ::minus_i::inventory::iter::<&dyn ::minus_i::Function>,
+                        ::rusteval::inventory::iter::<&dyn ::rusteval::Function>,
                     ),
                     |function| function.function_name() == function_name,
                 ) {
                     function.eval(args, f)
                 } else {
-                    f(Err(::minus_i::InteractiveError::FunctionNotFound {
+                    f(Err(::rusteval::InteractiveError::FunctionNotFound {
                         function_name,
                     }))
                 }
@@ -50,7 +50,7 @@ pub fn derive_root(input: TokenStream) -> TokenStream {
                 &mut self,
                 function_name: &str,
                 args: &str,
-                f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>),
+                f: &mut dyn FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>),
             ) {
                 (&*self).eval_method(function_name, args, f)
             }
@@ -59,7 +59,7 @@ pub fn derive_root(input: TokenStream) -> TokenStream {
                 ::lazy_static::lazy_static! {
                     static ref NAMES: ::std::vec::Vec<&'static str> = ::core::iter::Iterator::collect(::core::iter::Iterator::map(
                         ::core::iter::IntoIterator::into_iter(
-                            ::minus_i::inventory::iter::<&dyn ::minus_i::Function>,
+                            ::rusteval::inventory::iter::<&dyn ::rusteval::Function>,
                         ),
                         |function| function.function_name(),
                     ));
@@ -85,7 +85,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
         let name = get_name(field, i);
 
         quote! {
-            stringify!(#name) => f(::minus_i::specialization::AsDebug::try_as_debug(&self.#name)),
+            stringify!(#name) => f(::rusteval::specialization::AsDebug::try_as_debug(&self.#name)),
         }
     });
 
@@ -93,7 +93,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
         let name = get_name(field, i);
 
         quote! {
-            stringify!(#name) => ::minus_i::specialization::AsInteractive::try_as_interactive(&self.#name),
+            stringify!(#name) => ::rusteval::specialization::AsInteractive::try_as_interactive(&self.#name),
         }
     });
 
@@ -105,7 +105,7 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
             let name = get_name(field, i);
 
             quote! {
-                stringify!(#name) => ::minus_i::specialization::AsInteractiveMut::try_as_interactive_mut(&mut self.#name),
+                stringify!(#name) => ::rusteval::specialization::AsInteractiveMut::try_as_interactive_mut(&mut self.#name),
             }
         });
 
@@ -119,25 +119,25 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
     // TODO shorten impl when default impl would work as_well
 
     quote! {
-        impl #impl_generics ::minus_i::Interactive for #struct_name #ty_generics #where_clause {
-            fn get_field<#tick_a>(&#tick_a self, field_name: &#tick_a str) -> ::minus_i::Result<'_, &dyn ::minus_i::Interactive>{
+        impl #impl_generics ::rusteval::Interactive for #struct_name #ty_generics #where_clause {
+            fn get_field<#tick_a>(&#tick_a self, field_name: &#tick_a str) -> ::rusteval::Result<'_, &dyn ::rusteval::Interactive>{
                 match field_name {
                     #(#get_field_matches)*
-                    _ => Err(::minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
+                    _ => Err(::rusteval::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
                 }
             }
-            fn get_field_mut<#tick_a>(&#tick_a mut self, field_name: &#tick_a str) -> ::minus_i::Result<'_, &mut dyn ::minus_i::Interactive>{
+            fn get_field_mut<#tick_a>(&#tick_a mut self, field_name: &#tick_a str) -> ::rusteval::Result<'_, &mut dyn ::rusteval::Interactive>{
                 match field_name {
                     #(#get_field_mut_matches)*
-                    _ => Err(::minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
+                    _ => Err(::rusteval::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
                 }
             }
 
-            fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>))
+            fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>))
             {
                 match field_name {
                     #(#eval_field_matches)*
-                    _ => f(Err(::minus_i::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name})),
+                    _ => f(Err(::rusteval::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name})),
                 }
             }
 
@@ -161,9 +161,9 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
         quote! {
             .field(
                 stringify!(#name),
-                match ::minus_i::specialization::AsDebug::try_as_debug(&self.#name){
+                match ::rusteval::specialization::AsDebug::try_as_debug(&self.#name){
                     Ok(field) => field,
-                    Err(_) => &::minus_i::specialization::Unknown,
+                    Err(_) => &::rusteval::specialization::Unknown,
                 },
             )
         }
@@ -183,7 +183,7 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
 }
 
 fn get_unused_lifetime(ast: &ItemStruct) -> Lifetime {
-    let mut lifetime_name = "'minus_i".to_owned();
+    let mut lifetime_name = "'rusteval".to_owned();
 
     for possible_lifetime in ('a'..='z').map(|char| char.to_string()) {
         if ast

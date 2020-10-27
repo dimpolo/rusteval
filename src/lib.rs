@@ -33,7 +33,7 @@
 //!
 //! # Example
 //! ```
-//! use minus_i::{Interactive, Methods, InteractiveRoot, Function, PartialDebug};
+//! use rusteval::{Interactive, Methods, InteractiveRoot, Function, PartialDebug};
 //!
 //! #[derive(Default)]
 //! struct NoDebug;
@@ -83,8 +83,8 @@
 //!
 //! The macros then implement getters that look something like this:
 //! ```
-//! # use minus_i::*;
-//! # use minus_i::specialization::*;
+//! # use rusteval::*;
+//! # use rusteval::specialization::*;
 //! # struct Stub {
 //! #     field1: (),
 //! #     field2: (),
@@ -129,7 +129,7 @@
 ///
 ///
 /// ```
-/// use minus_i::{Interactive, InteractiveRoot, Methods, Function};
+/// use rusteval::{Interactive, InteractiveRoot, Methods, Function};
 ///
 /// #[derive(Interactive)]
 /// struct SomethingInteractive;
@@ -157,13 +157,13 @@
 /// assert_eq!(root.eval_to_string("field.ping()"), "\"pong\"");
 /// assert_eq!(root.eval_to_string("add_one(42)"), "43");
 /// ```
-pub use minus_i_derive::InteractiveRoot;
+pub use rusteval_derive::InteractiveRoot;
 
 /// Gives interactive access to a structs fields.
 ///
 /// # What it does:
 /// ```
-/// # use minus_i::Interactive;
+/// # use rusteval::Interactive;
 /// #
 /// #[derive(Interactive)]
 /// struct Struct {
@@ -173,9 +173,9 @@ pub use minus_i_derive::InteractiveRoot;
 /// ```
 /// Expands to something like:
 /// ```
-/// # use minus_i::*;
-/// # use minus_i::specialization::*;
-/// # use minus_i::InteractiveError::*;
+/// # use rusteval::*;
+/// # use rusteval::specialization::*;
+/// # use rusteval::InteractiveError::*;
 /// # use core::fmt::Debug;
 /// #
 /// # struct Struct {
@@ -209,7 +209,7 @@ pub use minus_i_derive::InteractiveRoot;
 ///     }
 /// }
 /// ```
-pub use minus_i_derive::Interactive;
+pub use rusteval_derive::Interactive;
 
 /// Gives interactive access to a structs methods.
 ///
@@ -228,7 +228,7 @@ pub use minus_i_derive::Interactive;
 ///
 /// # What it does:
 /// ```
-/// # use minus_i::Methods;
+/// # use rusteval::Methods;
 /// #
 /// # struct Struct;
 /// #
@@ -246,9 +246,9 @@ pub use minus_i_derive::Interactive;
 /// (notice how `frob` is only available inside `eval_method_mut`)
 /// ```
 /// # use core::fmt::Debug;
-/// # use minus_i::*;
-/// # use minus_i::arg_parse::*;
-/// # use minus_i::InteractiveError::*;
+/// # use rusteval::*;
+/// # use rusteval::arg_parse::*;
+/// # use rusteval::InteractiveError::*;
 /// #
 /// # struct Struct;
 /// #
@@ -295,7 +295,7 @@ pub use minus_i_derive::Interactive;
 ///     }
 /// }
 /// ```
-pub use minus_i_derive::Methods;
+pub use rusteval_derive::Methods;
 
 /// Implements [`Debug`] for a struct replacing all fields that do not implement `Debug` with a placeholder.
 ///
@@ -303,7 +303,7 @@ pub use minus_i_derive::Methods;
 ///
 /// # What it does:
 /// ```
-/// # use minus_i::PartialDebug;
+/// # use rusteval::PartialDebug;
 ///
 /// struct NoDebug;
 ///
@@ -317,7 +317,7 @@ pub use minus_i_derive::Methods;
 /// ```
 /// # use std::fmt::Debug;
 /// # use core::fmt;
-/// # use minus_i::specialization::AsDebug;
+/// # use rusteval::specialization::AsDebug;
 /// #
 /// # struct NoDebug;
 /// # struct Struct {
@@ -331,7 +331,7 @@ pub use minus_i_derive::Methods;
 ///                 "field",
 ///                 match &self.field.try_as_debug() {
 ///                     Ok(field) => field,
-///                     Err(_) => &minus_i::specialization::Unknown,
+///                     Err(_) => &rusteval::specialization::Unknown,
 ///                 },
 ///             )
 ///             .finish()
@@ -339,7 +339,7 @@ pub use minus_i_derive::Methods;
 /// }
 ///
 /// ```
-pub use minus_i_derive::PartialDebug;
+pub use rusteval_derive::PartialDebug;
 
 /// Gives interactive access to a function.
 ///
@@ -355,7 +355,7 @@ pub use minus_i_derive::PartialDebug;
 /// [link]: macro@crate::InteractiveRoot
 /// # What it does:
 /// ```
-/// # use minus_i::Function;
+/// # use rusteval::Function;
 /// #
 /// #[Function]
 /// fn add_one(a: u32) -> u32 {
@@ -365,9 +365,9 @@ pub use minus_i_derive::PartialDebug;
 /// Expands to something like:
 /// ```
 /// # use core::fmt::Debug;
-/// # use minus_i::*;
-/// # use minus_i::arg_parse::*;
-/// # use minus_i::inventory;
+/// # use rusteval::*;
+/// # use rusteval::arg_parse::*;
+/// # use rusteval::inventory;
 ///
 /// # fn add_one(a: u32) -> u32 {
 /// #     a + 1
@@ -386,12 +386,12 @@ pub use minus_i_derive::PartialDebug;
 ///     }
 /// }
 /// inventory::submit! {
-///     &FunctionXYZ as &dyn::minus_i::Function
+///     &FunctionXYZ as &dyn::rusteval::Function
 /// }
 ///
 /// ```
 #[cfg(feature = "std")]
-pub use minus_i_derive::Function;
+pub use rusteval_derive::Function;
 
 pub use error::{ArgParseError, InteractiveError, Result};
 #[cfg(feature = "std")]

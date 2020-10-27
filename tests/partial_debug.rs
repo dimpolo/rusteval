@@ -1,4 +1,4 @@
-use minus_i::{Interactive, InteractiveRoot, PartialDebug};
+use rusteval::{Interactive, InteractiveRoot, PartialDebug};
 
 #[derive(Interactive, Default)]
 struct NotDebug {

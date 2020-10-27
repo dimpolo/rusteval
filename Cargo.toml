@@ -1,11 +1,11 @@
 [package]
-name = "minus-i"
+name = "rusteval"
 version = "0.1.0"
 authors = ["Dimitri Polonski <d.polonski@wmt.team>"]
 edition = "2018"
 
 [dependencies]
-minus-i-derive = { path = "minus-i-derive" , default-features = false}
+rusteval-derive = { path = "rusteval-derive", default-features = false}
 core-error = "0.0.1-rc4"
 auto_impl = { git = "https://github.com/dimpolo/auto_impl.git" , branch = "no_std_compat"}
 inventory = { version = "0.1.9", optional = true }
@@ -13,7 +13,7 @@ lazy_static = { version = "1", optional = true }
 
 [features]
 default = ["std", "inventory", "lazy_static"]
-std = ["core-error/std", "minus-i-derive/std"]
+std = ["core-error/std", "rusteval-derive/std"]
 
 [[example]]
 name = "minimal"

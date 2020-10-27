@@ -3,7 +3,7 @@ use rustyline::Context;
 use rustyline::Editor;
 use rustyline_derive::{Helper, Highlighter, Hinter, Validator};
 
-use minus_i::{Function, Interactive, InteractiveRoot, Methods};
+use rusteval::{Function, Interactive, InteractiveRoot, Methods};
 
 #[derive(Interactive, Debug, Default)]
 struct ChildStruct {

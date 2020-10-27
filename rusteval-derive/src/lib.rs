@@ -1,4 +1,4 @@
-//! Procedural macros for the [minus-i](../minus_i/index.html) crate.
+//! Procedural macros for the [rusteval](../rusteval/index.html) crate.
 //! Don't use this crate directly.
 // TODO correct link
 

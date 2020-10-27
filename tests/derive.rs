@@ -1,5 +1,5 @@
 use core::fmt::Debug;
-use minus_i::Interactive;
+use rusteval::Interactive;
 
 #[derive(Default, Debug)]
 struct Inner(bool, Option<String>);
@@ -134,7 +134,7 @@ fn test_mut_references_as_shared_references() {
 
 #[test]
 fn test_shared_references_as_mut_references() {
-    use minus_i::InteractiveError;
+    use rusteval::InteractiveError;
 
     let test_struct = TestStruct::default();
 
@@ -242,7 +242,7 @@ fn test_dyn_mut_references_as_shared_references() {
 
 #[test]
 fn test_dyn_shared_references_as_mut_references() {
-    use minus_i::InteractiveError;
+    use rusteval::InteractiveError;
 
     let test_struct = TestStruct::default();
 

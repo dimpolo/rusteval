@@ -1,4 +1,4 @@
-use minus_i::{Function, Interactive, InteractiveRoot, Methods};
+use rusteval::{Function, Interactive, InteractiveRoot, Methods};
 
 #[derive(Interactive, Debug, Default)]
 struct ChildStruct {

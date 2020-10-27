@@ -83,7 +83,7 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// # Example
     ///
     /// ```
-    /// # use minus_i::{Interactive, Methods, InteractiveRoot};
+    /// # use rusteval::{Interactive, Methods, InteractiveRoot};
     /// # use core::fmt::Debug;
     /// #
     /// #[derive(Interactive, Debug, Default)]
@@ -140,7 +140,7 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// # Example
     ///
     /// ```
-    /// # use minus_i::{Interactive, Methods, InteractiveRoot};
+    /// # use rusteval::{Interactive, Methods, InteractiveRoot};
     /// # use core::fmt::Debug;
     /// #
     /// #[derive(Interactive, Debug, Default)]
@@ -204,7 +204,7 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// # Example
     ///
     /// ```
-    /// # use minus_i::{Interactive, InteractiveRoot};
+    /// # use rusteval::{Interactive, InteractiveRoot};
     /// # use core::fmt::Debug;
     /// #
     /// #[derive(Interactive, Debug, Default)]

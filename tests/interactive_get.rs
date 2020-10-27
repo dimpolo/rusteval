@@ -1,4 +1,4 @@
-use minus_i::{Interactive, Methods};
+use rusteval::{Interactive, Methods};
 
 #[derive(Interactive, Debug, Default)]
 struct TestStruct {

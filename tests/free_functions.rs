@@ -1,4 +1,4 @@
-use minus_i::{Function, InteractiveError, InteractiveRoot, Methods};
+use rusteval::{Function, InteractiveError, InteractiveRoot, Methods};
 
 #[Function]
 fn add_one(a: u32) -> u32 {

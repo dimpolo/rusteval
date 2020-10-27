@@ -57,18 +57,18 @@ pub fn methods(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #original_impl
 
-        impl #impl_generics ::minus_i::Methods for #struct_name #ty_generics #where_clause{
+        impl #impl_generics ::rusteval::Methods for #struct_name #ty_generics #where_clause{
             fn eval_method(
                 &self,
                 method_name: &str,
                 args: &str,
-                f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>),
+                f: &mut dyn FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>),
             )
             {
                 match method_name {
                     #(#method_matches)*
 
-                    _ => f(Err(::minus_i::InteractiveError::MethodNotFound {
+                    _ => f(Err(::rusteval::InteractiveError::MethodNotFound {
                         type_name: stringify!(#struct_name),
                         method_name,
                     })),
@@ -79,13 +79,13 @@ pub fn methods(input: TokenStream) -> TokenStream {
                 &mut self,
                 method_name: &str,
                 args: &str,
-                f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>),
+                f: &mut dyn FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>),
             )
             {
                 match method_name {
                     #(#method_mut_matches)*
 
-                    _ => f(Err(::minus_i::InteractiveError::MethodNotFound {
+                    _ => f(Err(::rusteval::InteractiveError::MethodNotFound {
                         type_name: stringify!(#struct_name),
                         method_name,
                     })),
@@ -117,8 +117,8 @@ pub fn function(input: TokenStream) -> TokenStream {
 
         struct #struct_name;
 
-        impl ::minus_i::Function for #struct_name{
-            fn eval(&self, args: &str, f: &mut dyn FnMut(::minus_i::Result<'_, &dyn ::core::fmt::Debug>)) {
+        impl ::rusteval::Function for #struct_name{
+            fn eval(&self, args: &str, f: &mut dyn FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>)) {
                 let method_name = self.function_name();
                 #method_call
             }
@@ -127,8 +127,8 @@ pub fn function(input: TokenStream) -> TokenStream {
             }
         }
 
-        ::minus_i::inventory::submit! {
-            &#struct_name as &dyn ::minus_i::Function
+        ::rusteval::inventory::submit! {
+            &#struct_name as &dyn ::rusteval::Function
         }
     };
 
@@ -167,7 +167,7 @@ fn get_expected_arg_len(method: &ImplItemMethod, receiver: &Option<TokenStream2>
 
 /// Generate something like this:
 /// ```ignore
-/// "func" => match ::minus_i::arg_parse::parse_2_args(method_name, args) {
+/// "func" => match ::rusteval::arg_parse::parse_2_args(method_name, args) {
 ///     Ok((arg0, arg1, mut arg2)) => f(Ok(&self.add(arg0, &arg1, &mut arg2))),
 ///     Err(e) => f(Err(e)),
 /// },
@@ -231,7 +231,7 @@ fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> 
         });
 
     quote! {
-        match ::minus_i::arg_parse::#parse_func(method_name, args){
+        match ::rusteval::arg_parse::#parse_func(method_name, args){
             Ok((#(#tuple_args)*)) => f(Ok(& #receiver #method_ident(#(#call_args)*))),
             Err(e) => f(Err(e)),
         }
