@@ -39,6 +39,8 @@ enum AccessType<'a> {
 ///
 /// References to these types are also supported.
 ///
+/// Generic argument types are not supported.
+///
 /// Both `String` and `str` are only available with default features on.
 pub trait InteractiveRoot: Interactive + Sized {
     #[cfg(feature = "std")]

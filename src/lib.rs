@@ -222,6 +222,8 @@ pub use minus_i_derive::Interactive;
 ///
 /// References to these types are also supported.
 ///
+/// Generic argument types are not supported.
+///
 /// Both `String` and `str` are only available with default features on.
 ///
 /// # What it does:
@@ -374,7 +376,7 @@ pub use minus_i_derive::PartialDebug;
 /// struct FunctionXYZ;
 /// impl Function for FunctionXYZ {
 ///     fn eval(&self, args: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
-///         match parse_1_arg(self.function_name(), args) {
+///         match parse_1_arg("add_one", args) {
 ///             Ok((arg0,)) => f(Ok(&add_one(arg0))),
 ///             Err(e) => f(Err(e)),
 ///         }
@@ -384,7 +386,7 @@ pub use minus_i_derive::PartialDebug;
 ///     }
 /// }
 /// inventory::submit! {
-///     &FunctionXYZ as &dyn ::minus_i::Function
+///     &FunctionXYZ as &dyn::minus_i::Function
 /// }
 ///
 /// ```

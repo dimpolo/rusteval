@@ -1,8 +1,9 @@
-#![doc(hidden)]
-
+//! Implementation details.
 use crate::{ArgParseError, InteractiveError};
 
+/// Parse str -> Self
 pub trait ArgParse: Sized {
+    /// Parse str -> Self
     fn arg_parse(s: &str) -> Result<Self, ArgParseError<'_>>;
 }
 
@@ -100,13 +101,14 @@ fn find_next_separator_index(s: &str) -> Option<usize> {
     None
 }
 
+#[allow(missing_docs)]
 pub fn parse_0_args<'a>(method_name: &'a str, mut args: &'a str) -> crate::Result<'a, ()> {
     clear_args(method_name, &mut args, 0, 0)
 }
 
 macro_rules! parse_x_args {
     ($funcname:ident::<$($TN:ident),*>, ($($i:literal),*), x=$x:literal) => {
-        #[allow(non_snake_case)]
+        #[allow(non_snake_case, missing_docs)]
         pub fn $funcname<'a, $($TN: ArgParse,)*>(
             method_name: &'a str,
             mut args: &'a str,
