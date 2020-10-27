@@ -1,8 +1,24 @@
 [package]
 name = "rusteval"
+description = "Make your application's structs and functions interactive"
 version = "0.1.0"
-authors = ["Dimitri Polonski <d.polonski@wmt.team>"]
+authors = ["Dimitri Polonski"]
 edition = "2018"
+repository = "https://github.com/dimpolo/rusteval/"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+categories = [
+    "command-line-interface",
+    "development-tools::debugging",
+    "hardware-support",
+    "no-std",
+    "parser-implementations"
+]
+keywords = [
+    "repl",
+    "eval",
+    "interactive"
+]
 
 [dependencies]
 rusteval-derive = { path = "rusteval-derive", default-features = false}

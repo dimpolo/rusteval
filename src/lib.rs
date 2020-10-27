@@ -11,14 +11,18 @@
 //! and blink those LEDs from a USB or UART connection.
 //!
 //! # Usage
-//! * Annotate everything you want to access with [`macro@Interactive`], [`macro@Methods`] and [`macro@Function`]
+//! * Annotate everything you want to access with [`Interactive`], [`Methods`] and [`Function`]
 //! * Define a new struct that owns or holds references to the objects you want to access
-//! * Derive [`macro@InteractiveRoot`] for it
+//! * Derive [`InteractiveRoot`] for it
 //! * Use the trait's methods to evaluate a string
 //! (the simplest one is [`eval_to_string`](InteractiveRoot::eval_to_string) but others allow for more custom behaviour)
 //! * Accessing a field will give you its Debug representation
 //! * Calling a function or a method will parse its arguments and give you the Debug representation of its return value
 //!
+//! [`Interactive`]: macro@Interactive
+//! [`Methods`]: macro@Methods
+//! [`Function`]: macro@Function
+//! [`InteractiveRoot`]: macro@InteractiveRoot
 //!
 //! Since this crate makes a lot of use of the [`Debug`] trait the helper macro [`PartialDebug`] is provided.
 //! It implements `Debug` for a struct replacing all fields that do not implement `Debug` with a placeholder.
