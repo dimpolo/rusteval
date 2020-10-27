@@ -17,7 +17,7 @@
 //! * Use the trait's methods to evaluate a string
 //! (the simplest one is [`eval_to_string`](InteractiveRoot::eval_to_string) but others allow for more custom behaviour)
 //! * Accessing a field will give you its Debug representation
-//! * Calling a method will parse the arguments and give you the Debug representation of its return value
+//! * Calling a function or a method will parse its arguments and give you the Debug representation of its return value
 //!
 //!
 //! Since this crate makes a lot of use of the [`Debug`] trait the helper macro [`PartialDebug`] is provided.
@@ -25,7 +25,7 @@
 //!
 //! [`Debug`]: core::fmt::Debug
 //!
-//! ### CLI
+//! ### CLI Usage
 //! Functions like [`get_all_field_names`](Interactive::get_all_field_names) are provided.
 //! This makes it possible to implement things like auto-completion.
 //!
@@ -70,6 +70,7 @@
 //! let mut root = Root::default();
 //! assert_eq!(root.eval_to_string("parent.child.add(4.2, 6.9)"), "11.1");
 //! assert_eq!(root.eval_to_string("parent.child"), "ChildStruct { last_sum: 11.1, no_debug: Unknown }");
+//! // split_str_at("foobar", 3) => ("foo", "bar")
 //! assert_eq!(root.eval_to_string("split_str_at(\"foobar\", 3)"), "(\"foo\", \"bar\")");
 //! ```
 //!

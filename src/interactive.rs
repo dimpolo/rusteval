@@ -6,7 +6,12 @@ use auto_impl::auto_impl;
 use crate::specialization::{AsDebug, AsMethods, AsMethodsMut};
 use crate::{InteractiveError, Result};
 
-/// The main trait of this crate TODO
+/// A trait that gives interactive access to its fields either as `dyn Interactive` or `dyn Debug`.
+///
+/// This trait gets implemented automatically when you use derive it with [`Interactive`].
+/// See the macros documentation for more information.
+///
+/// [`Interactive`]: macro@crate::Interactive
 #[cfg_attr(feature = "std", auto_impl(&, &mut, Box, Rc, Arc))]
 #[cfg_attr(not(feature = "std"), auto_impl(&, &mut))]
 pub trait Interactive: AsDebug + AsMethods + AsMethodsMut {
@@ -33,7 +38,7 @@ pub trait Interactive: AsDebug + AsMethods + AsMethodsMut {
     /// Looks for a field with the given name,
     /// and passes it as a `Ok(&dyn Debug)` to the given closure.
     ///
-    /// On error the an `Err(InteractiveError)` is passed to the closure instead.
+    /// On error the `Err(InteractiveError)` is passed to the closure instead.
     fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
         f(Err(InteractiveError::FieldNotFound {
             type_name: type_name::<Self>(),
@@ -52,6 +57,7 @@ pub trait Interactive: AsDebug + AsMethods + AsMethodsMut {
 /// A trait that allows to interactively evaluate a structs methods and pass their result to the given closure.
 ///
 /// This trait gets implemented automatically when you use the [`Methods`] attribute.
+/// See its documentation for more information.
 ///
 /// [`Interactive`]: macro@crate::Interactive
 /// [`Methods`]: macro@crate::Methods
@@ -63,7 +69,7 @@ pub trait Methods {
     /// executes the method and
     /// passes the result as a `Ok(&dyn Debug)` to the given closure.
     ///
-    /// On error the an `Err(InteractiveError)` is passed to the closure instead.
+    /// On error the `Err(InteractiveError)` is passed to the closure instead.
     ///
     /// This method does not have access to methods that take `&mut self` as their receiver,
     /// use [`eval_method_mut`] instead.
@@ -89,7 +95,7 @@ pub trait Methods {
     /// executes the method and
     /// passes the result as a `Ok(&dyn Debug)` to the given closure.
     ///
-    /// On error the an `Err(InteractiveError)` is passed to the closure instead.
+    /// On error the `Err(InteractiveError)` is passed to the closure instead.
     #[auto_impl(keep_default_for(&, Rc, Arc))]
     fn eval_method_mut(
         &mut self,

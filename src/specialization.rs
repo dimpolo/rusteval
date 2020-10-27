@@ -1,3 +1,4 @@
+//! Implementation details.
 #![allow(missing_docs)]
 
 use core::any::type_name;

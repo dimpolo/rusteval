@@ -328,8 +328,8 @@ mod tests {
     #[test]
     fn test_complex_string() {
         test_parse_one_arg(
-            "\" test \\n '\\u{2764}' \\r \\\"täst\\\" \\x41\"",
-            String::from(" test \n '❤' \r \"täst\" A"),
+            "\" test \\n '\\u{1f980} is \\u{2764}' \\r \\\"täst\\\" \\x41\"",
+            String::from(" test \n '🦀 is ❤' \r \"täst\" A"),
         );
     }
 

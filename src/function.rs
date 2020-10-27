@@ -6,6 +6,7 @@ use crate::Result;
 /// A trait that allows to interactively evaluate a function and pass its result to the given closure.
 ///
 /// This trait gets implemented automatically when you use the [`Function`] attribute.
+/// See its documentation for more information.
 ///
 /// [`Function`]: macro@crate::Function
 pub trait Function {
@@ -13,7 +14,7 @@ pub trait Function {
     /// executes the method and
     /// passes the result as a `Ok(&dyn Debug)` to the given closure.
     ///
-    /// On error the an `Err(InteractiveError)` is passed to the closure instead.
+    /// On error an `Err(InteractiveError)` is passed to the closure instead.
     fn eval(&self, args: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>));
 
     /// Returns the functions name.

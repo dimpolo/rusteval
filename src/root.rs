@@ -7,7 +7,31 @@ enum AccessType<'a> {
     MethodAccess(&'a str, &'a str),
 }
 
-/// Docs and stuff TODO
+/// The main entry point to everything interactive.
+///
+/// The provided methods are not meant to be overridden.
+/// They provide access to interactive fields, methods, and free functions by means of a string query.
+///
+/// A query looks just like Rust syntax. Possible queries are:
+/// * `free_function()`
+/// * `field_of_root`
+/// * `field_of_root.child_field`
+/// * `field_of_root.child_method()`
+/// * etc.
+///
+/// Functions can be called with arguments just as you would in Rust:
+/// * `takes_bool(true)`
+/// * `takes_nums(1, 2)`
+/// * `takes_char('C')`
+/// * `takes_string_like("foo")`
+///
+/// Chars and string like types support escaping:
+/// * `show_escaping('\x41', "\u{1f980} is \u{2764}")`
+///
+/// Currently supported argument types are `bool`, `char`, `String`, `str` and all numerical types.
+/// References to these types are also supported.
+///
+/// Both `String` and `str` are only available with default features on.
 pub trait InteractiveRoot: Interactive + Sized {
     #[cfg(feature = "std")]
     /// Evaluates the expression and returns the result as a String.
@@ -102,6 +126,7 @@ pub trait InteractiveRoot: Interactive + Sized {
 
     /// Evaluates the given expression and calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>`.
     ///
+    /// If mutability is required access will only succeed for owned fields or fields behind a `&mut`.
     /// # Example
     ///
     /// ```
@@ -119,15 +144,17 @@ pub trait InteractiveRoot: Interactive + Sized {
     ///     }
     /// }
     ///
-    /// #[derive(InteractiveRoot, Debug, Default)]
-    /// struct Root {
-    ///     child: Child,
+    /// #[derive(InteractiveRoot, Debug)]
+    /// struct Root<'a> {
+    ///     owned: Child,
+    ///     borrowed: &'a Child,
     /// }
     ///
-    /// let mut root = Root::default();
-    /// root.try_eval_mut("child.toggle()", |result| assert!(result.is_ok()));
-    /// root.try_eval_mut("child.field1", |result| assert_eq!(format!("{:?}", result.unwrap()), "true"));
-    /// root.try_eval("child.field2", |result| assert_eq!(format!("{}", result.unwrap_err()), "No field `field2` found for type `Child`"));
+    /// let mut root = Root{ owned: Child::default(), borrowed: &Child::default()};
+    /// root.try_eval_mut("owned.toggle()", |result| assert!(result.is_ok()));
+    /// root.try_eval_mut("owned.field1", |result| assert_eq!(format!("{:?}", result.unwrap()), "true"));
+    /// root.try_eval_mut("borrowed.toggle()", |result| assert!(result.is_err()));
+    /// root.try_eval_mut("borrowed.field1", |result| assert_eq!(format!("{:?}", result.unwrap()), "false"));
     /// ```
     fn try_eval_mut<F>(&mut self, expression: &str, mut f: F)
     where

@@ -4,40 +4,40 @@ use core::fmt::{Display, Formatter};
 pub type Result<'a, T> = core::result::Result<T, InteractiveError<'a>>;
 
 /// The main error type of this crate
+#[allow(missing_docs)]
 #[non_exhaustive]
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum InteractiveError<'a> {
-    #[allow(missing_docs)]
-    InteractiveNotImplemented { type_name: &'a str },
-    #[allow(missing_docs)]
-    MethodsNotImplemented { type_name: &'a str },
-    #[allow(missing_docs)]
-    DebugNotImplemented { type_name: &'static str },
-    #[allow(missing_docs)]
+    InteractiveNotImplemented {
+        type_name: &'a str,
+    },
+    MethodsNotImplemented {
+        type_name: &'a str,
+    },
+    DebugNotImplemented {
+        type_name: &'static str,
+    },
     FieldNotFound {
         type_name: &'a str,
         field_name: &'a str,
     },
-    #[allow(missing_docs)]
     MethodNotFound {
         type_name: &'a str,
         method_name: &'a str,
     },
-    #[allow(missing_docs)]
+    FunctionNotFound {
+        function_name: &'a str,
+    },
     WrongNumberOfArguments {
         method_name: &'a str,
         expected: usize,
         found: usize,
     },
-    #[allow(missing_docs)]
     ArgParseError {
         method_name: &'a str,
         error: ArgParseError<'a>,
     },
-    #[allow(missing_docs)]
     SyntaxError,
-    #[allow(missing_docs)]
-    FunctionNotFound { function_name: &'a str },
 }
 
 impl Display for InteractiveError<'_> {
@@ -68,6 +68,9 @@ impl Display for InteractiveError<'_> {
                 "No method named `{}` found for type `{}`",
                 method_name, type_name
             ),
+            InteractiveError::FunctionNotFound { function_name } => {
+                write!(f, "No function named `{}` found", function_name)
+            }
             InteractiveError::WrongNumberOfArguments {
                 method_name,
                 expected,
@@ -92,9 +95,6 @@ impl Display for InteractiveError<'_> {
                 error // TODO improve message
             ),
             InteractiveError::SyntaxError => write!(f, "Syntax Error"),
-            InteractiveError::FunctionNotFound { function_name } => {
-                write!(f, "No function named `{}` found", function_name)
-            }
         }
     }
 }
