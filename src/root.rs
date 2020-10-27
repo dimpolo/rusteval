@@ -44,11 +44,11 @@ enum AccessType<'a> {
 /// Both `String` and `str` are only available with default features on.
 pub trait InteractiveRoot: Interactive + Sized {
     #[cfg(feature = "std")]
-    /// Evaluates the expression and returns the result as a String.
+    /// Evaluates the query and returns the result as a String.
     /// Not available in no_std contexts.
-    fn eval_to_string(&mut self, expression: &str) -> String {
+    fn eval_to_string(&mut self, query: &str) -> String {
         let mut s = String::new();
-        self.try_eval_mut(expression, |result| {
+        self.try_eval_mut(query, |result| {
             s = match result {
                 Ok(r) => format!("{:?}", r),
                 Err(e) => format!("{}", e),
@@ -57,14 +57,14 @@ pub trait InteractiveRoot: Interactive + Sized {
         s
     }
 
-    /// Evaluates the expression and writes the result into the provided buffer.
+    /// Evaluates the query and writes the result into the provided buffer.
     /// Useful in no_std contexts.
-    fn eval_and_write<T>(&mut self, expression: &str, buf: &mut T) -> core::fmt::Result
+    fn eval_and_write<T>(&mut self, query: &str, buf: &mut T) -> core::fmt::Result
     where
         T: core::fmt::Write,
     {
         let mut r = Ok(());
-        self.try_eval_mut(expression, |result| {
+        self.try_eval_mut(query, |result| {
             r = match result {
                 Ok(r) => write!(buf, "{:?}", r),
                 Err(e) => write!(buf, "{}", e),
@@ -73,7 +73,7 @@ pub trait InteractiveRoot: Interactive + Sized {
         r
     }
 
-    /// Evaluates the given expression and calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>`.
+    /// Evaluates the given query and calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>`.
     ///
     /// This method does not have access to methods that take `&mut self` as their receiver,
     /// use [`try_eval_mut`] instead.
@@ -110,11 +110,11 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// root.try_eval("child.field1", |result| assert_eq!(format!("{:?}", result.unwrap()), "false"));
     /// root.try_eval("child.toggle()", |result| assert_eq!(format!("{}", result.unwrap_err()), "No method named `toggle` found for type `Child`"));
     /// ```
-    fn try_eval<F>(&self, expression: &str, mut f: F)
+    fn try_eval<F>(&self, query: &str, mut f: F)
     where
         F: FnMut(Result<'_, &dyn Debug>),
     {
-        match self.get_queried_object(expression) {
+        match self.get_queried_object(query) {
             Ok((object, rest_expression)) => {
                 let access_type = parse_access_type(rest_expression);
                 match access_type {
@@ -134,7 +134,7 @@ pub trait InteractiveRoot: Interactive + Sized {
         }
     }
 
-    /// Evaluates the given expression and calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>`.
+    /// Evaluates the given query and calls the given closure with a [`Result`]`<&dyn `[`Debug`]`>`.
     ///
     /// If mutability is required access will only succeed for owned fields or fields behind a `&mut`.
     /// # Example
@@ -166,11 +166,11 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// root.try_eval_mut("borrowed.toggle()", |result| assert!(result.is_err()));
     /// root.try_eval_mut("borrowed.field1", |result| assert_eq!(format!("{:?}", result.unwrap()), "false"));
     /// ```
-    fn try_eval_mut<F>(&mut self, expression: &str, mut f: F)
+    fn try_eval_mut<F>(&mut self, query: &str, mut f: F)
     where
         F: FnMut(Result<'_, &dyn Debug>),
     {
-        match self.get_queried_object_mut(expression) {
+        match self.get_queried_object_mut(query) {
             Ok((object, rest_expression)) => {
                 let access_type = parse_access_type(rest_expression);
                 match access_type {
@@ -186,17 +186,17 @@ pub trait InteractiveRoot: Interactive + Sized {
                     Err(e) => f(Err(e)),
                 }
             }
-            Err(InteractiveError::FieldNotFound { .. }) => self.try_eval(expression, f), // field might be behind shared reference
+            Err(InteractiveError::FieldNotFound { .. }) => self.try_eval(query, f), // field might be behind shared reference
             Err(e) => f(Err(e)),
         }
     }
 
-    /// Splits the given expression into an object path and a rest expression.
+    /// Splits the given query into an object path and a rest expression.
     ///
     /// Then recursively looks for an object matching the given object path
     /// and if successful returns a shared reference to it together with the rest expression.
     ///
-    /// The object path is the part of the given expression before the last `.`
+    /// The object path is the part of the given query before the last `.`
     ///
     /// E.g. `"path.to.obj.foo"` will split into the object path `"path.to.obj"` and the rest expression `"foo"`.
     ///
@@ -222,11 +222,8 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// assert_eq!(child.get_all_field_names(), &["field1"]);
     /// assert_eq!(rest_expression, "rest");
     /// ```
-    fn get_queried_object<'a>(
-        &'a self,
-        expression: &'a str,
-    ) -> Result<'_, (&dyn Interactive, &str)> {
-        let (mut object_path, rest_expression) = parse_object_path(expression);
+    fn get_queried_object<'a>(&'a self, query: &'a str) -> Result<'_, (&dyn Interactive, &str)> {
+        let (mut object_path, rest_expression) = parse_object_path(query);
 
         let mut current: &dyn Interactive = self;
 
@@ -246,9 +243,9 @@ pub trait InteractiveRoot: Interactive + Sized {
     /// [`get_queried_object`]: #method.get_queried_object
     fn get_queried_object_mut<'a>(
         &'a mut self,
-        expression: &'a str,
+        query: &'a str,
     ) -> Result<'_, (&mut dyn Interactive, &str)> {
-        let (mut object_path, rest_expression) = parse_object_path(expression);
+        let (mut object_path, rest_expression) = parse_object_path(query);
 
         let mut current: &mut dyn Interactive = self;
 
@@ -273,14 +270,15 @@ fn parse_access_type(expression: &str) -> Result<'_, AccessType<'_>> {
     }
 }
 
-fn parse_object_path(expression: &str) -> (&str, &str) {
-    let args_start_index = expression.find('(').unwrap_or_else(|| expression.len());
-    match expression[..args_start_index].rfind('.') {
+/// splits query into object_path and rest_expression
+fn parse_object_path(query: &str) -> (&str, &str) {
+    let args_start_index = query.find('(').unwrap_or_else(|| query.len());
+    match query[..args_start_index].rfind('.') {
         Some(last_dot_index) => {
-            let (object_path, rest_expression) = expression.split_at(last_dot_index);
+            let (object_path, rest_expression) = query.split_at(last_dot_index);
             (object_path.trim(), &rest_expression.get(1..).unwrap_or(""))
         }
-        None => ("", expression),
+        None => ("", query),
     }
 }
 
