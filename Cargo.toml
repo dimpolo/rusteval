@@ -20,6 +20,7 @@ keywords = [
 
 [dependencies]
 rusteval-derive = { path="rusteval-derive", version = "0.1", default-features = false}
+auto_impl = "1.0.1"
 inventory = { version = "0.3.2", optional = true }
 lazy_static = { version = "1.4.0", optional = true }
 

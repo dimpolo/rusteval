@@ -1,6 +1,8 @@
 use core::any::type_name;
 use core::fmt::Debug;
 
+use auto_impl::auto_impl;
+
 use crate::specialization::{AsDebug, AsMethods, AsMethodsMut};
 use crate::{InteractiveError, Result};
 
@@ -10,6 +12,8 @@ use crate::{InteractiveError, Result};
 /// See the macros documentation for more information.
 ///
 /// [`Interactive`]: macro@crate::Interactive
+#[cfg_attr(feature = "std", auto_impl(&, &mut, Box, Rc, Arc))]
+#[cfg_attr(not(feature = "std"), auto_impl(&, &mut))]
 pub trait Interactive: AsDebug + AsMethods + AsMethodsMut {
     /// Looks for a field with the given name and on success return a shared reference to it.
     fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive> {
@@ -20,6 +24,7 @@ pub trait Interactive: AsDebug + AsMethods + AsMethodsMut {
     }
 
     /// Looks for a field with the given name and on success return a mutable reference to it.
+    #[auto_impl(keep_default_for(&, Rc, Arc))]
     fn get_field_mut<'a>(
         &'a mut self,
         field_name: &'a str,
@@ -56,6 +61,8 @@ pub trait Interactive: AsDebug + AsMethods + AsMethodsMut {
 ///
 /// [`Interactive`]: macro@crate::Interactive
 /// [`Methods`]: macro@crate::Methods
+#[cfg_attr(feature = "std", auto_impl(&, &mut, Box, Rc, Arc))]
+#[cfg_attr(not(feature = "std"), auto_impl(&, &mut))]
 pub trait Methods {
     /// Looks for a method with the given name,
     /// parses the args string into the expected arguments of the method,
@@ -89,6 +96,7 @@ pub trait Methods {
     /// passes the result as a `Ok(&dyn Debug)` to the given closure.
     ///
     /// On error the `Err(InteractiveError)` is passed to the closure instead.
+    #[auto_impl(keep_default_for(&, Rc, Arc))]
     fn eval_method_mut(
         &mut self,
         method_name: &str,
@@ -107,177 +115,5 @@ pub trait Methods {
     /// Can be used to drive auto-completion in a CLI.
     fn get_all_method_names(&self) -> &'static [&'static str] {
         &[]
-    }
-}
-
-// TODO remove after https://github.com/auto-impl-rs/auto_impl/pull/73 gets merged
-impl<'b, T: 'b + Interactive + ?::core::marker::Sized> Interactive for &'b T
-where
-    &'b T: AsDebug + AsMethods + AsMethodsMut,
-{
-    fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive> {
-        T::get_field(self, field_name)
-    }
-    fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
-        T::eval_field(self, field_name, f)
-    }
-    fn get_all_field_names(&self) -> &'static [&'static str] {
-        T::get_all_field_names(self)
-    }
-}
-impl<'b, T: 'b + Interactive + ?::core::marker::Sized> Interactive for &'b mut T
-where
-    &'b mut T: AsDebug + AsMethods + AsMethodsMut,
-{
-    fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive> {
-        T::get_field(self, field_name)
-    }
-    fn get_field_mut<'a>(
-        &'a mut self,
-        field_name: &'a str,
-    ) -> crate::Result<'a, &mut dyn crate::Interactive> {
-        T::get_field_mut(self, field_name)
-    }
-    fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
-        T::eval_field(self, field_name, f)
-    }
-    fn get_all_field_names(&self) -> &'static [&'static str] {
-        T::get_all_field_names(self)
-    }
-}
-#[cfg(feature = "std")]
-impl<T: Interactive + ?::std::marker::Sized> Interactive for ::std::boxed::Box<T>
-where
-    ::std::boxed::Box<T>: AsDebug + AsMethods + AsMethodsMut,
-{
-    fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive> {
-        T::get_field(self, field_name)
-    }
-    fn get_field_mut<'a>(
-        &'a mut self,
-        field_name: &'a str,
-    ) -> crate::Result<'a, &mut dyn crate::Interactive> {
-        T::get_field_mut(self, field_name)
-    }
-    fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
-        T::eval_field(self, field_name, f)
-    }
-    fn get_all_field_names(&self) -> &'static [&'static str] {
-        T::get_all_field_names(self)
-    }
-}
-#[cfg(feature = "std")]
-impl<T: Interactive + ?::std::marker::Sized> Interactive for ::std::rc::Rc<T>
-where
-    ::std::rc::Rc<T>: AsDebug + AsMethods + AsMethodsMut,
-{
-    fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive> {
-        T::get_field(self, field_name)
-    }
-    fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
-        T::eval_field(self, field_name, f)
-    }
-    fn get_all_field_names(&self) -> &'static [&'static str] {
-        T::get_all_field_names(self)
-    }
-}
-#[cfg(feature = "std")]
-impl<T: Interactive + ?::std::marker::Sized> Interactive for ::std::sync::Arc<T>
-where
-    ::std::sync::Arc<T>: AsDebug + AsMethods + AsMethodsMut,
-{
-    fn get_field<'a>(&'a self, field_name: &'a str) -> crate::Result<'a, &dyn crate::Interactive> {
-        T::get_field(self, field_name)
-    }
-    fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(Result<'_, &dyn Debug>)) {
-        T::eval_field(self, field_name, f)
-    }
-    fn get_all_field_names(&self) -> &'static [&'static str] {
-        T::get_all_field_names(self)
-    }
-}
-
-impl<'a, T: 'a + Methods + ?::core::marker::Sized> Methods for &'a T {
-    fn eval_method(
-        &self,
-        method_name: &str,
-        args: &str,
-        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
-    ) {
-        T::eval_method(self, method_name, args, f)
-    }
-    fn get_all_method_names(&self) -> &'static [&'static str] {
-        T::get_all_method_names(self)
-    }
-}
-impl<'a, T: 'a + Methods + ?::core::marker::Sized> Methods for &'a mut T {
-    fn eval_method(
-        &self,
-        method_name: &str,
-        args: &str,
-        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
-    ) {
-        T::eval_method(self, method_name, args, f)
-    }
-    fn eval_method_mut(
-        &mut self,
-        method_name: &str,
-        args: &str,
-        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
-    ) {
-        T::eval_method_mut(self, method_name, args, f)
-    }
-    fn get_all_method_names(&self) -> &'static [&'static str] {
-        T::get_all_method_names(self)
-    }
-}
-#[cfg(feature = "std")]
-impl<T: Methods + ?::std::marker::Sized> Methods for ::std::boxed::Box<T> {
-    fn eval_method(
-        &self,
-        method_name: &str,
-        args: &str,
-        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
-    ) {
-        T::eval_method(self, method_name, args, f)
-    }
-    fn eval_method_mut(
-        &mut self,
-        method_name: &str,
-        args: &str,
-        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
-    ) {
-        T::eval_method_mut(self, method_name, args, f)
-    }
-    fn get_all_method_names(&self) -> &'static [&'static str] {
-        T::get_all_method_names(self)
-    }
-}
-#[cfg(feature = "std")]
-impl<T: Methods + ?::std::marker::Sized> Methods for ::std::rc::Rc<T> {
-    fn eval_method(
-        &self,
-        method_name: &str,
-        args: &str,
-        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
-    ) {
-        T::eval_method(self, method_name, args, f)
-    }
-    fn get_all_method_names(&self) -> &'static [&'static str] {
-        T::get_all_method_names(self)
-    }
-}
-#[cfg(feature = "std")]
-impl<T: Methods + ?::std::marker::Sized> Methods for ::std::sync::Arc<T> {
-    fn eval_method(
-        &self,
-        method_name: &str,
-        args: &str,
-        f: &mut dyn FnMut(Result<'_, &dyn Debug>),
-    ) {
-        T::eval_method(self, method_name, args, f)
-    }
-    fn get_all_method_names(&self) -> &'static [&'static str] {
-        T::get_all_method_names(self)
     }
 }
