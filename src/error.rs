@@ -112,5 +112,3 @@ pub enum ArgParseError<'a> {
     /// Produced when parsing string-like types.
     UnescapeError(&'a str),
 }
-
-impl core_error::Error for InteractiveError<'_> {}

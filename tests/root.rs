@@ -1,5 +1,3 @@
-#![feature(str_split_once)]
-
 use core::fmt::Debug;
 use rusteval::{Interactive, InteractiveError, InteractiveRoot, Methods};
 

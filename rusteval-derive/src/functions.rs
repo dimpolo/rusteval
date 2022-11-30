@@ -62,13 +62,13 @@ pub fn methods(input: TokenStream) -> TokenStream {
                 &self,
                 method_name: &str,
                 args: &str,
-                f: &mut dyn FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>),
+                f: &mut dyn ::core::ops::FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>),
             )
             {
                 match method_name {
                     #(#method_matches)*
 
-                    _ => f(Err(::rusteval::InteractiveError::MethodNotFound {
+                    _ => f(::core::result::Result::Err(::rusteval::InteractiveError::MethodNotFound {
                         type_name: stringify!(#struct_name),
                         method_name,
                     })),
@@ -79,13 +79,13 @@ pub fn methods(input: TokenStream) -> TokenStream {
                 &mut self,
                 method_name: &str,
                 args: &str,
-                f: &mut dyn FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>),
+                f: &mut dyn ::core::ops::FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>),
             )
             {
                 match method_name {
                     #(#method_mut_matches)*
 
-                    _ => f(Err(::rusteval::InteractiveError::MethodNotFound {
+                    _ => f(::core::result::Result::Err(::rusteval::InteractiveError::MethodNotFound {
                         type_name: stringify!(#struct_name),
                         method_name,
                     })),
@@ -118,7 +118,7 @@ pub fn function(input: TokenStream) -> TokenStream {
         struct #struct_name;
 
         impl ::rusteval::Function for #struct_name{
-            fn eval(&self, args: &str, f: &mut dyn FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>)) {
+            fn eval(&self, args: &str, f: &mut dyn ::core::ops::FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>)) {
                 let method_name = self.function_name();
                 #method_call
             }
@@ -232,8 +232,8 @@ fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> 
 
     quote! {
         match ::rusteval::arg_parse::#parse_func(method_name, args){
-            Ok((#(#tuple_args)*)) => f(Ok(& #receiver #method_ident(#(#call_args)*))),
-            Err(e) => f(Err(e)),
+            ::core::result::Result::Ok((#(#tuple_args)*)) => f(::core::result::Result::Ok(& #receiver #method_ident(#(#call_args)*))),
+            ::core::result::Result::Err(e) => f(::core::result::Result::Err(e)),
         }
     }
 }

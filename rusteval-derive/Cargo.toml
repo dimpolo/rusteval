@@ -2,8 +2,7 @@
 name = "rusteval-derive"
 description = "macros for rusteval"
 version = "0.1.1"
-authors = ["Dimitri Polonski"]
-edition = "2018"
+edition = "2021"
 repository = "https://github.com/dimpolo/rusteval/"
 license = "MIT OR Apache-2.0"
 
@@ -11,9 +10,9 @@ license = "MIT OR Apache-2.0"
 proc-macro = true
 
 [dependencies]
-syn = { version = "1", features = ["full"] }
-quote = "1"
-proc-macro2 = "1"
+syn = { version = "1.0.104", features = ["full"] }
+quote = "1.0.21"
+proc-macro2 = "1.0.47"
 
 [features]
 default = ["std"]

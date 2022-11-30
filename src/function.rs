@@ -8,7 +8,7 @@ use crate::Result;
 /// See its documentation for more information.
 ///
 /// [`Function`]: macro@crate::Function
-pub trait Function {
+pub trait Function: Sync {
     /// Parses the args string into the expected arguments of the method,
     /// executes the method and
     /// passes the result as a `Ok(&dyn Debug)` to the given closure.

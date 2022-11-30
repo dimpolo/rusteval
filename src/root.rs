@@ -272,11 +272,11 @@ fn parse_access_type(expression: &str) -> Result<'_, AccessType<'_>> {
 
 /// splits query into object_path and rest_expression
 fn parse_object_path(query: &str) -> (&str, &str) {
-    let args_start_index = query.find('(').unwrap_or_else(|| query.len());
+    let args_start_index = query.find('(').unwrap_or(query.len());
     match query[..args_start_index].rfind('.') {
         Some(last_dot_index) => {
             let (object_path, rest_expression) = query.split_at(last_dot_index);
-            (object_path.trim(), &rest_expression.get(1..).unwrap_or(""))
+            (object_path.trim(), rest_expression.get(1..).unwrap_or(""))
         }
         None => ("", query),
     }

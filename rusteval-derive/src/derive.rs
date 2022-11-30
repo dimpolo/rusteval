@@ -30,9 +30,9 @@ pub fn derive_root(input: TokenStream) -> TokenStream {
                 &self,
                 function_name: &str,
                 args: &str,
-                f: &mut dyn FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>),
+                f: &mut dyn ::core::ops::FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>),
             ) {
-                if let Some(function) = ::core::iter::Iterator::find(
+                if let ::core::option::Option::Some(function) = ::core::iter::Iterator::find(
                     &mut ::core::iter::IntoIterator::into_iter(
                         ::rusteval::inventory::iter::<&dyn ::rusteval::Function>,
                     ),
@@ -40,7 +40,7 @@ pub fn derive_root(input: TokenStream) -> TokenStream {
                 ) {
                     function.eval(args, f)
                 } else {
-                    f(Err(::rusteval::InteractiveError::FunctionNotFound {
+                    f(::core::result::Result::Err(::rusteval::InteractiveError::FunctionNotFound {
                         function_name,
                     }))
                 }
@@ -50,7 +50,7 @@ pub fn derive_root(input: TokenStream) -> TokenStream {
                 &mut self,
                 function_name: &str,
                 args: &str,
-                f: &mut dyn FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>),
+                f: &mut dyn ::core::ops::FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>),
             ) {
                 (&*self).eval_method(function_name, args, f)
             }
@@ -123,21 +123,21 @@ fn interactive_impl(ast: &ItemStruct) -> TokenStream2 {
             fn get_field<#tick_a>(&#tick_a self, field_name: &#tick_a str) -> ::rusteval::Result<'_, &dyn ::rusteval::Interactive>{
                 match field_name {
                     #(#get_field_matches)*
-                    _ => Err(::rusteval::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
+                    _ => ::core::result::Result::Err(::rusteval::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
                 }
             }
             fn get_field_mut<#tick_a>(&#tick_a mut self, field_name: &#tick_a str) -> ::rusteval::Result<'_, &mut dyn ::rusteval::Interactive>{
                 match field_name {
                     #(#get_field_mut_matches)*
-                    _ => Err(::rusteval::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
+                    _ => ::core::result::Result::Err(::rusteval::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name}),
                 }
             }
 
-            fn eval_field(&self, field_name: &str, f: &mut dyn FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>))
+            fn eval_field(&self, field_name: &str, f: &mut dyn ::core::ops::FnMut(::rusteval::Result<'_, &dyn ::core::fmt::Debug>))
             {
                 match field_name {
                     #(#eval_field_matches)*
-                    _ => f(Err(::rusteval::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name})),
+                    _ => f(::core::result::Result::Err(::rusteval::InteractiveError::FieldNotFound{type_name: stringify!(#struct_name), field_name})),
                 }
             }
 
@@ -162,8 +162,8 @@ pub fn derive_partial_debug(input: TokenStream) -> TokenStream {
             .field(
                 stringify!(#name),
                 match ::rusteval::specialization::AsDebug::try_as_debug(&self.#name){
-                    Ok(field) => field,
-                    Err(_) => &::rusteval::specialization::Unknown,
+                    ::core::result::Result::Ok(field) => field,
+                    ::core::result::Result::Err(_) => &::rusteval::specialization::Unknown,
                 },
             )
         }

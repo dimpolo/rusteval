@@ -115,7 +115,6 @@
 
 #![allow(incomplete_features)] // TODO re-enable warning
 #![feature(specialization)]
-#![feature(str_split_once)]
 #![warn(
     missing_copy_implementations,
     missing_debug_implementations,
