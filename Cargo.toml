@@ -1,7 +1,7 @@
 [package]
 name = "rusteval"
 description = "Make your application's structs and functions interactive"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 repository = "https://github.com/dimpolo/rusteval/"
 license = "MIT OR Apache-2.0"
@@ -19,7 +19,7 @@ keywords = [
 ]
 
 [dependencies]
-rusteval-derive = { path="rusteval-derive", version = "0.1", default-features = false}
+rusteval-derive = { path="rusteval-derive", version = "0.2", default-features = false}
 auto_impl = "1.0.1"
 inventory = { version = "0.3.2", optional = true }
 lazy_static = { version = "1.4.0", optional = true }

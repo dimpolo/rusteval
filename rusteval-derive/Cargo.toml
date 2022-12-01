@@ -1,7 +1,7 @@
 [package]
 name = "rusteval-derive"
 description = "macros for rusteval"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 repository = "https://github.com/dimpolo/rusteval/"
 license = "MIT OR Apache-2.0"
