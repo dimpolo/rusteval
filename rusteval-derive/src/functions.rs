@@ -23,7 +23,7 @@ pub fn methods(input: TokenStream) -> TokenStream {
 
     let struct_name = &ast.self_ty;
 
-    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
+    let (impl_generics, _, where_clause) = ast.generics.split_for_impl();
 
     let methods = ast.items.iter().filter_map(|item| match item {
         ImplItem::Method(method) => Some(method),
@@ -38,7 +38,8 @@ pub fn methods(input: TokenStream) -> TokenStream {
             matches!(
                 method.sig.receiver(),
                 Some(FnArg::Receiver(Receiver {
-                    mutability: None, ..
+                    mutability: None,
+                    ..
                 }))
             )
         })
@@ -57,7 +58,7 @@ pub fn methods(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #original_impl
 
-        impl #impl_generics ::rusteval::Methods for #struct_name #ty_generics #where_clause{
+        impl #impl_generics ::rusteval::Methods for #struct_name #where_clause{
             fn eval_method(
                 &self,
                 method_name: &str,
