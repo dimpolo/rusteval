@@ -233,7 +233,10 @@ fn gen_method_call(method: &ImplItemMethod, receiver: &Option<TokenStream2>) -> 
 
     quote! {
         match ::rusteval::arg_parse::#parse_func(method_name, args){
-            ::core::result::Result::Ok((#(#tuple_args)*)) => f(::core::result::Result::Ok(& #receiver #method_ident(#(#call_args)*))),
+            ::core::result::Result::Ok((#(#tuple_args)*)) => {
+                let result = #receiver #method_ident(#(#call_args)*);
+                f(::rusteval::specialization::AsDebug::try_as_debug(&result))
+            },
             ::core::result::Result::Err(e) => f(::core::result::Result::Err(e)),
         }
     }
