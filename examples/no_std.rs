@@ -25,7 +25,7 @@ struct Root {
 
 fn main() -> core::fmt::Result {
     let mut root = Root::default();
-    let mut buf = ArrayString::<[u8; 100]>::new();
+    let mut buf = ArrayString::<100>::new();
 
     root.eval_and_write("parent.child.add(1, 2)", &mut buf)?;
     assert_eq!(buf.as_str(), "3.0");

@@ -38,7 +38,7 @@ fn main() -> rustyline::Result<()> {
     let root = Root::default();
     let h = RustyLine { root };
 
-    let mut rl = Editor::new();
+    let mut rl = Editor::new().unwrap();
     rl.set_helper(Some(h));
 
     loop {

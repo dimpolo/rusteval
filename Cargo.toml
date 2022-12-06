@@ -41,6 +41,6 @@ name = "no_std"
 path = "examples/no_std.rs"
 
 [dev_dependencies]
-rustyline = "6"
-rustyline-derive = "0.3"
-arrayvec = "0.5"
+rustyline = "10.0.0"
+rustyline-derive = "0.7.0"
+arrayvec = "0.7.2"
