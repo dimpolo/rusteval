@@ -1,0 +1,11 @@
+[package]
+name = "rusteval-build"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# rustdoc-json = {git = "https://github.com/dimpolo/cargo-public-api/", branch ="builder-clone"}
+rustdoc-json = { path = "../../cargo-public-api/rustdoc-json" }
+rustdoc-types = "0.19.0"
+serde_json = "1.0.89"
+quote = "1.0.21"

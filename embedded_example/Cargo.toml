@@ -1,0 +1,19 @@
+[package]
+name = "embedded_example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# hardware
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+stm32f4xx-hal = { version = "0.14.0", features = ["rt", "stm32f405", "usb_fs"] }
+usb-device = "0.2"
+usbd-serial = "0.1"
+
+# repl
+noline = { git = "https://github.com/dimpolo/noline.git", branch = "dev", features = ["embedded"] }
+rusteval = { path = "..", default_features = false }
+
+[build-dependencies]
+rusteval-build = { path = "../rusteval-build" }
